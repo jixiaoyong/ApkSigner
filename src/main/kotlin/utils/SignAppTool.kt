@@ -1,4 +1,4 @@
-package pages.utils
+package utils
 
 /**
  * @author : jixiaoyong

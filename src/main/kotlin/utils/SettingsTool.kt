@@ -1,4 +1,4 @@
-package pages.utils
+package utils
 
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings

@@ -1,4 +1,4 @@
-package pages.utils
+package utils
 
 import androidx.compose.ui.awt.ComposeWindow
 import java.awt.SystemColor.window
