@@ -15,7 +15,7 @@ import androidx.compose.ui.window.application
 import pages.settings.PageSettingInfo
 import pages.signInfos.PageSignInfo
 import pages.signapp.PageSignApp
-import pages.utils.SettingsTool
+import utils.SettingsTool
 
 object Routes {
     const val SignInfo = "signInfo"
@@ -33,9 +33,9 @@ fun App(window: ComposeWindow) {
 
     val routes = remember {
         listOf(
-            Pair("✍️签名信息", Routes.SignInfo),
-            Pair("🔒签名APP", Routes.SignApp),
-            Pair("⚙️设置信息", Routes.SettingInfo)
+            Pair("\uD83D\uDDDD 签名信息", Routes.SignInfo),
+            Pair("\uD83D\uDD12 签名APP", Routes.SignApp),
+            Pair("\uD83D\uDEE0 设置信息", Routes.SettingInfo)
         )
     }
 
