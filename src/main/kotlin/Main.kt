@@ -14,8 +14,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import pages.settings.PageSettingInfo
 import pages.signInfos.PageSignInfo
-import pages.signInfos.SignInfoBean
 import pages.signapp.PageSignApp
+import pages.utils.SettingsTool
 
 object Routes {
     const val SignInfo = "signInfo"
@@ -27,8 +27,8 @@ object Routes {
 @Preview
 fun App(window: ComposeWindow) {
 
-    val pageIndex = remember {
-        mutableStateOf(Routes.SignInfo)
+    val settings = remember {
+        SettingsTool()
     }
 
     val routes = remember {
@@ -39,7 +39,13 @@ fun App(window: ComposeWindow) {
         )
     }
 
-    var selectedSignInfo by remember { mutableStateOf(SignInfoBean()) }
+    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+
+    val pageIndex = remember {
+        mutableStateOf(Routes.SignInfo)
+    }
+
+    var currentApkFilePath by remember { mutableStateOf("") }
 
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -57,15 +63,15 @@ fun App(window: ComposeWindow) {
                 }
             }
             when (pageIndex.value) {
-                Routes.SignInfo -> PageSignInfo(selectedSignInfo) {
-                    selectedSignInfo = it
+                Routes.SignInfo -> PageSignInfo(window, settings)
+
+                Routes.SignApp -> PageSignApp(window, selectedSignInfo, currentApkFilePath, {
+                    currentApkFilePath = it
+                }) { route ->
+                    pageIndex.value = route
                 }
 
-                Routes.SignApp -> PageSignApp(window, selectedSignInfo) {
-                    pageIndex.value = Routes.SignInfo
-                }
-
-                Routes.SettingInfo -> PageSettingInfo()
+                Routes.SettingInfo -> PageSettingInfo(window, settings)
             }
         }
 
