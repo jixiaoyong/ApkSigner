@@ -22,10 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
-import io.github.jixiaoyong.pages.signapp.InfoItemWidget
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.widgets.InfoItemWidget
 import javax.swing.JPanel
 
 /**
@@ -105,9 +105,9 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
 }
 
 private fun saveApkSigner(settings: SettingsTool, apkSigner: String?) {
-    settings.save(StorageKeys.APK_SIGNER_PATH, Json.encodeToString(apkSigner))
+    settings.save(StorageKeys.APK_SIGNER_PATH, apkSigner)
 }
 
 private fun saveZipAlign(settings: SettingsTool, zipAlign: String?) {
-    settings.save(StorageKeys.ZIP_ALIGN_PATH, Json.encodeToString(zipAlign))
+    settings.save(StorageKeys.ZIP_ALIGN_PATH, zipAlign)
 }

@@ -6,6 +6,7 @@ import Logger
 import io.github.jixiaoyong.Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -22,9 +23,13 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.widgets.InfoItemWidget
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
@@ -171,27 +176,6 @@ fun PageSignApp(
     }
 
 
-}
-
-@Composable
-fun InfoItemWidget(
-    title: String,
-    description: String,
-    showChangeButton: Boolean = true,
-    onChange: (() -> Unit)? = null
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(15.dp))
-            .padding(horizontal = 15.dp, vertical = 10.dp)
-    ) {
-        Text("$title：")
-        Divider(color = Color.Gray)
-        Text(description)
-        if (showChangeButton) Button({ onChange?.invoke() }) {
-            Text("修改")
-        }
-    }
 }
 
 @Composable

@@ -43,13 +43,11 @@ object ApkSigner {
             return apkSignerResult
         }
 
-
         val zipAlignPath = "$androidBuildToolsDir/zipalign"
         val zipAlignResult = setupZipAlign(zipAlignPath)
         if (null != zipAlignResult) {
             return zipAlignResult
         }
-
         return null
     }
 
@@ -57,7 +55,6 @@ object ApkSigner {
         return if (RunCommandUtil.runCommand("$apkSignerPath version", "apk signer", true, false) != 0) {
             "apkSigner命令不存在，请重新选择。"
         } else {
-
             apkSignerCmdPath = apkSignerPath
             null
         }
