@@ -1,15 +1,13 @@
-package utils
+package io.github.jixiaoyong.utils
 
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
-import com.russhwolf.settings.coroutines.getStringFlow
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
-import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 
 /**
  * @author : jixiaoyong
@@ -43,12 +41,6 @@ class SettingsTool : KeyValueStorage {
     private val settings: Settings by lazy { Settings() }
     private val observableSettings: ObservableSettings by lazy { settings as ObservableSettings }
 
-    init {
-        settings.keys.forEach {
-            println(settings.get<String>(key = it))
-        }
-    }
-
     override val apkSigner: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNER_PATH.key)
     override val zipAlign: Flow<String?>
@@ -69,13 +61,6 @@ class SettingsTool : KeyValueStorage {
             settings[key.key] = value
         } else {
             settings.remove(key.key)
-        }
-        settings.keys.forEach {
-            println(it + settings.get<String>(key = it))
-        }
-
-        observableSettings.keys.forEach {
-            println(it + settings.get<String>(key = it))
         }
     }
 

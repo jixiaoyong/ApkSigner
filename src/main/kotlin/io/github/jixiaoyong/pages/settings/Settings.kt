@@ -1,4 +1,4 @@
-package pages.settings
+package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -18,16 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import pages.signapp.DropBoxPanel
-import pages.signapp.InfoItemWidget
-import utils.FileChooseUtil
-import utils.SettingsTool
-import utils.StorageKeys
+import io.github.jixiaoyong.pages.signapp.DropBoxPanel
+import io.github.jixiaoyong.pages.signapp.InfoItemWidget
+import io.github.jixiaoyong.utils.FileChooseUtil
+import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.StorageKeys
 import javax.swing.JPanel
 
 /**

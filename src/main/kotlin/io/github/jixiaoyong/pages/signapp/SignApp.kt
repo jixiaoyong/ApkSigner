@@ -1,9 +1,9 @@
-package pages.signapp
+package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
 import CommandResult
 import Logger
-import Routes
+import io.github.jixiaoyong.Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -22,10 +22,9 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
@@ -141,7 +140,6 @@ fun PageSignApp(
                                 SnackbarDuration.Long
                             )
 
-                            print(result)
                             if (SnackbarResult.ActionPerformed == result) {
 
                                 // todo 打开文件夹

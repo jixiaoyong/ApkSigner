@@ -1,12 +1,11 @@
-package utils
+package io.github.jixiaoyong.utils
 
 import androidx.compose.ui.awt.ComposeWindow
-import java.awt.SystemColor.window
 import java.io.FilenameFilter
 
 /**
  * @author : jixiaoyong
- * @description ：TODO
+ * @description ：文件工具类
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/19

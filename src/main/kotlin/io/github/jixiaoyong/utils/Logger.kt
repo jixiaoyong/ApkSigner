@@ -12,8 +12,8 @@ object Logger {
         log("\u001B[33m${message}\u001B[0m")
     }
 
-    fun error(message: String) {
-        log("\u001B[31m${message}\u001B[0m")
+    fun error(message: String, error: Exception? = null) {
+        log("\u001B[31m${message}\n${error}\u001B[0m")
     }
 
     fun success(message: String) {
@@ -24,7 +24,7 @@ object Logger {
         log("\u001B[90m${message}\u001B[0m")
     }
 
-    fun log(message: String) {
+    fun log(message: String?) {
         if (IS_PRINT) {
             println(message)
         }

@@ -136,9 +136,9 @@ object ApkSigner {
 
 // 等待子进程结束并获取退出值
                 val exitCode = process.waitFor()
-                println("Exited with code: $exitCode")
+                Logger.log("Exited with code: $exitCode")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Logger.error("签名失败", e)
                 return CommandResult.Error("签名失败", e)
             }
         }
@@ -161,13 +161,13 @@ object ApkSigner {
 // 读取输出流并打印到控制台
             var line: String?
             while (reader.readLine().also { line = it } != null) {
-                println(line)
+                Logger.log(line)
                 line?.let { onProgress(it) }
             }
 
 // 等待子进程结束并获取退出值
             val exitCode = process.waitFor()
-            println("Exited with code: $exitCode")
+            Logger.log("Exited with code: $exitCode")
         } catch (e: Exception) {
             return null
         }

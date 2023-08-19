@@ -1,4 +1,4 @@
-package pages.signInfos
+package io.github.jixiaoyong.pages.signInfos
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
@@ -23,9 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import utils.FileChooseUtil
-import utils.SettingsTool
-import utils.StorageKeys
+import io.github.jixiaoyong.utils.FileChooseUtil
+import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.StorageKeys
 
 /**
  * @author : jixiaoyong
