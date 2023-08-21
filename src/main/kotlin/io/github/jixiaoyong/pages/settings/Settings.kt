@@ -16,11 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
@@ -54,7 +51,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = Color.Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(15.dp))
+                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
                     .padding(15.dp),
                 component = JPanel(),
                 onFileDrop = {

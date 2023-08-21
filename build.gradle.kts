@@ -13,6 +13,7 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+    maven("https://jitpack.io")
 }
 val multiplatformSettings = "1.0.0"
 dependencies {
@@ -25,6 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("com.russhwolf:multiplatform-settings-serialization:$multiplatformSettings")
     implementation("com.russhwolf:multiplatform-settings-coroutines:$multiplatformSettings")
+    implementation("com.github.Dansoftowner:jSystemThemeDetector:3.6")
 }
 
 compose.desktop {
@@ -35,6 +37,16 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ApkSigner"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("src/main/resources/imgs/icon.icns"))
+            }
+            windows {
+                iconFile.set(project.file("src/main/resources/imgs/icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/imgs/icon.png"))
+            }
         }
     }
 }

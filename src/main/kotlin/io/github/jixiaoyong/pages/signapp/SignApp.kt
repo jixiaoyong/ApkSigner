@@ -20,13 +20,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.widgets.InfoItemWidget
@@ -75,7 +71,7 @@ fun PageSignApp(
             DropBoxPanel(
                 window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = Color.Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(15.dp))
+                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
                     .padding(15.dp),
                 component = JPanel(),
                 onFileDrop = {
@@ -166,7 +162,7 @@ fun PageSignApp(
                 ).fillMaxWidth()
                     .heightIn(100.dp, 200.dp)
                     .padding(vertical = 5.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f))
+                    .background(MaterialTheme.colors.surface)
             ) {
                 items(signLogs) {
                     Text(it)

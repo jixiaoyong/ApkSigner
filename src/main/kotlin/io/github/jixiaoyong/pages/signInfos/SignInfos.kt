@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +25,7 @@ import kotlinx.serialization.json.Json
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
+import java.awt.SystemColor.text
 
 /**
  * @author : jixiaoyong
@@ -62,11 +62,15 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
         ) {
 
             Row(
-                modifier = Modifier.padding(vertical = 10.dp).background(Color.White, shape = RoundedCornerShape(15.dp))
+                modifier = Modifier.padding(vertical = 10.dp)
+                    .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
                     .padding(horizontal = 15.dp, vertical = 3.dp).fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("当前签名:", style = TextStyle(fontWeight = FontWeight.Bold))
+                Text(
+                    "当前签名:",
+                    style = TextStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onSurface)
+                )
                 Text(selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath)
                 Spacer(modifier = Modifier.weight(1f))
                 Button(onClick = {
@@ -89,7 +93,8 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
 
             Column(
                 modifier = Modifier.padding(vertical = 10.dp)
-                    .background(Color.White, RoundedCornerShape(15.dp)).padding(horizontal = 15.dp, vertical = 15.dp)
+                    .background(MaterialTheme.colors.surface, RoundedCornerShape(15.dp))
+                    .padding(horizontal = 15.dp, vertical = 15.dp)
                     .fillMaxWidth()
             ) {
                 var newSignInfo by remember { mutableStateOf(SignInfoBean()) }

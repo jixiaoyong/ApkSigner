@@ -35,7 +35,7 @@ fun InfoItemWidget(
 ) {
     Column(
         modifier = Modifier.padding(vertical = 10.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(15.dp))
+            .background(color = MaterialTheme.colors.background, shape = RoundedCornerShape(15.dp))
             .padding(horizontal = 15.dp, vertical = 10.dp)
             .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(15.dp))
     ) {
