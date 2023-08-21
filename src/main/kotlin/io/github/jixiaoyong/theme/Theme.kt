@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/21
  */
-private val background = Color(0xFFE0F2F1)
+private val background = Color(0xFFFFFFF)
 private val primary = Color(0xFF03a9f4)
 private val accent = Color(0xFF3ddc84)
 private val textColor = Color(0xFF212121)

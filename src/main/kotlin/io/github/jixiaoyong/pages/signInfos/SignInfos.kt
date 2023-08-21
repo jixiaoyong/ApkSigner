@@ -18,14 +18,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import io.github.jixiaoyong.utils.FileChooseUtil
+import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import io.github.jixiaoyong.utils.FileChooseUtil
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
-import java.awt.SystemColor.text
 
 /**
  * @author : jixiaoyong
@@ -54,33 +54,32 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-                .scrollable(
-                    rememberScrollableState { return@rememberScrollableState 0f },
-                    orientation = Orientation.Vertical
-                )
+            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
+                rememberScrollableState { return@rememberScrollableState 0f },
+                orientation = Orientation.Vertical
+            )
         ) {
 
             Row(
                 modifier = Modifier.padding(vertical = 10.dp)
                     .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
-                    .padding(horizontal = 15.dp, vertical = 3.dp).fillMaxWidth(),
+                    .padding(horizontal = 15.dp, vertical = 10.dp).fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "当前签名:",
-                    style = TextStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onSurface)
+                    "当前签名: ", style = TextStyle(
+                        fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onSurface
+                    )
                 )
                 Text(selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath)
                 Spacer(modifier = Modifier.weight(1f))
-                Button(onClick = {
-                    dropdownMenu.status = DropdownMenuState.Status.Open(Offset(50.0f, 80.0f))
-                }) {
-                    Text("重新选择签名")
-                }
+                ButtonWidget(onClick = {
+                    dropdownMenu.status = DropdownMenuState.Status.Open(Offset(50.0f, 50.0f))
+                }, title = "重新选择签名")
             }
 
-            DropdownMenu(dropdownMenu, onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed }) {
+            DropdownMenu(dropdownMenu,
+                onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed }) {
                 signInfoList.forEach {
                     DropdownMenuItem(onClick = {
                         onSignInfoChanged(settings, it)
@@ -94,20 +93,17 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
             Column(
                 modifier = Modifier.padding(vertical = 10.dp)
                     .background(MaterialTheme.colors.surface, RoundedCornerShape(15.dp))
-                    .padding(horizontal = 15.dp, vertical = 15.dp)
-                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 15.dp).fillMaxWidth()
             ) {
                 var newSignInfo by remember { mutableStateOf(SignInfoBean()) }
                 SignInfoItem("签名别名", newSignInfo.keyNickName, false) { nickName ->
                     newSignInfo = newSignInfo.copy(keyNickName = nickName)
                 }
                 SignInfoItem(
-                    "文件路径",
-                    newSignInfo.keyStorePath,
-                    false,
-                    onClick = {
+                    "文件路径", newSignInfo.keyStorePath, false, onClick = {
                         scope.launch {
-                            val result = FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
+                            val result =
+                                FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
                             if (result.isNullOrBlank()) {
                                 scaffoldState.snackbarHostState.showSnackbar("请选择Android签名文件")
                             } else {
@@ -119,7 +115,9 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     newSignInfo = newSignInfo.copy(keyStorePath = keyStorePath)
                 }
 
-                SignInfoItem("keyStorePassword", newSignInfo.keyStorePassword, true) { keyStorePassword ->
+                SignInfoItem(
+                    "keyStorePassword", newSignInfo.keyStorePassword, true
+                ) { keyStorePassword ->
                     newSignInfo = newSignInfo.copy(keyStorePassword = keyStorePassword)
                 }
                 SignInfoItem("keyAlias", newSignInfo.keyAlias, false) { keyAlias ->
@@ -171,16 +169,17 @@ private fun SignInfoItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(name, modifier = Modifier.weight(0.3f))
-        Row(modifier = Modifier.weight(0.7f)) {
+        Row(modifier = Modifier.weight(0.7f), verticalAlignment = Alignment.CenterVertically) {
             TextField(
                 value,
                 onValueChange = onChange,
                 modifier = Modifier.weight(1f),
                 keyboardOptions = if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default
             )
-            if (null != onClick) Button(onClick = onClick, modifier = Modifier.padding(horizontal = 5.dp)) {
-                Text(buttonText)
-            }
+            if (null != onClick) ButtonWidget(
+                onClick = onClick,
+                title = buttonText
+            )
         }
     }
 }

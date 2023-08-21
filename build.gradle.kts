@@ -38,6 +38,12 @@ compose.desktop {
             packageName = "ApkSigner"
             packageVersion = "1.0.0"
 
+            buildTypes.release {
+                proguard {
+                    configurationFiles.from("compose.desktop.pro")
+                }
+            }
+
             macOS {
                 iconFile.set(project.file("src/main/resources/imgs/icon.icns"))
             }

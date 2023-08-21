@@ -3,10 +3,8 @@ package io.github.jixiaoyong.pages.signapp
 import ApkSigner
 import CommandResult
 import Logger
-import io.github.jixiaoyong.Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -23,9 +21,11 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import io.github.jixiaoyong.Routes
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
+import kotlinx.coroutines.launch
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
@@ -65,13 +65,18 @@ fun PageSignApp(
     Scaffold(scaffoldState = scaffoldState) {
         Column(
             modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
-                rememberScrollableState { return@rememberScrollableState 0f }, orientation = Orientation.Vertical
-            )
+                rememberScrollableState { return@rememberScrollableState 0f },
+                orientation = Orientation.Vertical
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DropBoxPanel(
                 window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
+                    .background(
+                        color = MaterialTheme.colors.surface,
+                        shape = RoundedCornerShape(15.dp)
+                    )
                     .padding(15.dp),
                 component = JPanel(),
                 onFileDrop = {
@@ -86,7 +91,10 @@ fun PageSignApp(
                     }
                 }
             ) {
-                Text(text = "请拖拽apk文件到这里哦", modifier = Modifier.align(alignment = Alignment.Center))
+                Text(
+                    text = "请拖拽apk文件到这里哦",
+                    modifier = Modifier.align(alignment = Alignment.Center)
+                )
             }
             InfoItemWidget("当前选择的文件", currentApkFilePath ?: "", showChangeButton = false)
             InfoItemWidget(
@@ -96,63 +104,59 @@ fun PageSignApp(
                     onChangePage(Routes.SignInfo)
                 })
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                Button({
-                    scope.launch {
-                        if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.toLowerCase().endsWith(".apk")) {
-                            scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
-                            return@launch
-                        }
+            ButtonWidget({
+                scope.launch {
+                    if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.toLowerCase()
+                            .endsWith(".apk")
+                    ) {
+                        scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
+                        return@launch
+                    }
 
-                        if (selectedSignInfo?.isValid() != true) {
-                            onChangePage(Routes.SignInfo)
-                            scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
-                            return@launch
-                        }
+                    if (selectedSignInfo?.isValid() != true) {
+                        onChangePage(Routes.SignInfo)
+                        scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
+                        return@launch
+                    }
 
-                        if (!ApkSigner.isInitialized()) {
-                            onChangePage(Routes.SettingInfo)
-                            scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
-                            return@launch
-                        }
+                    if (!ApkSigner.isInitialized()) {
+                        onChangePage(Routes.SettingInfo)
+                        scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
+                        return@launch
+                    }
 
-                        signApkResult = ApkSigner.alignAndSignApk(
-                            currentApkFilePath,
-                            selectedSignInfo.keyStorePath,
-                            selectedSignInfo.keyAlias,
-                            selectedSignInfo.keyStorePassword,
-                            selectedSignInfo.keyPassword,
-                            onProgress = { line ->
-                                scope.launch {
-                                    signLogs = mutableListOf<String>().apply {
-                                        addAll(signLogs)
-                                        add(line)
-                                    }
-//                                    logScrollState.scrollTo(logScrollState.maxValue)
+                    signApkResult = ApkSigner.alignAndSignApk(
+                        currentApkFilePath,
+                        selectedSignInfo.keyStorePath,
+                        selectedSignInfo.keyAlias,
+                        selectedSignInfo.keyStorePassword,
+                        selectedSignInfo.keyPassword,
+                        onProgress = { line ->
+                            scope.launch {
+                                signLogs = mutableListOf<String>().apply {
+                                    addAll(signLogs)
+                                    add(line)
                                 }
                             }
+                        }
+                    )
+
+                    Logger.log("result:$signApkResult")
+                    if (signApkResult is CommandResult.Success<*>) {
+                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                            "签名成功，是否打开签名后的文件？",
+                            "打开",
+                            SnackbarDuration.Long
                         )
 
-                        Logger.log("result:$signApkResult")
-                        if (signApkResult is CommandResult.Success<*>) {
-                            val result = scaffoldState.snackbarHostState.showSnackbar(
-                                "签名成功，是否打开签名后的文件？",
-                                "打开",
-                                SnackbarDuration.Long
-                            )
-
-                            if (SnackbarResult.ActionPerformed == result) {
-
-                                // todo 打开文件夹
-                            }
+                        if (SnackbarResult.ActionPerformed == result) {
+                            // todo 打开文件夹
                         }
-
-                        signApkResult = CommandResult.NOT_EXECUT
                     }
-                }, enabled = CommandResult.NOT_EXECUT == signApkResult) {
-                    Text("开始签名apk")
+
+                    signApkResult = CommandResult.NOT_EXECUT
                 }
-            }
+            }, enabled = CommandResult.NOT_EXECUT == signApkResult, title = "开始签名apk")
 
             LazyColumn(
                 modifier = Modifier.scrollable(
@@ -169,9 +173,8 @@ fun PageSignApp(
                 }
             }
         }
+
     }
-
-
 }
 
 @Composable
@@ -189,7 +192,10 @@ fun DropBoxPanel(
 
     Box(modifier = modifier.onPlaced {
         dropBoundsBean.value = DropBoundsBean(
-            x = it.positionInWindow().x, y = it.positionInWindow().y, width = it.size.width, height = it.size.height
+            x = it.positionInWindow().x,
+            y = it.positionInWindow().y,
+            width = it.size.width,
+            height = it.size.height
         )
     }) {
         LaunchedEffect(true) {

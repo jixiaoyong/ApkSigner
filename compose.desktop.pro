@@ -1,0 +1,7 @@
+-dontwarn org.slf4j.**
+-dontwarn io.github.g00fy2.versioncompare.**
+-keep class org.slf4j.**{ *; }
+-keep class javax.annotation.**{ *; }
+-keep class io.github.g00fy2.versioncompare.**{ *; }
+-keep class com.sun.jna.* { *; }
+-keep class * implements com.sun.jna.* { *; }

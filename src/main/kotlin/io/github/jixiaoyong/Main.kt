@@ -72,23 +72,20 @@ fun App(window: ComposeWindow) {
     AppTheme(darkTheme = isDarkTheme) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
-                modifier = Modifier.fillMaxWidth()
-                    .heightIn(min = 65.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
                     .background(color = MaterialTheme.colors.primary, shape = RectangleShape),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 for (route in routes) {
                     val isActive = route.second == pageIndex.value
-                    val backgroundColor = if (isActive) MaterialTheme.colors.secondary else MaterialTheme.colors.surface
+                    val backgroundColor = if (isActive) MaterialTheme.colors.secondary
+                    else MaterialTheme.colors.surface
                     val textColor = if (isActive) Color.White else MaterialTheme.colors.onPrimary
-                    Row(modifier = Modifier
-                        .background(backgroundColor, RoundedCornerShape(15.dp))
+                    Row(modifier = Modifier.background(backgroundColor, RoundedCornerShape(15.dp))
                         .clickable {
                             pageIndex.value = route.second
-                        }
-                        .padding(horizontal = 35.dp, vertical = 15.dp)
-                    ) {
+                        }.padding(horizontal = 35.dp, vertical = 15.dp)) {
                         Text(route.first, style = TextStyle(color = textColor))
                     }
                 }
@@ -112,7 +109,8 @@ fun App(window: ComposeWindow) {
 
 fun main() = application {
     Window(
-        onCloseRequest = ::exitApplication, title = "APK Signer",
+        onCloseRequest = ::exitApplication,
+        title = "APK Signer",
         icon = painterResource("/imgs/icon.png")
     ) {
         App(window)

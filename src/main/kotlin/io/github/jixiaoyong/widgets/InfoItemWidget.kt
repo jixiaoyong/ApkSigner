@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -40,29 +39,26 @@ fun InfoItemWidget(
             .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(15.dp))
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .heightIn(min = 35.dp)
-                .background(
-                    color = MaterialTheme.colors.primaryVariant.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
-                )
-                .padding(horizontal = 5.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 35.dp).background(
+                color = MaterialTheme.colors.primaryVariant.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
+            ).padding(5.dp),
             verticalAlignment = Alignment.Bottom
         ) {
             Text(
-                "$title：",
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                "$title：", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)
             )
-            if (showChangeButton) Button({ onChange?.invoke() }) {
-                Text("\uD83D\uDCDD修改")
-            }
+            if (showChangeButton) ButtonWidget({ onChange?.invoke() }, title = "\uD83D\uDCDD修改")
         }
         Row(
             modifier = Modifier.fillMaxWidth()
                 .background(Color.White, RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
                 .padding(vertical = 10.dp, horizontal = 5.dp)
         ) {
-            Text(description ?: "暂无内容", style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp))
+            Text(
+                description ?: "暂无内容",
+                style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp)
+            )
         }
     }
 }
