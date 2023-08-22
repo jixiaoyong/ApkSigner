@@ -3,6 +3,7 @@ package io.github.jixiaoyong.pages.signapp
 import ApkSigner
 import CommandResult
 import Logger
+import Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -21,7 +22,6 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.dp
-import io.github.jixiaoyong.Routes
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
