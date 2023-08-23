@@ -12,9 +12,11 @@ A tool for Android developers to sign their applications with GUI software.
 
 TODO：
 
--[x] 添加打开已签名文件的功能；
--[ ] 添加可以自定义签名文件输出地址的功能；
--[x] 添加删除签名功能。
+- [x] 添加打开已签名文件的功能；
+
+- [ ] 添加可以自定义签名文件输出地址的功能；
+
+- [x] 添加删除签名功能。
 
 # 主要功能
 
