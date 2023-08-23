@@ -52,7 +52,7 @@ fun App(window: ComposeWindow) {
         mutableStateOf(Routes.SignInfo)
     }
 
-    var currentApkFilePath by remember { mutableStateOf("") }
+    var currentApkFilePath by remember { mutableStateOf<String?>(null) }
     var isDarkTheme by remember { mutableStateOf(false) }
 
     val detector: OsThemeDetector = OsThemeDetector.getDetector()
@@ -70,7 +70,10 @@ fun App(window: ComposeWindow) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
-                    .background(color = MaterialTheme.colors.primary, shape = RectangleShape),
+                    .background(
+                        color = MaterialTheme.colors.surface.copy(alpha = .2f),
+                        shape = RectangleShape
+                    ),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -79,10 +82,12 @@ fun App(window: ComposeWindow) {
                     val backgroundColor = if (isActive) MaterialTheme.colors.secondary
                     else MaterialTheme.colors.surface
                     val textColor = if (isActive) Color.White else MaterialTheme.colors.onPrimary
-                    Row(modifier = Modifier.background(backgroundColor, RoundedCornerShape(15.dp))
-                        .clickable {
-                            pageIndex.value = route.second
-                        }.padding(horizontal = 35.dp, vertical = 15.dp)) {
+                    Row(
+                        modifier = Modifier.background(backgroundColor, RoundedCornerShape(15.dp))
+                            .clickable {
+                                pageIndex.value = route.second
+                            }.padding(horizontal = 35.dp, vertical = 15.dp)
+                    ) {
                         Text(route.first, style = TextStyle(color = textColor))
                     }
                 }

@@ -7,6 +7,7 @@ import java.io.InputStreamReader
  * @description ： 使用ADB build tools中的zipalign和apksigner.jar对齐并签名APK
  * 上述两个文件可以替换为你自己的文件
  * 他们的使用可以参考官网文章：
+ * 签名apk https://developer.android.com/studio/command-line/apksigner?hl=zh-cn#options-sign
  * apksigner：https://developer.android.com/studio/command-line/apksigner?hl=zh-cn#usage-sign
  * zipalign：https://developer.android.com/studio/command-line/zipalign?hl=zh-cn
  * @email : jixiaoyong1995@gmail.com
@@ -14,7 +15,8 @@ import java.io.InputStreamReader
  */
 object ApkSigner {
 
-    const val ANDROID_BUILD_TOOLS_DIR_EXAMPLE = "/some/directory/to/your/android/sdk/build-tools/34.0.0/"
+    const val ANDROID_BUILD_TOOLS_DIR_EXAMPLE =
+        "/some/directory/to/your/android/sdk/build-tools/34.0.0/"
 
     private lateinit var apkSignerCmdPath: String
     private lateinit var zipAlignCmdPath: String
@@ -32,7 +34,8 @@ object ApkSigner {
      * @return 返回失败原因，可对用户展示，返回null则表示正常初始化
      */
     fun init(androidBuildToolsDir: String?): String? {
-        val buildTools = if (androidBuildToolsDir.isNullOrBlank()) return "" else File(androidBuildToolsDir)
+        val buildTools =
+            if (androidBuildToolsDir.isNullOrBlank()) return "" else File(androidBuildToolsDir)
         if (!buildTools.exists() || !buildTools.isDirectory) {
             return "指定的Android SDK中build-tools目录无效或不存在，请重新选择。\n该目录一般为${ANDROID_BUILD_TOOLS_DIR_EXAMPLE}"
         }
@@ -52,7 +55,13 @@ object ApkSigner {
     }
 
     fun setupApkSigner(apkSignerPath: String): String? {
-        return if (RunCommandUtil.runCommand("$apkSignerPath version", "apk signer", true, false) != 0) {
+        return if (RunCommandUtil.runCommand(
+                "$apkSignerPath version",
+                "apk signer",
+                true,
+                false
+            ) != 0
+        ) {
             "apkSigner命令不存在，请重新选择。"
         } else {
             apkSignerCmdPath = apkSignerPath
@@ -82,12 +91,14 @@ object ApkSigner {
      * @param keyAlias 表示 signer 在密钥库中的私钥和证书数据的别名的名称
      * @param keyStorePwd 包含 signer 私钥和证书的密钥库的密码
      * @param keyPwd signer 私钥的密码。
+     * @param zipAlign 是否需要对齐
      * @param signedApkPath 签名之后的文件输出路径，默认为apkFilePath对应的x.apk添加_signed后缀,即x_signed.apk
      * @return 返回结果 Pair(是否成功，失败原因或输出文件路径)
      */
     fun alignAndSignApk(
         apkFilePath: String, keyStorePath: String, keyAlias: String,
         keyStorePwd: String, keyPwd: String, signedApkPath: String? = null,
+        zipAlign: Boolean = true,
         onProgress: (String) -> Unit
     ): CommandResult {
 
@@ -96,33 +107,42 @@ object ApkSigner {
         }
 
         val outPutFilePath = signedApkPath ?: apkFilePath.replace(".apk", "_signed.apk")
-        val alignedApkFilePath = zipAlignApk(apkFilePath, onProgress = onProgress)
+        val alignedApkFilePath = if (zipAlign) {
+            zipAlignApk(apkFilePath, onProgress = onProgress)
+        } else {
+            apkFilePath
+        }
         if (alignedApkFilePath != null) {
             try {
-// 创建ProcessBuilder对象并设置相关属性
+                // 创建ProcessBuilder对象并设置相关属性
                 val processBuilder = ProcessBuilder()
                 processBuilder.command(
                     apkSignerCmdPath,
                     "sign",
-                    "--ks",
+                    "--ks",// signer 的私钥和证书链包含在给定的基于 Java 的密钥库文件中
                     keyStorePath,
-                    "--ks-key-alias",
+                    "--ks-key-alias",// 表示 signer 在密钥库中的私钥和证书数据的别名的名称
                     keyAlias,
-                    "--key-pass",
+                    "--key-pass",// signer 私钥的密码。
                     "pass:$keyPwd",
-                    "--ks-pass",
+                    "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
                     "pass:$keyStorePwd",
+                    "--v1-signing-enabled",
+                    "true",
+                    "--v2-signing-enabled",
+                    "true",
+                    "-v",
                     "--out",
                     outPutFilePath,
                     alignedApkFilePath
                 )
                 processBuilder.redirectErrorStream(true)
 
-// 启动子进程并获取输出流
+                // 启动子进程并获取输出流
                 val process = processBuilder.start()
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
 
-// 读取输出流并打印到控制台
+                // 读取输出流并打印到控制台
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
                     line?.let {
@@ -131,7 +151,7 @@ object ApkSigner {
                     }
                 }
 
-// 等待子进程结束并获取退出值
+                // 等待子进程结束并获取退出值
                 val exitCode = process.waitFor()
                 Logger.log("Exited with code: $exitCode")
             } catch (e: Exception) {
@@ -143,12 +163,24 @@ object ApkSigner {
     }
 
 
-    fun zipAlignApk(apkFilePath: String, alignedApkPath: String? = null, onProgress: (String) -> Unit): String? {
+    fun zipAlignApk(
+        apkFilePath: String,
+        alignedApkPath: String? = null,
+        onProgress: (String) -> Unit
+    ): String? {
         val outPutFilePath = alignedApkPath ?: apkFilePath.replace(".apk", "_aligned.apk")
         try {
 // 创建ProcessBuilder对象并设置相关属性
             val processBuilder = ProcessBuilder()
-            processBuilder.command(zipAlignCmdPath, "-v", "-f", "-p", "4", apkFilePath, outPutFilePath)
+            processBuilder.command(
+                zipAlignCmdPath,
+                "-v",
+                "-f",
+                "-p",
+                "4",
+                apkFilePath,
+                outPutFilePath
+            )
             processBuilder.redirectErrorStream(true)
 
 // 启动子进程并获取输出流

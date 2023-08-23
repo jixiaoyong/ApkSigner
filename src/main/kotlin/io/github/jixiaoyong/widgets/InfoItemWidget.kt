@@ -52,7 +52,7 @@ fun InfoItemWidget(
         }
         Row(
             modifier = Modifier.fillMaxWidth()
-                .background(Color.White, RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
+                .background(MaterialTheme.colors.background, RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
                 .padding(vertical = 10.dp, horizontal = 5.dp)
         ) {
             Text(

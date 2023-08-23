@@ -2,7 +2,6 @@ package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
 import CommandResult
-import Logger
 import Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
@@ -10,9 +9,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -26,11 +22,13 @@ import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.launch
+import java.awt.Desktop
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDropEvent
+import java.io.File
 import javax.swing.JPanel
 import kotlin.math.roundToInt
 
@@ -41,6 +39,8 @@ import kotlin.math.roundToInt
  *      选择签名文件？
  * 2. 开始签名
  * 3. 签名历史
+ *
+ * todo 添加可以自定义签名文件输出地址的功能
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
@@ -60,7 +60,9 @@ fun PageSignApp(
     var signLogs by remember { mutableStateOf(listOf<String>()) }
     var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
     val scaffoldState = rememberScaffoldState()
-    val logScrollState = rememberScrollState()
+    val isEnabled = remember(signApkResult) {
+        CommandResult.NOT_EXECUT == signApkResult
+    }
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
@@ -96,7 +98,11 @@ fun PageSignApp(
                     modifier = Modifier.align(alignment = Alignment.Center)
                 )
             }
-            InfoItemWidget("当前选择的文件", currentApkFilePath ?: "", showChangeButton = false)
+            InfoItemWidget(
+                "当前选择的文件",
+                currentApkFilePath ?: "请先选择apk文件",
+                showChangeButton = false
+            )
             InfoItemWidget(
                 "当前选择的签名文件",
                 selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath,
@@ -104,74 +110,73 @@ fun PageSignApp(
                     onChangePage(Routes.SignInfo)
                 })
 
-            ButtonWidget({
-                scope.launch {
-                    if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.toLowerCase()
-                            .endsWith(".apk")
-                    ) {
-                        scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
-                        return@launch
-                    }
+            ButtonWidget(
+                {
+                    scope.launch {
+                        if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.toLowerCase()
+                                .endsWith(".apk")
+                        ) {
+                            scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
+                            return@launch
+                        }
 
-                    if (selectedSignInfo?.isValid() != true) {
-                        onChangePage(Routes.SignInfo)
-                        scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
-                        return@launch
-                    }
+                        if (selectedSignInfo?.isValid() != true) {
+                            onChangePage(Routes.SignInfo)
+                            scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
+                            return@launch
+                        }
 
-                    if (!ApkSigner.isInitialized()) {
-                        onChangePage(Routes.SettingInfo)
-                        scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
-                        return@launch
-                    }
+                        if (!ApkSigner.isInitialized()) {
+                            onChangePage(Routes.SettingInfo)
+                            scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
+                            return@launch
+                        }
 
-                    signApkResult = ApkSigner.alignAndSignApk(
-                        currentApkFilePath,
-                        selectedSignInfo.keyStorePath,
-                        selectedSignInfo.keyAlias,
-                        selectedSignInfo.keyStorePassword,
-                        selectedSignInfo.keyPassword,
-                        onProgress = { line ->
-                            scope.launch {
-                                signLogs = mutableListOf<String>().apply {
-                                    addAll(signLogs)
-                                    add(line)
+                        val signResult = ApkSigner.alignAndSignApk(
+                            currentApkFilePath,
+                            selectedSignInfo.keyStorePath,
+                            selectedSignInfo.keyAlias,
+                            selectedSignInfo.keyStorePassword,
+                            selectedSignInfo.keyPassword,
+                            zipAlign = false,
+                            onProgress = { line ->
+                                scope.launch {
+                                    signLogs = mutableListOf<String>().apply {
+                                        addAll(signLogs)
+                                        add(line)
+                                    }
                                 }
                             }
-                        }
-                    )
-
-                    Logger.log("result:$signApkResult")
-                    if (signApkResult is CommandResult.Success<*>) {
-                        val result = scaffoldState.snackbarHostState.showSnackbar(
-                            "签名成功，是否打开签名后的文件？",
-                            "打开",
-                            SnackbarDuration.Long
                         )
 
-                        if (SnackbarResult.ActionPerformed == result) {
-                            // todo 打开文件夹
+                        signApkResult = signResult
+                        if (signResult is CommandResult.Success<*> && !signResult.result?.toString()
+                                .isNullOrBlank()
+                        ) {
+                            val result = scaffoldState.snackbarHostState.showSnackbar(
+                                "签名成功，是否打开签名后的文件？",
+                                "打开",
+                                SnackbarDuration.Long
+                            )
+                            val file = File(signResult.result?.toString() ?: "")
+                            if (SnackbarResult.ActionPerformed == result && file.exists()) {
+                                Desktop.getDesktop().open(file.parentFile)
+                            }
                         }
+
+                        signApkResult = CommandResult.NOT_EXECUT
                     }
 
-                    signApkResult = CommandResult.NOT_EXECUT
-                }
-            }, enabled = CommandResult.NOT_EXECUT == signApkResult, title = "开始签名apk")
+                },
+                enabled = isEnabled,
+                title = "开始签名apk",
+                modifier = Modifier.size(250.dp, 50.dp)
+                    .background(
+                        if (isEnabled) MaterialTheme.colors.secondary else MaterialTheme.colors.surface,
+                        shape = RoundedCornerShape(15.dp)
+                    ).padding(horizontal = 15.dp, vertical = 5.dp)
+            )
 
-            LazyColumn(
-                modifier = Modifier.scrollable(
-                    logScrollState,
-                    orientation = Orientation.Vertical,
-                    reverseDirection = true
-                ).fillMaxWidth()
-                    .heightIn(100.dp, 200.dp)
-                    .padding(vertical = 5.dp)
-                    .background(MaterialTheme.colors.surface)
-            ) {
-                items(signLogs) {
-                    Text(it)
-                }
-            }
         }
 
     }

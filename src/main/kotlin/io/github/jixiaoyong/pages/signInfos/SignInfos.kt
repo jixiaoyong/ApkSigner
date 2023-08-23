@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
@@ -71,8 +74,11 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                         fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onSurface
                     )
                 )
-                Text(selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath)
-                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    selectedSignInfo?.keyNickName + " | " + selectedSignInfo?.keyStorePath,
+                    style = TextStyle(lineBreak = LineBreak.Paragraph),
+                    modifier = Modifier.weight(1f)
+                )
                 ButtonWidget(onClick = {
                     dropdownMenu.status = DropdownMenuState.Status.Open(Offset(50.0f, 50.0f))
                 }, title = "重新选择签名")
@@ -85,7 +91,20 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                         onSignInfoChanged(settings, it)
                         dropdownMenu.status = DropdownMenuState.Status.Closed
                     }) {
-                        Text(text = it.keyNickName)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = it.keyNickName)
+                            Spacer(modifier = Modifier.weight(1f))
+                            IconButton(onClick = {
+                                val tempList = signInfoList.toMutableList()
+                                tempList.remove(it)
+                                settings.save(
+                                    StorageKeys.SIGN_INFO_LIST,
+                                    Json.encodeToString(tempList)
+                                )
+                            }) {
+                                Icon(Icons.Default.Delete, "")
+                            }
+                        }
                     }
                 }
             }
