@@ -1,13 +1,16 @@
 name: Publish release
 
+permissions:
+  contents: write
+
 on:
-  release:
-    types: [ published ]
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
-  publish-release:
+  mac_build:
     runs-on: macos-latest
-
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v2
@@ -15,19 +18,89 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: "zulu"
           java-version: 17
-
-      - name: Setup Kotlin
-        uses: fwilhe2/setup-kotlin@0.2.0
 
       - name: Gradle Build Action
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run:
-          ./gradlew package
-          cd build/compose/
-          ls -R
+        run: |
+          ./gradlew packageDistributionForCurrentOS
+      - name: Upload mac os artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-artifact
+          path: build/compose/binaries/main/dmg/*.dmg
 
+  windows_build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
 
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: 17
+
+      - name: Gradle Build Action
+        uses: gradle/gradle-build-action@v2.7.1
+
+      - name: Execute Gradle build
+        run: ./gradlew packageDistributionForCurrentOS
+      - name: Upload windows artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-artifact
+          path: build/compose/binaries/main/msi/*.msi
+
+  ubuntu_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: 17
+
+      - name: Gradle Build Action
+        uses: gradle/gradle-build-action@v2.7.1
+
+      - name: Execute Gradle build
+        run: ./gradlew packageDistributionForCurrentOS
+      - name: Upload ubuntu artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-artifact
+          path: build/compose/binaries/main/deb/*.deb
+
+  publisher:
+    name: Publish artifacts to github release
+    needs: [mac_build, windows_build, ubuntu_build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: dist
+
+      - name: Auto Changelog
+        uses: ardalanamini/auto-changelog@v4.0.0
+        id  : changelog
+
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh release create ${{ github.ref_name }}
+          ./dist/*/*
+          --notes "${{ steps.changelog.outputs.changelog }}"
+          --title "ApkSigner ${{ github.ref_name }}"
