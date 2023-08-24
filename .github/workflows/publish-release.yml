@@ -20,7 +20,7 @@ jobs:
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run:
+        run: |
           ./gradlew package
           cd build/compose/
           ls -R
