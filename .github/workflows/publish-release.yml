@@ -1,6 +1,9 @@
 name: Publish release
 
-on: [ push ]
+on:
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   mac_build:
@@ -12,7 +15,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: "zulu"
           java-version: 17
 
       - name: Gradle Build Action
@@ -27,7 +30,6 @@ jobs:
           name: macos-artifact
           path: build/compose/binaries/main/dmg/*.dmg
 
-
   windows_build:
     runs-on: windows-latest
     steps:
@@ -37,15 +39,14 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: "zulu"
           java-version: 17
 
       - name: Gradle Build Action
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run:
-          ./gradlew packageDistributionForCurrentOS
+        run: ./gradlew packageDistributionForCurrentOS
       - name: Upload windows artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -61,25 +62,23 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: "zulu"
           java-version: 17
 
       - name: Gradle Build Action
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run:
-          ./gradlew packageDistributionForCurrentOS
+        run: ./gradlew packageDistributionForCurrentOS
       - name: Upload ubuntu artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ubuntu-artifact
           path: build/compose/binaries/main/deb/*.deb
 
-
   publisher:
     name: Publish artifacts to github release
-    needs: [ mac_build,windows_build,ubuntu_build ]
+    needs: [mac_build, windows_build, ubuntu_build]
     runs-on: ubuntu-latest
     steps:
       - name: Download mac artifact
@@ -101,13 +100,8 @@ jobs:
         shell: bash
         run: |
           ls -R
-          artifacts=`ls /`
-          echo ${artifacts}
-          echo "--------"
-          echo ${{artifacts}}
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            ${artifacts}
+          files: '**/*'
