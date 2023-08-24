@@ -20,7 +20,7 @@ jobs:
 
       - name: Execute Gradle build
         run: |
-          ./gradlew package
+          ./gradlew packageDistributionForCurrentOS
       - name: Upload mac os artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -45,12 +45,12 @@ jobs:
 
       - name: Execute Gradle build
         run:
-          ./gradlew package
-      - name: Upload mac os artifacts
+          ./gradlew packageDistributionForCurrentOS
+      - name: Upload windows artifacts
         uses: actions/upload-artifact@v3
         with:
           name: windows-artifact
-          path: build/compose/binaries/main/*.exe
+          path: build/compose/binaries/main/msi/*.msi
 
   ubuntu_build:
     runs-on: ubuntu-latest
@@ -69,12 +69,12 @@ jobs:
 
       - name: Execute Gradle build
         run:
-          ./gradlew package
-      - name: Upload mac os artifacts
+          ./gradlew packageDistributionForCurrentOS
+      - name: Upload ubuntu artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ubuntu-artifact
-          path: build/compose/binaries/main/*.deb
+          path: build/compose/binaries/main/deb/*.deb
 
 
   publisher:
@@ -100,4 +100,4 @@ jobs:
       - name: Print all file
         shell: bash
         run: |
-          ls -al
+          ls -R
