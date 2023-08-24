@@ -1,0 +1,33 @@
+name: Publish release
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  publish-release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Setup Kotlin
+        uses: fwilhe2/setup-kotlin@0.2.0
+
+      - name: Gradle Build Action
+        uses: gradle/gradle-build-action@v2.7.1
+
+      - name: Execute Gradle build
+        run:
+          ./gradlew package
+          cd build/compose/
+          ls -R
+
+
