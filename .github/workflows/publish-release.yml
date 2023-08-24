@@ -101,9 +101,13 @@ jobs:
         shell: bash
         run: |
           ls -R
+          artifacts=`ls /`
+          echo ${artifacts}
+          echo "--------"
+          echo ${{artifacts}}
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.2
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: ApkSigner 
-          path: /
+          files: |
+            ${artifacts}
