@@ -1,11 +1,10 @@
 name: Publish release
 
-on: [push]
+on: [ push ]
 
 jobs:
-  publish-release:
+  mac_build:
     runs-on: macos-latest
-
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v2
@@ -22,7 +21,83 @@ jobs:
       - name: Execute Gradle build
         run:
           ./gradlew package
-          cd build/compose/
-          ls -R
+      - name: Upload mac os artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-artifact
+          path: build/compose/binaries/main/dmg/*.dmg
 
 
+  windows_build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Gradle Build Action
+        uses: gradle/gradle-build-action@v2.7.1
+
+      - name: Execute Gradle build
+        run:
+          ./gradlew package
+      - name: Upload mac os artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-artifact
+          path: build/compose/binaries/main/*.exe
+
+  ubuntu_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Gradle Build Action
+        uses: gradle/gradle-build-action@v2.7.1
+
+      - name: Execute Gradle build
+        run:
+          ./gradlew package
+      - name: Upload mac os artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-artifact
+          path: build/compose/binaries/main/*.deb
+
+
+  publisher:
+    name: Publish artifacts to github release
+    needs: [ mac_build,windows_build,ubuntu_build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download mac artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-artifact
+
+      - name: Download windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-artifact
+
+      - name: Download ubuntu artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ubuntu-artifact
+
+      - name: Print all file
+        shell: bash
+        run: |
+          ls -al
