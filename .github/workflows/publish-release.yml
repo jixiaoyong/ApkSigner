@@ -84,26 +84,32 @@ jobs:
     needs: [mac_build, windows_build, ubuntu_build]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+    
       - name: Download mac artifact
         uses: actions/download-artifact@v3
         with:
           name: macos-artifact
+          path: dist
 
       - name: Download windows artifact
         uses: actions/download-artifact@v3
         with:
           name: windows-artifact
+          path: dist
 
       - name: Download ubuntu artifact
         uses: actions/download-artifact@v3
         with:
           name: ubuntu-artifact
+          path: dist
 
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
           gh release create ${{ github.ref_name }}
-          ./*.*
+          ./dist/*.*
           --generate-notes
           --title "${{ github.ref_name }}"
