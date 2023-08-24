@@ -2,7 +2,7 @@ name: Publish release
 
 permissions:
   contents: write
-  
+
 on:
   push:
     tags:
@@ -100,9 +100,10 @@ jobs:
           name: ubuntu-artifact
 
       - name: Publish Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          generate_release_notes: true
-          files: '**/*'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh release create ${{ github.ref_name }}
+          '**/*'
+          --generate-notes
+          --title "Version ${{ github.ref_name }}"
