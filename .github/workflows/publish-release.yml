@@ -99,12 +99,10 @@ jobs:
         with:
           name: ubuntu-artifact
 
-      - name: Print all file
-        shell: bash
-        run: |
-          ls -R
-
-      - name: Release
+      - name: Publish Release
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
           files: '**/*'
