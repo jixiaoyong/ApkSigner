@@ -1,14 +1,26 @@
+<div align="center">
+
 ![icon](./docs/shortscreen/icon.png)
 
-# ApkSigner
+# ApkSigner ![GitHub release (with filter)](https://img.shields.io/github/v/release/jixiaoyong/ApkSigner) ![GitHub Release Date - Published_At](https://img.shields.io/github/release-date/jixiaoyong/ApkSigner)
 
 A tool for Android developers to sign their applications with GUI software.
 
 一款供Android开发者用来可视化签名的工具。
 
+基于[JetBrains Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/)
+
+![Support Mac](https://img.shields.io/badge/Mac-grey?logo=apple)
+![Support Windows](https://img.shields.io/badge/Windows-blue?logo=windows)
+![Static Badge](https://img.shields.io/badge/Ubuntu-%23E95420?logo=Ubuntu&logoColor=white)
+
 [![download button](./docs/shortscreen/download.svg)](https://github.com/jixiaoyong/ApkSigner/releases)
 
-基于[JetBrains Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/)
+</div>
+
+<br/>
+<br/>
+<br/>
 
 🚧 目前界面功能还在持续完善中，基础签名功能可用。
 
@@ -22,7 +34,9 @@ TODO：
 
 # 主要功能
 
-支持在设置多个签名，并且可以切换。
+支持在管理多个签名，并且可以切换，一键签名APK。
+
+<br/>
 
 起因是 Flutter 打包出来的工程在360加固时提示“没有签名”，但360加固提供的签名过程又过于繁琐，故此开发这样一个小工具，使用图形界面来签名APK文件。
 
