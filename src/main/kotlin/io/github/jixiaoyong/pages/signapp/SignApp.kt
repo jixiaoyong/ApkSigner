@@ -17,10 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.awt.Desktop
 import java.awt.datatransfer.DataFlavor
@@ -52,6 +57,7 @@ fun PageSignApp(
     window: ComposeWindow,
     selectedSignInfo: SignInfoBean?,
     currentApkFilePath: String?,
+    settings: SettingsTool,
     onChangeApk: (String) -> Unit,
     onChangePage: (String) -> Unit
 ) {
@@ -63,6 +69,7 @@ fun PageSignApp(
     val isEnabled = remember(signApkResult) {
         CommandResult.NOT_EXECUT == signApkResult
     }
+    val apkSignType by settings.signTypeList.collectAsState(setOf())
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
@@ -110,6 +117,35 @@ fun PageSignApp(
                     onChangePage(Routes.SignInfo)
                 })
 
+            Text(
+                "签名方案：",
+                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
+                    .padding(bottom = 15.dp)
+            ) {
+                SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
+                    val isSelected = apkSignType.contains(item.type)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = isSelected, onCheckedChange = {
+                            val newTypes = mutableSetOf<Int>()
+                            newTypes.addAll(apkSignType)
+                            if (isSelected) {
+                                newTypes.remove(item.type)
+                            } else {
+                                newTypes.add(item.type)
+                            }
+
+                            settings.signTypeList = flowOf(newTypes)
+                        })
+                        Text(item.name, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
+                    }
+
+                }
+            }
+
             ButtonWidget(
                 {
                     scope.launch {
@@ -132,6 +168,11 @@ fun PageSignApp(
                             return@launch
                         }
 
+                        if (apkSignType.isEmpty()) {
+                            scaffoldState.snackbarHostState.showSnackbar("请至少选择一种签名方式")
+                            return@launch
+                        }
+
                         val signResult = ApkSigner.alignAndSignApk(
                             currentApkFilePath,
                             selectedSignInfo.keyStorePath,
@@ -139,6 +180,7 @@ fun PageSignApp(
                             selectedSignInfo.keyStorePassword,
                             selectedSignInfo.keyPassword,
                             zipAlign = false,
+                            signVersions = SignType.ALL_SIGN_TYPES.filter { apkSignType.contains(it.type) },
                             onProgress = { line ->
                                 scope.launch {
                                     signLogs = mutableListOf<String>().apply {
@@ -162,6 +204,10 @@ fun PageSignApp(
                             if (SnackbarResult.ActionPerformed == result && file.exists()) {
                                 Desktop.getDesktop().open(file.parentFile)
                             }
+                        } else if (signResult is CommandResult.Error<*>) {
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                "签名失败：${signResult.message}",
+                            )
                         }
 
                         signApkResult = CommandResult.NOT_EXECUT

@@ -1,3 +1,4 @@
+import io.github.jixiaoyong.pages.signapp.SignType
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -99,6 +100,7 @@ object ApkSigner {
         apkFilePath: String, keyStorePath: String, keyAlias: String,
         keyStorePwd: String, keyPwd: String, signedApkPath: String? = null,
         zipAlign: Boolean = true,
+        signVersions: List<SignType> = SignType.DEF_SIGN_TYPES,
         onProgress: (String) -> Unit
     ): CommandResult {
 
@@ -128,9 +130,13 @@ object ApkSigner {
                     "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
                     "pass:$keyStorePwd",
                     "--v1-signing-enabled",
-                    "true",
+                    if (signVersions.contains(SignType.V1)) "true" else "false",
                     "--v2-signing-enabled",
-                    "true",
+                    if (signVersions.contains(SignType.V2)) "true" else "false",
+                    "--v3-signing-enabled",
+                    if (signVersions.contains(SignType.V3)) "true" else "false",
+                    "--v4-signing-enabled",
+                    if (signVersions.contains(SignType.V4)) "true" else "false",
                     "-v",
                     "--out",
                     outPutFilePath,
@@ -143,8 +149,8 @@ object ApkSigner {
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
 
                 // 读取输出流并打印到控制台
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
+                var line: String?=null
+                while (reader.readLine().also { if(null!=it){line = it} } != null) {
                     line?.let {
                         Logger.info(it)
                         onProgress(it)
@@ -154,9 +160,14 @@ object ApkSigner {
                 // 等待子进程结束并获取退出值
                 val exitCode = process.waitFor()
                 Logger.log("Exited with code: $exitCode")
+                return if (0 == exitCode) {
+                    CommandResult.Success(outPutFilePath)
+                } else {
+                    CommandResult.Error("$line")
+                }
             } catch (e: Exception) {
                 Logger.error("签名失败", e)
-                return CommandResult.Error("签名失败", e)
+                return CommandResult.Error("${e.message}", e)
             }
         }
         return CommandResult.Success(outPutFilePath)

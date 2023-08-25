@@ -24,11 +24,9 @@ import androidx.compose.ui.unit.dp
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.utils.gson
 import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 /**
  * @author : jixiaoyong
@@ -99,7 +97,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                                 tempList.remove(it)
                                 settings.save(
                                     StorageKeys.SIGN_INFO_LIST,
-                                    Json.encodeToString(tempList)
+                                    gson.toJson(tempList)
                                 )
                             }) {
                                 Icon(Icons.Default.Delete, "")
@@ -156,7 +154,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                         val newSignInfos = mutableListOf<SignInfoBean>()
                         newSignInfos.addAll(signInfoList)
                         newSignInfos.add(newSignInfo)
-                        settings.save(StorageKeys.SIGN_INFO_LIST, Json.encodeToString(newSignInfos))
+                        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
                         newSignInfo = SignInfoBean()
                     }) {
                         Text("保存新签名文件")
@@ -169,7 +167,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
 }
 
 private fun onSignInfoChanged(settings: SettingsTool, signInfoBean: SignInfoBean?) {
-    settings.save(StorageKeys.SIGN_INFO_SELECT, Json.encodeToString(signInfoBean))
+    settings.save(StorageKeys.SIGN_INFO_SELECT, gson.toJson(signInfoBean))
 }
 
 @Preview
@@ -203,7 +201,6 @@ private fun SignInfoItem(
     }
 }
 
-@Serializable
 data class SignInfoBean(
     var keyNickName: String = "",
     var keyStorePath: String = "",

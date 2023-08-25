@@ -33,9 +33,9 @@ object Routes {
 @Composable
 @Preview
 fun App(window: ComposeWindow) {
-
+    val scope = rememberCoroutineScope()
     val settings = remember {
-        SettingsTool()
+        SettingsTool(scope)
     }
 
     val routes = remember {
@@ -95,9 +95,14 @@ fun App(window: ComposeWindow) {
             when (pageIndex.value) {
                 Routes.SignInfo -> PageSignInfo(window, settings)
 
-                Routes.SignApp -> PageSignApp(window, selectedSignInfo, currentApkFilePath, {
-                    currentApkFilePath = it
-                }) { route ->
+                Routes.SignApp -> PageSignApp(
+                    window,
+                    selectedSignInfo,
+                    currentApkFilePath,
+                    settings,
+                    {
+                        currentApkFilePath = it
+                    }) { route ->
                     pageIndex.value = route
                 }
 

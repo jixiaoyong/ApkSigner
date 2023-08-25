@@ -23,7 +23,7 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation("com.russhwolf:multiplatform-settings-no-arg:$multiplatformSettings")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.russhwolf:multiplatform-settings-serialization:$multiplatformSettings")
     implementation("com.russhwolf:multiplatform-settings-coroutines:$multiplatformSettings")
     implementation("com.github.Dansoftowner:jSystemThemeDetector:3.6")
