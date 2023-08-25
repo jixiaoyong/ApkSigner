@@ -94,7 +94,7 @@ object ApkSigner {
      * @param keyPwd signer 私钥的密码。
      * @param zipAlign 是否需要对齐
      * @param signedApkPath 签名之后的文件输出路径，默认为apkFilePath对应的x.apk添加_signed后缀,即x_signed.apk
-     * @return 返回结果 Pair(是否成功，失败原因或输出文件路径)
+     * @return 返回结果 CommandResult 成功或失败，及信息
      */
     fun alignAndSignApk(
         apkFilePath: String, keyStorePath: String, keyAlias: String,
@@ -149,8 +149,12 @@ object ApkSigner {
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
 
                 // 读取输出流并打印到控制台
-                var line: String?=null
-                while (reader.readLine().also { if(null!=it){line = it} } != null) {
+                var line: String? = null
+                while (reader.readLine().also {
+                        if (null != it) {
+                            line = it
+                        }
+                    } != null) {
                     line?.let {
                         Logger.info(it)
                         onProgress(it)
@@ -212,6 +216,55 @@ object ApkSigner {
             return null
         }
         return outPutFilePath
+    }
+
+    /**
+     * 获取Apk文件使用的签名
+     * @param apkFilePath 签名的apk文件绝对路径
+     * @return 返回结果 Pair(是否成功，失败原因或输出文件路径)
+     */
+    fun getApkSignInfo(
+        apkFilePath: String,
+    ): CommandResult {
+
+        if (!isInitialized()) {
+            return CommandResult.Error("请先初始化相关配置")
+        }
+
+        if (apkFilePath.isNotEmpty()) {
+            try {
+                // 创建ProcessBuilder对象并设置相关属性
+                val processBuilder = ProcessBuilder()
+                processBuilder.command(
+                    apkSignerCmdPath,
+                    "verify",
+                    "--print-certs",
+                    apkFilePath,
+                )
+                processBuilder.redirectErrorStream(true)
+
+                // 启动子进程并获取输出流
+                val process = processBuilder.start()
+                val reader = BufferedReader(InputStreamReader(process.inputStream))
+
+                // 读取输出流并打印到控制台
+                val result = reader.readLines().joinToString("\n")
+
+                // 等待子进程结束并获取退出值
+                val exitCode = process.waitFor()
+                Logger.log("Exited with code: $exitCode")
+                return if (0 == exitCode) {
+                    CommandResult.Success(result)
+                } else {
+                    CommandResult.Error(result)
+                }
+            } catch (e: Exception) {
+                Logger.error("查询签名失败", e)
+                return CommandResult.Error("${e.message}", e)
+            }
+        } else {
+            return CommandResult.Error("apk文件路径不能为空")
+        }
     }
 }
 

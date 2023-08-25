@@ -12,17 +12,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.widgets.InfoItemWidget
+import kotlinx.coroutines.launch
 import javax.swing.JPanel
 
 /**
@@ -46,12 +49,16 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
     Scaffold(scaffoldState = scaffoldState) {
         Column(
             modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
-                rememberScrollableState { return@rememberScrollableState 0f }, orientation = Orientation.Vertical
+                rememberScrollableState { return@rememberScrollableState 0f },
+                orientation = Orientation.Vertical
             )
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
+                    .background(
+                        color = MaterialTheme.colors.surface,
+                        shape = RoundedCornerShape(15.dp)
+                    )
                     .padding(15.dp),
                 component = JPanel(),
                 onFileDrop = {
@@ -70,9 +77,10 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 )
             }
 
-            InfoItemWidget("apk signer目录", apkSign ?: "尚未初始化", onChange = {
+            InfoItemWidget("apk signer目录", apkSign ?: "尚未初始化", onClick = {
                 scope.launch {
-                    val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
+                    val chooseFileName =
+                        FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
                     if (chooseFileName.isNullOrBlank()) {
                         scaffoldState.snackbarHostState.showSnackbar("请选择apksigner文件")
                     } else {
@@ -83,7 +91,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 }
 
             })
-            InfoItemWidget("zip align目录", zipAlign ?: "尚未初始化", onChange = {
+            InfoItemWidget("zip align目录", zipAlign ?: "尚未初始化", onClick = {
                 scope.launch {
                     val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
                     if (chooseFileName.isNullOrBlank()) {

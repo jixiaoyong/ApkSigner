@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.sp
 fun InfoItemWidget(
     title: String,
     description: String?,
+    buttonTitle: String? = null,
     showChangeButton: Boolean = true,
-    onChange: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = Modifier.padding(vertical = 10.dp)
@@ -48,11 +49,17 @@ fun InfoItemWidget(
             Text(
                 "$title：", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)
             )
-            if (showChangeButton) ButtonWidget({ onChange?.invoke() }, title = "\uD83D\uDCDD修改")
+            if (showChangeButton) ButtonWidget(
+                { onClick?.invoke() },
+                title = buttonTitle ?: "\uD83D\uDCDD修改"
+            )
         }
         Row(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colors.background, RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
+                .background(
+                    MaterialTheme.colors.background,
+                    RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp)
+                )
                 .padding(vertical = 10.dp, horizontal = 5.dp)
         ) {
             Text(

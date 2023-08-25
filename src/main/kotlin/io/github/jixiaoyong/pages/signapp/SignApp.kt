@@ -51,6 +51,7 @@ import kotlin.math.roundToInt
  * @date : 2023/8/18
  */
 
+@OptIn(ExperimentalMaterialApi::class)
 @Preview
 @Composable
 fun PageSignApp(
@@ -70,6 +71,29 @@ fun PageSignApp(
         CommandResult.NOT_EXECUT == signApkResult
     }
     val apkSignType by settings.signTypeList.collectAsState(setOf())
+    var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
+
+
+    val local = signInfoResult
+    when (local) {
+        is CommandResult.Success<*> -> {
+            AlertDialog(onDismissRequest = {
+                signInfoResult = CommandResult.NOT_EXECUT
+            }, buttons = {
+
+            }, title = { Text("查询签名结果") }, text = {
+                Text(local.result?.toString() ?: "")
+            })
+        }
+
+        is CommandResult.Error<*> -> {
+            scope.launch {
+                scaffoldState.snackbarHostState.showSnackbar("查询签名失败:${local.message}")
+            }
+        }
+
+        else -> {}
+    }
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
@@ -108,12 +132,21 @@ fun PageSignApp(
             InfoItemWidget(
                 "当前选择的文件",
                 currentApkFilePath ?: "请先选择apk文件",
-                showChangeButton = false
+                buttonTitle = "查看签名",
+                onClick = {
+                    scope.launch {
+                        if (currentApkFilePath.isNullOrBlank()) {
+                            scaffoldState.snackbarHostState.showSnackbar("请先选择apk文件")
+                        } else {
+                            signInfoResult = ApkSigner.getApkSignInfo(currentApkFilePath)
+                        }
+                    }
+                }
             )
             InfoItemWidget(
                 "当前选择的签名文件",
                 selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath,
-                onChange = {
+                onClick = {
                     onChangePage(Routes.SignInfo)
                 })
 
