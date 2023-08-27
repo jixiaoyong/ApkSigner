@@ -73,7 +73,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     )
                 )
                 Text(
-                    selectedSignInfo?.keyNickName + " | " + selectedSignInfo?.keyStorePath,
+                    selectedSignInfo?.toString() ?: "暂无",
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
                     modifier = Modifier.weight(1f)
                 )
@@ -99,6 +99,9 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                                     StorageKeys.SIGN_INFO_LIST,
                                     gson.toJson(tempList)
                                 )
+                                if (it == selectedSignInfo) {
+                                    onSignInfoChanged(settings, null)
+                                }
                             }) {
                                 Icon(Icons.Default.Delete, "")
                             }
@@ -167,7 +170,8 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
 }
 
 private fun onSignInfoChanged(settings: SettingsTool, signInfoBean: SignInfoBean?) {
-    settings.save(StorageKeys.SIGN_INFO_SELECT, gson.toJson(signInfoBean))
+    val json = if (null == signInfoBean) null else gson.toJson(signInfoBean)
+    settings.save(StorageKeys.SIGN_INFO_SELECT, json)
 }
 
 @Preview
@@ -198,17 +202,5 @@ private fun SignInfoItem(
                 title = buttonText
             )
         }
-    }
-}
-
-data class SignInfoBean(
-    var keyNickName: String = "",
-    var keyStorePath: String = "",
-    var keyStorePassword: String = "",
-    var keyAlias: String = "",
-    var keyPassword: String = "",
-) {
-    fun isValid(): Boolean {
-        return keyNickName.isNotEmpty() && keyStorePath.isNotEmpty() && keyStorePassword.isNotEmpty() && keyAlias.isNotEmpty() && keyPassword.isNotEmpty()
     }
 }

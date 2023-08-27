@@ -21,7 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
@@ -34,6 +33,7 @@ import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
+import java.util.*
 import javax.swing.JPanel
 import kotlin.math.roundToInt
 
@@ -56,7 +56,6 @@ import kotlin.math.roundToInt
 @Composable
 fun PageSignApp(
     window: ComposeWindow,
-    selectedSignInfo: SignInfoBean?,
     currentApkFilePath: String?,
     settings: SettingsTool,
     onChangeApk: (String) -> Unit,
@@ -71,6 +70,8 @@ fun PageSignApp(
         CommandResult.NOT_EXECUT == signApkResult
     }
     val apkSignType by settings.signTypeList.collectAsState(setOf())
+    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
 
 
@@ -114,7 +115,7 @@ fun PageSignApp(
                 component = JPanel(),
                 onFileDrop = {
                     scope.launch {
-                        val file = it.firstOrNull { it.toLowerCase().endsWith(".apk") }
+                        val file = it.firstOrNull { it.lowercase(Locale.getDefault()).endsWith(".apk") }
                         if (null == file) {
                             scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
                         } else {
@@ -145,7 +146,7 @@ fun PageSignApp(
             )
             InfoItemWidget(
                 "当前选择的签名文件",
-                selectedSignInfo?.keyNickName + selectedSignInfo?.keyStorePath,
+                selectedSignInfo?.toString() ?: "暂无",
                 onClick = {
                     onChangePage(Routes.SignInfo)
                 })
@@ -182,14 +183,15 @@ fun PageSignApp(
             ButtonWidget(
                 {
                     scope.launch {
-                        if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.toLowerCase()
+                        if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.lowercase(Locale.getDefault())
                                 .endsWith(".apk")
                         ) {
                             scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
                             return@launch
                         }
 
-                        if (selectedSignInfo?.isValid() != true) {
+                        val localSelectedSignInfo = selectedSignInfo
+                        if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
                             onChangePage(Routes.SignInfo)
                             scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
                             return@launch
@@ -208,10 +210,10 @@ fun PageSignApp(
 
                         val signResult = ApkSigner.alignAndSignApk(
                             currentApkFilePath,
-                            selectedSignInfo.keyStorePath,
-                            selectedSignInfo.keyAlias,
-                            selectedSignInfo.keyStorePassword,
-                            selectedSignInfo.keyPassword,
+                            localSelectedSignInfo.keyStorePath,
+                            localSelectedSignInfo.keyAlias,
+                            localSelectedSignInfo.keyStorePassword,
+                            localSelectedSignInfo.keyPassword,
                             zipAlign = false,
                             signVersions = SignType.ALL_SIGN_TYPES.filter { apkSignType.contains(it.type) },
                             onProgress = { line ->
@@ -291,7 +293,7 @@ fun DropBoxPanel(
             )
             window.contentPane.add(component)
 
-            val target = object : DropTarget(component, object : DropTargetAdapter() {
+            object : DropTarget(component, object : DropTargetAdapter() {
                 override fun drop(event: DropTargetDropEvent) {
 
                     event.acceptDrop(DnDConstants.ACTION_REFERENCE)

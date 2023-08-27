@@ -46,7 +46,6 @@ fun App(window: ComposeWindow) {
         )
     }
 
-    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
 
     val pageIndex = remember {
         mutableStateOf(Routes.SignInfo)
@@ -97,7 +96,6 @@ fun App(window: ComposeWindow) {
 
                 Routes.SignApp -> PageSignApp(
                     window,
-                    selectedSignInfo,
                     currentApkFilePath,
                     settings,
                     {
