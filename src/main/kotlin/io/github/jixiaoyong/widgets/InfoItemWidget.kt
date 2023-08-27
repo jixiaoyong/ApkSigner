@@ -10,7 +10,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,22 +32,25 @@ fun InfoItemWidget(
     showChangeButton: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
+    val headerBackground = MaterialTheme.colors.surface
+    val rounderRadius = 10.dp
     Column(
         modifier = Modifier.padding(vertical = 10.dp)
-            .background(color = MaterialTheme.colors.background, shape = RoundedCornerShape(15.dp))
+            .background(color = MaterialTheme.colors.background, shape = RoundedCornerShape(rounderRadius))
             .padding(horizontal = 15.dp, vertical = 10.dp)
-            .border(1.dp, color = Color.Gray, shape = RoundedCornerShape(15.dp))
+            .border(1.dp, color = headerBackground, shape = RoundedCornerShape(rounderRadius))
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 35.dp).background(
-                color = MaterialTheme.colors.primaryVariant.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
+                color = headerBackground,
+                shape = RoundedCornerShape(topStart = rounderRadius, topEnd = rounderRadius)
             ).padding(5.dp),
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "$title：", style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                title, style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             )
+            Spacer(modifier = Modifier.weight(1f))
             if (showChangeButton) ButtonWidget(
                 { onClick?.invoke() },
                 title = buttonTitle ?: "\uD83D\uDCDD修改"
@@ -58,7 +60,7 @@ fun InfoItemWidget(
             modifier = Modifier.fillMaxWidth()
                 .background(
                     MaterialTheme.colors.background,
-                    RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp)
+                    RoundedCornerShape(bottomEnd = rounderRadius, bottomStart = rounderRadius)
                 )
                 .padding(vertical = 10.dp, horizontal = 5.dp)
         ) {

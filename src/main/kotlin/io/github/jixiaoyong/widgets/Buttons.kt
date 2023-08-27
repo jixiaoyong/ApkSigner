@@ -30,10 +30,12 @@ fun ButtonWidget(
     enabled: Boolean = true,
     content: (@Composable () -> Unit)? = null
 ) {
-    val modifier = modifier ?: Modifier.background(
-        if (enabled) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.surface,
-        shape = RoundedCornerShape(15.dp)
-    ).padding(horizontal = 15.dp, vertical = 5.dp)
+    val modifier = modifier ?: Modifier
+        .padding(horizontal = 5.dp)
+        .background(
+            if (enabled) MaterialTheme.colors.secondary else MaterialTheme.colors.surface,
+            shape = RoundedCornerShape(10.dp)
+        ).padding(horizontal = 15.dp, vertical = 10.dp)
     Box(
         modifier = modifier.clickable { if (enabled) onClick() },
         contentAlignment = Alignment.Center
@@ -41,7 +43,7 @@ fun ButtonWidget(
         if (null != content) {
             content()
         } else {
-            Text(title ?: "", style = TextStyle(color = MaterialTheme.colors.onSurface))
+            Text(title ?: "", style = TextStyle(color = MaterialTheme.colors.onSecondary))
         }
     }
 }

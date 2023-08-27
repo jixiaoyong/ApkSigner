@@ -195,6 +195,7 @@ private fun SignInfoItem(
                 value,
                 onValueChange = onChange,
                 modifier = Modifier.weight(1f),
+                colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.background),
                 keyboardOptions = if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default
             )
             if (null != onClick) ButtonWidget(

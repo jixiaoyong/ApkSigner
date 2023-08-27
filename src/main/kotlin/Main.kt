@@ -10,12 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.jthemedetecor.OsThemeDetector
 import io.github.jixiaoyong.pages.settings.PageSettingInfo
 import io.github.jixiaoyong.pages.signInfos.PageSignInfo
@@ -68,11 +68,9 @@ fun App(window: ComposeWindow) {
     AppTheme(darkTheme = isDarkTheme) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
-                    .background(
-                        color = MaterialTheme.colors.surface.copy(alpha = .2f),
-                        shape = RectangleShape
-                    ),
+                modifier = Modifier.fillMaxWidth()
+                    .heightIn(min = 65.dp)
+                    .padding(horizontal = 5.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -82,10 +80,15 @@ fun App(window: ComposeWindow) {
                     else MaterialTheme.colors.surface
                     val textColor = if (isActive) Color.White else MaterialTheme.colors.onPrimary
                     Row(
-                        modifier = Modifier.background(backgroundColor, RoundedCornerShape(15.dp))
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 1.dp)
+                            .background(backgroundColor, RoundedCornerShape(5.dp))
                             .clickable {
                                 pageIndex.value = route.second
-                            }.padding(horizontal = 35.dp, vertical = 15.dp)
+                            }.padding(vertical = 15.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(route.first, style = TextStyle(color = textColor))
                     }
@@ -113,10 +116,12 @@ fun App(window: ComposeWindow) {
 
 
 fun main() = application {
+    val windowState = rememberWindowState(height = 620.dp)
     Window(
         onCloseRequest = ::exitApplication,
         title = "APK Signer",
-        icon = painterResource("/imgs/icon.png")
+        icon = painterResource("/imgs/icon.png"),
+        state = windowState
     ) {
         App(window)
     }
