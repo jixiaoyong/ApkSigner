@@ -117,6 +117,9 @@ object ApkSigner {
         if (alignedApkFilePath != null) {
             try {
                 // 创建ProcessBuilder对象并设置相关属性
+                val signVersionParams = signVersions.flatMap {
+                    arrayListOf("--v${it.type}-signing-enabled","true")
+                }.toTypedArray()
                 val processBuilder = ProcessBuilder()
                 processBuilder.command(
                     apkSignerCmdPath,
@@ -129,14 +132,7 @@ object ApkSigner {
                     "pass:$keyPwd",
                     "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
                     "pass:$keyStorePwd",
-                    "--v1-signing-enabled",
-                    if (signVersions.contains(SignType.V1)) "true" else "false",
-                    "--v2-signing-enabled",
-                    if (signVersions.contains(SignType.V2)) "true" else "false",
-                    "--v3-signing-enabled",
-                    if (signVersions.contains(SignType.V3)) "true" else "false",
-                    "--v4-signing-enabled",
-                    if (signVersions.contains(SignType.V4)) "true" else "false",
+                    *signVersionParams,
                     "-v",
                     "--out",
                     outPutFilePath,
