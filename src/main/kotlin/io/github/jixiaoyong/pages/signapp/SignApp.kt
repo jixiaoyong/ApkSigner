@@ -5,11 +5,14 @@ import CommandResult
 import Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -177,7 +180,14 @@ fun PageSignApp(
 
                                 settings.signTypeList = flowOf(newTypes)
                             })
-                            Text(item.name, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
+                            Text(item.name, modifier = Modifier.padding(start = 5.dp))
+                            if (!item.description.isNullOrEmpty()) Icon(Icons.Default.Info,
+                                contentDescription = item.description,
+                                modifier = Modifier.padding(end = 10.dp).size(18.dp).clickable {
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState.showSnackbar(item.description)
+                                    }
+                                })
                         }
 
                     }

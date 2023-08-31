@@ -53,7 +53,7 @@ fun InfoItemWidget(
             Spacer(modifier = Modifier.weight(1f))
             if (showChangeButton) ButtonWidget(
                 { onClick?.invoke() },
-                title = buttonTitle ?: "\uD83D\uDCDD修改"
+                title = buttonTitle ?: "修改"
             )
         }
         Row(
