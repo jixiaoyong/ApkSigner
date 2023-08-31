@@ -116,13 +116,16 @@ fun App(window: ComposeWindow) {
 
 
 fun main() = application {
-    val windowState = rememberWindowState(height = 620.dp)
+    val windowState = rememberWindowState(height = 650.dp)
     Window(
         onCloseRequest = ::exitApplication,
         title = "APK Signer",
         icon = painterResource("/imgs/icon.png"),
         state = windowState
     ) {
+        LaunchedEffect(Unit){
+            window.minimumSize = window.size
+        }
         App(window)
     }
 }

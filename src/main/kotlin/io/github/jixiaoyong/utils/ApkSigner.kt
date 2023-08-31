@@ -7,6 +7,7 @@ import java.io.InputStreamReader
  * @author : jixiaoyong
  * @description ： 使用ADB build tools中的zipalign和apksigner.jar对齐并签名APK
  * 上述两个文件可以替换为你自己的文件
+ * 官方限制：API 24以上即使开启V1签名也无法生效
  * 他们的使用可以参考官网文章：
  * 签名apk https://developer.android.com/studio/command-line/apksigner?hl=zh-cn#options-sign
  * apksigner：https://developer.android.com/studio/command-line/apksigner?hl=zh-cn#usage-sign
@@ -234,6 +235,7 @@ object ApkSigner {
                 processBuilder.command(
                     apkSignerCmdPath,
                     "verify",
+                    "-v",
                     "--print-certs",
                     apkFilePath,
                 )

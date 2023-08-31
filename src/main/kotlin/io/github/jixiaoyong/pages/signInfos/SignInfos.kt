@@ -2,12 +2,11 @@ package io.github.jixiaoyong.pages.signInfos
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -55,10 +54,8 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
-                rememberScrollableState { return@rememberScrollableState 0f },
-                orientation = Orientation.Vertical
-            )
+            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                .verticalScroll(rememberScrollState())
         ) {
 
             Row(

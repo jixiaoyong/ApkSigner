@@ -3,14 +3,13 @@ package io.github.jixiaoyong.pages.settings
 import ApkSigner
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,10 +47,8 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
-                rememberScrollableState { return@rememberScrollableState 0f },
-                orientation = Orientation.Vertical
-            )
+            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)

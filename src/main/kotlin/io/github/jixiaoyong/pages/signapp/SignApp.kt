@@ -5,11 +5,10 @@ import CommandResult
 import Routes
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -97,169 +96,187 @@ fun PageSignApp(
     }
 
     Scaffold(scaffoldState = scaffoldState) {
-        Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).scrollable(
-                rememberScrollableState { return@rememberScrollableState 0f },
-                orientation = Orientation.Vertical
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            DropBoxPanel(
-                window,
-                modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(
-                        color = MaterialTheme.colors.surface,
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .padding(15.dp),
-                component = JPanel(),
-                onFileDrop = {
-                    scope.launch {
-                        val file = it.firstOrNull { it.lowercase(Locale.getDefault()).endsWith(".apk") }
-                        if (null == file) {
-                            scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
-                        } else {
-                            onChangeApk(file)
-                            scaffoldState.snackbarHostState.showSnackbar("选择apk文件成功")
-                        }
-                    }
-                }
-            ) {
-                Text(
-                    text = "请拖拽apk文件到这里哦",
-                    modifier = Modifier.align(alignment = Alignment.Center)
-                )
-            }
-            InfoItemWidget(
-                "当前选择的文件",
-                currentApkFilePath ?: "请先选择apk文件",
-                buttonTitle = "查看签名",
-                onClick = {
-                    scope.launch {
-                        if (currentApkFilePath.isNullOrBlank()) {
-                            scaffoldState.snackbarHostState.showSnackbar("请先选择apk文件")
-                        } else {
-                            signInfoResult = ApkSigner.getApkSignInfo(currentApkFilePath)
-                        }
-                    }
-                }
-            )
-            InfoItemWidget(
-                "当前选择的签名文件",
-                selectedSignInfo?.toString() ?: "暂无",
-                onClick = {
-                    onChangePage(Routes.SignInfo)
-                })
 
-            Text(
-                "签名方案：",
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
-                    .padding(bottom = 15.dp)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                    .verticalScroll(rememberScrollState())
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
-                    val isSelected = apkSignType.contains(item.type)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = isSelected, onCheckedChange = {
-                            val newTypes = mutableSetOf<Int>()
-                            newTypes.addAll(apkSignType)
-                            if (isSelected) {
-                                newTypes.remove(item.type)
+                DropBoxPanel(
+                    window,
+                    modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
+                        .background(
+                            color = MaterialTheme.colors.surface,
+                            shape = RoundedCornerShape(15.dp)
+                        )
+                        .padding(15.dp),
+                    component = JPanel(),
+                    onFileDrop = {
+                        scope.launch {
+                            val file =
+                                it.firstOrNull {
+                                    it.lowercase(Locale.getDefault()).endsWith(".apk")
+                                }
+                            if (null == file) {
+                                scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
                             } else {
-                                newTypes.add(item.type)
+                                onChangeApk(file)
+                                scaffoldState.snackbarHostState.showSnackbar("选择apk文件成功")
+                            }
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "请拖拽apk文件到这里哦",
+                        modifier = Modifier.align(alignment = Alignment.Center)
+                    )
+                }
+                InfoItemWidget(
+                    "当前选择的文件",
+                    currentApkFilePath ?: "请先选择apk文件",
+                    buttonTitle = "查看签名",
+                    onClick = {
+                        scope.launch {
+                            if (currentApkFilePath.isNullOrBlank()) {
+                                scaffoldState.snackbarHostState.showSnackbar("请先选择apk文件")
+                            } else {
+                                signInfoResult = ApkSigner.getApkSignInfo(currentApkFilePath)
+                            }
+                        }
+                    }
+                )
+                InfoItemWidget(
+                    "当前选择的签名文件",
+                    selectedSignInfo?.toString() ?: "暂无",
+                    onClick = {
+                        onChangePage(Routes.SignInfo)
+                    })
+
+                Text(
+                    "签名方案：",
+                    style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
+                        .padding(bottom = 15.dp)
+                ) {
+                    SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
+                        val isSelected = apkSignType.contains(item.type)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(checked = isSelected, onCheckedChange = {
+                                val newTypes = mutableSetOf<Int>()
+                                newTypes.addAll(apkSignType)
+                                if (isSelected) {
+                                    newTypes.remove(item.type)
+                                } else {
+                                    newTypes.add(item.type)
+                                }
+
+                                settings.signTypeList = flowOf(newTypes)
+                            })
+                            Text(item.name, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
+                        }
+
+                    }
+                }
+
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .background(color = MaterialTheme.colors.surface.copy(alpha = 0.3f))
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                ButtonWidget(
+                    {
+                        scope.launch {
+                            if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.lowercase(
+                                    Locale.getDefault()
+                                )
+                                    .endsWith(".apk")
+                            ) {
+                                scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
+                                return@launch
                             }
 
-                            settings.signTypeList = flowOf(newTypes)
-                        })
-                        Text(item.name, modifier = Modifier.padding(start = 5.dp, end = 10.dp))
-                    }
+                            val localSelectedSignInfo = selectedSignInfo
+                            if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
+                                onChangePage(Routes.SignInfo)
+                                scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
+                                return@launch
+                            }
 
-                }
-            }
+                            if (!ApkSigner.isInitialized()) {
+                                onChangePage(Routes.SettingInfo)
+                                scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
+                                return@launch
+                            }
 
-            ButtonWidget(
-                {
-                    scope.launch {
-                        if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.lowercase(Locale.getDefault())
-                                .endsWith(".apk")
-                        ) {
-                            scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
-                            return@launch
-                        }
+                            if (apkSignType.isEmpty()) {
+                                scaffoldState.snackbarHostState.showSnackbar("请至少选择一种签名方式")
+                                return@launch
+                            }
 
-                        val localSelectedSignInfo = selectedSignInfo
-                        if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
-                            onChangePage(Routes.SignInfo)
-                            scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
-                            return@launch
-                        }
-
-                        if (!ApkSigner.isInitialized()) {
-                            onChangePage(Routes.SettingInfo)
-                            scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
-                            return@launch
-                        }
-
-                        if (apkSignType.isEmpty()) {
-                            scaffoldState.snackbarHostState.showSnackbar("请至少选择一种签名方式")
-                            return@launch
-                        }
-
-                        val signResult = ApkSigner.alignAndSignApk(
-                            currentApkFilePath,
-                            localSelectedSignInfo.keyStorePath,
-                            localSelectedSignInfo.keyAlias,
-                            localSelectedSignInfo.keyStorePassword,
-                            localSelectedSignInfo.keyPassword,
-                            zipAlign = false,
-                            signVersions = SignType.ALL_SIGN_TYPES.filter { apkSignType.contains(it.type) },
-                            onProgress = { line ->
-                                scope.launch {
-                                    signLogs = mutableListOf<String>().apply {
-                                        addAll(signLogs)
-                                        add(line)
+                            val signResult = ApkSigner.alignAndSignApk(
+                                currentApkFilePath,
+                                localSelectedSignInfo.keyStorePath,
+                                localSelectedSignInfo.keyAlias,
+                                localSelectedSignInfo.keyStorePassword,
+                                localSelectedSignInfo.keyPassword,
+                                zipAlign = false,
+                                signVersions = SignType.ALL_SIGN_TYPES.filter {
+                                    apkSignType.contains(
+                                        it.type
+                                    )
+                                },
+                                onProgress = { line ->
+                                    scope.launch {
+                                        signLogs = mutableListOf<String>().apply {
+                                            addAll(signLogs)
+                                            add(line)
+                                        }
                                     }
                                 }
-                            }
-                        )
+                            )
 
-                        signApkResult = signResult
-                        if (signResult is CommandResult.Success<*> && !signResult.result?.toString()
-                                .isNullOrBlank()
-                        ) {
-                            val result = scaffoldState.snackbarHostState.showSnackbar(
-                                "签名成功，是否打开签名后的文件？",
-                                "打开",
-                                SnackbarDuration.Long
-                            )
-                            val file = File(signResult.result?.toString() ?: "")
-                            if (SnackbarResult.ActionPerformed == result && file.exists()) {
-                                Desktop.getDesktop().open(file.parentFile)
+                            signApkResult = signResult
+                            if (signResult is CommandResult.Success<*> && !signResult.result?.toString()
+                                    .isNullOrBlank()
+                            ) {
+                                val result = scaffoldState.snackbarHostState.showSnackbar(
+                                    "签名成功，是否打开签名后的文件？",
+                                    "打开",
+                                    SnackbarDuration.Long
+                                )
+                                val file = File(signResult.result?.toString() ?: "")
+                                if (SnackbarResult.ActionPerformed == result && file.exists()) {
+                                    Desktop.getDesktop().open(file.parentFile)
+                                }
+                            } else if (signResult is CommandResult.Error<*>) {
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    "签名失败：${signResult.message}",
+                                )
                             }
-                        } else if (signResult is CommandResult.Error<*>) {
-                            scaffoldState.snackbarHostState.showSnackbar(
-                                "签名失败：${signResult.message}",
-                            )
+
+                            signApkResult = CommandResult.NOT_EXECUT
                         }
 
-                        signApkResult = CommandResult.NOT_EXECUT
-                    }
-
-                },
-                enabled = isEnabled,
-                title = "开始签名apk",
-                modifier = Modifier.size(250.dp, 50.dp)
-                    .background(
-                        if (isEnabled) MaterialTheme.colors.secondary else MaterialTheme.colors.surface,
-                        shape = RoundedCornerShape(15.dp)
-                    ).padding(horizontal = 15.dp, vertical = 5.dp)
-            )
+                    },
+                    enabled = isEnabled,
+                    title = "开始签名apk",
+                    modifier = Modifier.size(250.dp, 50.dp)
+                        .background(
+                            if (isEnabled) MaterialTheme.colors.secondary else MaterialTheme.colors.surface,
+                            shape = RoundedCornerShape(15.dp)
+                        ).padding(horizontal = 15.dp, vertical = 5.dp)
+                )
+            }
 
         }
-
     }
 }
 
