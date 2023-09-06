@@ -2,6 +2,7 @@ package io.github.jixiaoyong.pages.signInfos
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -191,9 +193,18 @@ private fun SignInfoItem(
             TextField(
                 value,
                 onValueChange = onChange,
-                modifier = Modifier.weight(1f),
-                colors = TextFieldDefaults.outlinedTextFieldColors(backgroundColor = MaterialTheme.colors.background),
-                keyboardOptions = if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default
+                modifier = Modifier.weight(1f).border(1.dp, color = MaterialTheme.colors.secondary, shape = RoundedCornerShape(5.dp)),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = MaterialTheme.colors.background,
+                    focusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    focusedLabelColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    unfocusedLabelColor = Color.Transparent,
+                ),
+                keyboardOptions =
+                if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
+                shape = RoundedCornerShape(size = 15.dp),
             )
             if (null != onClick) ButtonWidget(
                 onClick = onClick,

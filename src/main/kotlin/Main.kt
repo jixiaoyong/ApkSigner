@@ -3,6 +3,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -70,7 +71,7 @@ fun App(window: ComposeWindow) {
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .heightIn(min = 65.dp)
-                    .padding(horizontal = 5.dp),
+                    .padding(horizontal = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -94,6 +95,7 @@ fun App(window: ComposeWindow) {
                     }
                 }
             }
+            Divider()
             when (pageIndex.value) {
                 Routes.SignInfo -> PageSignInfo(window, settings)
 

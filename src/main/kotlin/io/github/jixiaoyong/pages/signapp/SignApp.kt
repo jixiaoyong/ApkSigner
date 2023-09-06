@@ -53,8 +53,7 @@ import kotlin.math.roundToInt
  * @date : 2023/8/18
  */
 
-@OptIn(ExperimentalMaterialApi::class)
-@Preview
+@Preview()
 @Composable
 fun PageSignApp(
     window: ComposeWindow,
@@ -192,8 +191,9 @@ fun PageSignApp(
 
                     }
                 }
-
             }
+
+            Divider()
 
             Row(
                 modifier = Modifier.fillMaxWidth()
