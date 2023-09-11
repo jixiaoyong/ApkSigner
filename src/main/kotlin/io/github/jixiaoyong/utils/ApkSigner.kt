@@ -17,7 +17,7 @@ import java.io.InputStreamReader
  */
 object ApkSigner {
 
-    const val ANDROID_BUILD_TOOLS_DIR_EXAMPLE =
+    private const val ANDROID_BUILD_TOOLS_DIR_EXAMPLE =
         "/some/directory/to/your/android/sdk/build-tools/34.0.0/"
 
     private lateinit var apkSignerCmdPath: String
@@ -125,6 +125,7 @@ object ApkSigner {
                 processBuilder.command(
                     apkSignerCmdPath,
                     "sign",
+                    "-v",
                     "--ks",// signer 的私钥和证书链包含在给定的基于 Java 的密钥库文件中
                     keyStorePath,
                     "--ks-key-alias",// 表示 signer 在密钥库中的私钥和证书数据的别名的名称
@@ -134,12 +135,13 @@ object ApkSigner {
                     "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
                     "pass:$keyStorePwd",
                     *signVersionParams,
-                    "-v",
                     "--out",
                     outPutFilePath,
                     alignedApkFilePath
                 )
                 processBuilder.redirectErrorStream(true)
+
+                Logger.log(processBuilder.command().joinToString(" "))
 
                 // 启动子进程并获取输出流
                 val process = processBuilder.start()

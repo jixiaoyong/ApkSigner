@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -85,7 +86,9 @@ fun PageSignApp(
             }, buttons = {
 
             }, title = { Text("查询签名结果") }, text = {
-                Text(local.result?.toString() ?: "")
+                SelectionContainer {
+                    Text(local.result?.toString() ?: "")
+                }
             })
         }
 
