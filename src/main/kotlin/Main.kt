@@ -71,6 +71,7 @@ fun App(window: ComposeWindow) {
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .heightIn(min = 65.dp)
+                    .background(MaterialTheme.colors.background)
                     .padding(horizontal = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
@@ -95,7 +96,7 @@ fun App(window: ComposeWindow) {
                     }
                 }
             }
-            Divider()
+            Divider(color = MaterialTheme.colors.surface)
             when (pageIndex.value) {
                 Routes.SignInfo -> PageSignInfo(window, settings)
 

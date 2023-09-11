@@ -23,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
@@ -113,7 +114,19 @@ fun PageSignApp(
                             color = MaterialTheme.colors.surface,
                             shape = RoundedCornerShape(15.dp)
                         )
-                        .padding(15.dp),
+                        .padding(15.dp)
+                        .clickable {
+                            scope.launch {
+                                val chooseFileName =
+                                    FileChooseUtil.chooseSignFile(window, "请选择要签名的apk文件")
+                                if (chooseFileName.isNullOrBlank()) {
+                                    scaffoldState.snackbarHostState.showSnackbar("请选择要签名的apk文件")
+                                } else {
+                                    onChangeApk(chooseFileName)
+                                    scaffoldState.snackbarHostState.showSnackbar("修改成功")
+                                }
+                            }
+                        },
                     component = JPanel(),
                     onFileDrop = {
                         scope.launch {

@@ -9,6 +9,7 @@ data class SignInfoBean(
     var keyStorePassword: String = "",
     var keyAlias: String = "",
     var keyPassword: String = "",
+    val id: Long = System.currentTimeMillis()
 ) {
     fun isValid(): Boolean {
         return keyNickName.isNotEmpty() && keyStorePath.isNotEmpty() && keyStorePassword.isNotEmpty()
@@ -23,6 +24,8 @@ data class SignInfoBean(
         return other is SignInfoBean && keyNickName == other.keyNickName && keyStorePath == other.keyStorePath
                 && keyStorePassword == other.keyStorePassword && keyAlias == other.keyAlias && keyPassword == other.keyPassword
     }
+
+    fun isSameOne(other: SignInfoBean?) = id == other?.id
 
     override fun hashCode(): Int {
         return super.hashCode()

@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.LineBreak
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
@@ -45,6 +47,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
     val scope = rememberCoroutineScope()
 
     val dropdownMenu = remember { DropdownMenuState() }
+    var newSignInfo by remember { mutableStateOf(SignInfoBean()) }
 
     LaunchedEffect(Unit) {
         val firstSignInfo = signInfoList.firstOrNull()
@@ -74,6 +77,8 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                 Text(
                     selectedSignInfo?.toString() ?: "暂无",
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
                 ButtonWidget(onClick = {
@@ -90,7 +95,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = it.keyNickName)
-                            Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.weight(1f).widthIn(100.dp))
                             IconButton(onClick = {
                                 val tempList = signInfoList.toMutableList()
                                 tempList.remove(it)
@@ -104,6 +109,11 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                             }) {
                                 Icon(Icons.Default.Delete, "")
                             }
+                            IconButton(onClick = {
+                                newSignInfo = it
+                            }) {
+                                Icon(Icons.Default.Edit, "edit")
+                            }
                         }
                     }
                 }
@@ -114,7 +124,6 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     .background(MaterialTheme.colors.surface, RoundedCornerShape(15.dp))
                     .padding(horizontal = 15.dp, vertical = 15.dp).fillMaxWidth()
             ) {
-                var newSignInfo by remember { mutableStateOf(SignInfoBean()) }
                 SignInfoItem("签名别名", newSignInfo.keyNickName, false) { nickName ->
                     newSignInfo = newSignInfo.copy(keyNickName = nickName)
                 }
@@ -155,7 +164,13 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                         // save sign info to local storage
                         val newSignInfos = mutableListOf<SignInfoBean>()
                         newSignInfos.addAll(signInfoList)
-                        newSignInfos.add(newSignInfo)
+                        val indexOfSignInfo =
+                            newSignInfos.indexOfFirst { it.isSameOne(newSignInfo) }
+                        if (-1 != indexOfSignInfo) {
+                            newSignInfos[indexOfSignInfo] = newSignInfo
+                        } else {
+                            newSignInfos.add(newSignInfo)
+                        }
                         settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
                         newSignInfo = SignInfoBean()
                     }) {
@@ -193,7 +208,11 @@ private fun SignInfoItem(
             TextField(
                 value,
                 onValueChange = onChange,
-                modifier = Modifier.weight(1f).border(1.dp, color = MaterialTheme.colors.secondary, shape = RoundedCornerShape(5.dp)),
+                modifier = Modifier.weight(1f).border(
+                    1.dp,
+                    color = MaterialTheme.colors.secondary,
+                    shape = RoundedCornerShape(5.dp)
+                ),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = MaterialTheme.colors.background,
                     focusedBorderColor = Color.Transparent,

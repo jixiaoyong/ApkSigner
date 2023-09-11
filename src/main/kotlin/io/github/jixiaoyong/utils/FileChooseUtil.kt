@@ -1,7 +1,9 @@
 package io.github.jixiaoyong.utils
 
 import androidx.compose.ui.awt.ComposeWindow
+import java.io.File
 import java.io.FilenameFilter
+import javax.swing.JFileChooser
 
 /**
  * @author : jixiaoyong
@@ -13,9 +15,13 @@ import java.io.FilenameFilter
 object FileChooseUtil {
 
     /**
-     * @return 返回选择的文件
+     * @return 返回选择的文件完整路径
      */
-    fun chooseSignFile(window: ComposeWindow, title: String = "请选择文件", filter: FilenameFilter? = null): String? {
+    fun chooseSignFile(
+        window: ComposeWindow,
+        title: String = "请选择文件",
+        filter: FilenameFilter? = null
+    ): String? {
         val fileDialog = java.awt.FileDialog(window)
         fileDialog.title = title
         fileDialog.isVisible = true
@@ -26,4 +32,20 @@ object FileChooseUtil {
         return fileDialog.files?.firstOrNull()?.absolutePath
     }
 
+
+    /**
+     * @return 返回选择的文件完整路径
+     */
+    fun chooseSignDirectory(
+        window: ComposeWindow,
+        title: String = "请选择文件",
+        oldDirectory: String? = null
+    ): String? {
+        val jFileChooser = JFileChooser()
+        jFileChooser.dialogTitle = title
+        jFileChooser.currentDirectory = oldDirectory?.let { File(it) }
+        jFileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        jFileChooser.showDialog(window.glassPane, "选择")
+        return jFileChooser.currentDirectory.absolutePath
+    }
 }
