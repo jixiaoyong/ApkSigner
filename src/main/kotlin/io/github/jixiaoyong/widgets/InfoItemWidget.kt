@@ -35,9 +35,9 @@ fun InfoItemWidget(
     val headerBackground = MaterialTheme.colors.surface
     val rounderRadius = 10.dp
     Column(
-        modifier = Modifier.padding(vertical = 10.dp)
+        modifier = Modifier.padding(vertical = 5.dp)
             .background(color = MaterialTheme.colors.background, shape = RoundedCornerShape(rounderRadius))
-            .padding(horizontal = 15.dp, vertical = 10.dp)
+            .padding(horizontal = 15.dp, vertical = 5.dp)
             .border(1.dp, color = headerBackground, shape = RoundedCornerShape(rounderRadius))
     ) {
         Row(

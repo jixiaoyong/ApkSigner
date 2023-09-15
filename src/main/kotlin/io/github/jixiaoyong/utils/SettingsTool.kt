@@ -27,6 +27,7 @@ interface KeyValueStorage {
 
     val apkSigner: Flow<String?>
     val zipAlign: Flow<String?>
+    val signedDirectory: Flow<String?>
     val signTypeList: Flow<Set<Int>>
     val selectedSignInfoBean: Flow<SignInfoBean?>
     val signInfoBeans: Flow<List<SignInfoBean>>
@@ -40,6 +41,7 @@ enum class StorageKeys {
     ZIP_ALIGN_PATH,
     SIGN_INFO_SELECT,
     SIGN_INFO_LIST,
+    SIGNED_DIRECTORY,
     SIGN_TYPE_LIST;
 
     val key get() = this.name
@@ -53,6 +55,8 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
         get() = observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNER_PATH.key)
     override val zipAlign: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.ZIP_ALIGN_PATH.key)
+    override val signedDirectory: Flow<String?>
+        get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGNED_DIRECTORY.key)
     override var signTypeList: Flow<Set<Int>>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGN_TYPE_LIST.key).map {
             return@map if (it.isNullOrBlank()) SignType.DEF_SIGN_TYPES.map { it.type }.toSet()

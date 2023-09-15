@@ -47,6 +47,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
         var resetSignInfo by remember { mutableStateOf(false) }
         var resetApkTools by remember { mutableStateOf(false) }
         var resetSignTypes by remember { mutableStateOf(false) }
+        var resetSignedDirectory by remember { mutableStateOf(false) }
         AlertDialog(onDismissRequest = {
             showResetDialog = false
         }, confirmButton = {
@@ -62,6 +63,9 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 }
                 if (resetSignTypes) {
                     settings.save(StorageKeys.SIGN_TYPE_LIST, null)
+                }
+                if (resetSignedDirectory) {
+                    settings.save(StorageKeys.SIGNED_DIRECTORY, null)
                 }
             }, title = "确定")
 
@@ -87,6 +91,12 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                         checked = resetSignTypes,
                         onCheckedChange = { resetSignTypes = !resetSignTypes })
                     Text("签名方案")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = resetSignedDirectory,
+                        onCheckedChange = { resetSignedDirectory = !resetSignedDirectory })
+                    Text("签名文件输出目录")
                 }
             }
         })

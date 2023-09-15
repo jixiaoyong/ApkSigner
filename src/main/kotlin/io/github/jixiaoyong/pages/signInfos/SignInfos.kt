@@ -203,8 +203,8 @@ private fun SignInfoItem(
         modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(name, modifier = Modifier.weight(0.3f))
-        Row(modifier = Modifier.weight(0.7f), verticalAlignment = Alignment.CenterVertically) {
+        Text(name, modifier = Modifier.weight(0.25f))
+        Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
             TextField(
                 value,
                 onValueChange = onChange,

@@ -46,6 +46,6 @@ object FileChooseUtil {
         jFileChooser.currentDirectory = oldDirectory?.let { File(it) }
         jFileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         jFileChooser.showDialog(window.glassPane, "选择")
-        return jFileChooser.currentDirectory.absolutePath
+        return jFileChooser.selectedFile?.parent
     }
 }

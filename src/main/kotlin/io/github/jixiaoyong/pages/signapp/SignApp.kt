@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.flow.flowOf
@@ -74,6 +75,7 @@ fun PageSignApp(
     }
     val apkSignType by settings.signTypeList.collectAsState(setOf())
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+    val signedDirectory by settings.signedDirectory.collectAsState(null)
 
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
 
@@ -126,6 +128,12 @@ fun PageSignApp(
                                     scaffoldState.snackbarHostState.showSnackbar("请选择要签名的apk文件")
                                 } else {
                                     onChangeApk(chooseFileName)
+                                    if (!signedDirectory.isNullOrBlank()) {
+                                        settings.save(
+                                            StorageKeys.SIGNED_DIRECTORY,
+                                            chooseFileName.substringBeforeLast(File.separator)
+                                        )
+                                    }
                                     scaffoldState.snackbarHostState.showSnackbar("修改成功")
                                 }
                             }
@@ -171,6 +179,28 @@ fun PageSignApp(
                     onClick = {
                         onChangePage(Routes.SignInfo)
                     })
+
+                InfoItemWidget(
+                    "签名文件输出目录",
+                    signedDirectory ?: "请先选择签名文件输出目录",
+                    buttonTitle = "修改目录",
+                    onClick = {
+                        scope.launch {
+                            val outputDirectory =
+                                FileChooseUtil.chooseSignDirectory(
+                                    window,
+                                    "请先选择签名文件输出目录",
+                                 signedDirectory?:currentApkFilePath
+                                )
+                            if (outputDirectory.isNullOrBlank()) {
+                                scaffoldState.snackbarHostState.showSnackbar("请先选择签名文件输出目录")
+                            } else {
+                                settings.save(StorageKeys.SIGNED_DIRECTORY, outputDirectory)
+                                scaffoldState.snackbarHostState.showSnackbar("修改成功")
+                            }
+                        }
+                    }
+                )
 
                 Text(
                     "签名方案：",
