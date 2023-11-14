@@ -42,13 +42,13 @@ object ApkSigner {
             return "指定的Android SDK中build-tools目录无效或不存在，请重新选择。\n该目录一般为${ANDROID_BUILD_TOOLS_DIR_EXAMPLE}"
         }
 
-        val apkSignerPath = "$androidBuildToolsDir/apksigner"
+        val apkSignerPath = "$androidBuildToolsDir${File.separator}apksigner.bat"
         val apkSignerResult = setupApkSigner(apkSignerPath)
         if (null != apkSignerResult) {
             return apkSignerResult
         }
 
-        val zipAlignPath = "$androidBuildToolsDir/zipalign"
+        val zipAlignPath = "$androidBuildToolsDir${File.separator}zipalign.exe"
         val zipAlignResult = setupZipAlign(zipAlignPath)
         if (null != zipAlignResult) {
             return zipAlignResult
@@ -73,12 +73,13 @@ object ApkSigner {
 
     fun setupZipAlign(zipAlignPath: String): String? {
         // check os is mac/linux or windows
-        val command = if (System.getProperties().getProperty("os.name").contains("Windows")) {
-            "where $zipAlignPath"
-        } else {
-            "command -v $zipAlignPath"
-        }
-        return if (RunCommandUtil.runCommand(command, "zip align", true, false) != 0) {
+//        val command = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+//            "ls $zipAlignPath"
+//        } else {
+//            "command -v $zipAlignPath"
+//        }
+//        return if (RunCommandUtil.runCommand(command, "zip align", true, false) != 0) {
+        return if (!File(zipAlignPath).exists()) {
             "zipAlign命令不存在，请重新选择。"
         } else {
             zipAlignCmdPath = zipAlignPath
@@ -119,7 +120,7 @@ object ApkSigner {
             try {
                 // 创建ProcessBuilder对象并设置相关属性
                 val signVersionParams = signVersions.flatMap {
-                    arrayListOf("--v${it.type}-signing-enabled","true")
+                    arrayListOf("--v${it.type}-signing-enabled", "true")
                 }.toTypedArray()
                 val processBuilder = ProcessBuilder()
                 processBuilder.command(
