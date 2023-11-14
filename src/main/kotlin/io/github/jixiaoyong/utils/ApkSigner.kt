@@ -43,13 +43,24 @@ object ApkSigner {
         }
 
         val apkSignerPath = "$androidBuildToolsDir/apksigner"
-        val apkSignerResult = setupApkSigner(apkSignerPath)
+        // windows追加bat
+        val apkSignerPathWithBat = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+            "$apkSignerPath.bat"
+        } else {
+            apkSignerPath
+        }
+        val apkSignerResult = setupApkSigner(apkSignerPathWithBat)
         if (null != apkSignerResult) {
             return apkSignerResult
         }
-
-        val zipAlignPath = "$androidBuildToolsDir/zipalign"
-        val zipAlignResult = setupZipAlign(zipAlignPath)
+        val zipAlignPath = "$androidBuildToolsDir${File.separator}zipalign"
+        // windows追加exe
+        val zipAlignPathWithExe = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+            "$zipAlignPath.exe"
+        } else {
+            zipAlignPath
+        }
+        val zipAlignResult = setupZipAlign(zipAlignPathWithExe)
         if (null != zipAlignResult) {
             return zipAlignResult
         }
@@ -73,11 +84,15 @@ object ApkSigner {
 
     fun setupZipAlign(zipAlignPath: String): String? {
         // check os is mac/linux or windows
-        val command = if (System.getProperties().getProperty("os.name").contains("Windows")) {
-            "where $zipAlignPath"
-        } else {
-            "command -v $zipAlignPath"
+        if (System.getProperties().getProperty("os.name").contains("Windows")) {
+            return if (!File(zipAlignPath).exists()) {
+                "zipAlign命令不存在，请重新选择。"
+            } else {
+                zipAlignCmdPath = zipAlignPath
+                null
+            }
         }
+        val command = "command -v $zipAlignPath"
         return if (RunCommandUtil.runCommand(command, "zip align", true, false) != 0) {
             "zipAlign命令不存在，请重新选择。"
         } else {
