@@ -145,7 +145,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                     }
                 }) {
                 Text(
-                    text = "请拖拽Android SDK的build-tools文件夹到这里，以一次性修改apkSigner和zipAlign目录",
+                    text = "请拖拽Android SDK的build-tools的子文件夹到这里，以一次性修改apkSigner和zipAlign目录",
                     modifier = Modifier.align(alignment = Alignment.Center)
                 )
             }

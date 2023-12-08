@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.utils.FileChooseUtil
@@ -155,7 +156,8 @@ fun PageSignApp(
                     }
                 ) {
                     Text(
-                        text = "请拖拽apk文件到这里哦",
+                        text = "请拖拽apk文件到这里哦\n(也可以点击这里选择apk文件)",
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
