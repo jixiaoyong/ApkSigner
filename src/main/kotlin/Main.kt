@@ -47,7 +47,6 @@ fun App(window: ComposeWindow) {
         )
     }
 
-
     val pageIndex = remember {
         mutableStateOf(Routes.SignInfo)
     }
@@ -59,7 +58,6 @@ fun App(window: ComposeWindow) {
     detector.registerListener { isDark ->
         isDarkTheme = isDark
     }
-
 
     LaunchedEffect(Unit) {
         settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
@@ -126,7 +124,7 @@ fun main() = application {
         icon = painterResource("/imgs/icon.png"),
         state = windowState
     ) {
-        LaunchedEffect(Unit){
+        LaunchedEffect(Unit) {
             window.minimumSize = window.size
         }
         App(window)

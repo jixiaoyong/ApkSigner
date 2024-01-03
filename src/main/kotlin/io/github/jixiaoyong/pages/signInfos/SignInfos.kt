@@ -172,7 +172,16 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                             newSignInfos.add(newSignInfo)
                         }
                         settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
-                        newSignInfo = SignInfoBean()
+                        scope.launch {
+                            val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
+                                "🎉保存成功！\n请点击【重新选择签名】按钮查看，是否清除已填写内容？",
+                                actionLabel = "清空",
+                                duration = SnackbarDuration.Short
+                            )
+                            if (SnackbarResult.ActionPerformed == isNeedClean) {
+                                newSignInfo = SignInfoBean()
+                            }
+                        }
                     }) {
                         Text("保存新签名文件")
                     }
