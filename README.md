@@ -1,6 +1,6 @@
 <div align="center">
 
-![icon](./docs/shortscreen/icon.png)
+![icon](./src/main/resources/imgs/icon.png)
 
 # ApkSigner ![GitHub release (with filter)](https://img.shields.io/github/v/release/jixiaoyong/ApkSigner) ![GitHub Release Date - Published_At](https://img.shields.io/github/release-date/jixiaoyong/ApkSigner)
 

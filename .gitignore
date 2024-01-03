@@ -39,4 +39,5 @@ bin/
 .vscode/
 
 ### Mac OS ###
+/local.properties
 .DS_Store
