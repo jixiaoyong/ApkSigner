@@ -20,6 +20,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.jthemedetecor.OsThemeDetector
 import io.github.jixiaoyong.pages.settings.PageSettingInfo
 import io.github.jixiaoyong.pages.signInfos.PageSignInfo
+import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.pages.signapp.PageSignApp
 import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.SettingsTool
@@ -53,6 +54,7 @@ fun App(window: ComposeWindow) {
 
     var currentApkFilePath by remember { mutableStateOf<String?>(null) }
     var isDarkTheme by remember { mutableStateOf(false) }
+    val newSignInfo = remember { mutableStateOf(SignInfoBean()) }
 
     val detector: OsThemeDetector = OsThemeDetector.getDetector()
     detector.registerListener { isDark ->
@@ -96,7 +98,7 @@ fun App(window: ComposeWindow) {
             }
             Divider(color = MaterialTheme.colors.surface)
             when (pageIndex.value) {
-                Routes.SignInfo -> PageSignInfo(window, settings)
+                Routes.SignInfo -> PageSignInfo(window, settings, newSignInfo)
 
                 Routes.SignApp -> PageSignApp(
                     window,

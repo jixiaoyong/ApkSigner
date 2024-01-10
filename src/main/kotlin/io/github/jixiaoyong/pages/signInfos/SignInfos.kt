@@ -40,14 +40,13 @@ import kotlinx.coroutines.launch
  */
 @Preview()
 @Composable
-fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
+fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: MutableState<SignInfoBean>) {
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
     val signInfoList by settings.signInfoBeans.collectAsState(listOf())
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
-    val dropdownMenu = remember { DropdownMenuState() }
-    var newSignInfo by remember { mutableStateOf(SignInfoBean()) }
+    val dropdownMenu = remember{ DropdownMenuState() }
 
     LaunchedEffect(Unit) {
         val firstSignInfo = signInfoList.firstOrNull()
@@ -110,7 +109,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                                 Icon(Icons.Default.Delete, "")
                             }
                             IconButton(onClick = {
-                                newSignInfo = it
+                                newSignInfo.value = it
                             }) {
                                 Icon(Icons.Default.Edit, "edit")
                             }
@@ -124,35 +123,35 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     .background(MaterialTheme.colors.surface, RoundedCornerShape(15.dp))
                     .padding(horizontal = 15.dp, vertical = 15.dp).fillMaxWidth()
             ) {
-                SignInfoItem("签名别名", newSignInfo.keyNickName, false) { nickName ->
-                    newSignInfo = newSignInfo.copy(keyNickName = nickName)
+                SignInfoItem("签名别名", newSignInfo.value.keyNickName, false) { nickName ->
+                    newSignInfo.value = newSignInfo.value.copy(keyNickName = nickName)
                 }
                 SignInfoItem(
-                    "文件路径", newSignInfo.keyStorePath, false, onClick = {
+                    "文件路径", newSignInfo.value.keyStorePath, false, onClick = {
                         scope.launch {
                             val result =
                                 FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
                             if (result.isNullOrBlank()) {
                                 scaffoldState.snackbarHostState.showSnackbar("请选择Android签名文件")
                             } else {
-                                newSignInfo = newSignInfo.copy(keyStorePath = result)
+                                newSignInfo.value = newSignInfo.value.copy(keyStorePath = result)
                             }
                         }
                     }, buttonText = "选择文件"
                 ) { keyStorePath ->
-                    newSignInfo = newSignInfo.copy(keyStorePath = keyStorePath)
+                    newSignInfo.value = newSignInfo.value.copy(keyStorePath = keyStorePath)
                 }
 
                 SignInfoItem(
-                    "keyStorePassword", newSignInfo.keyStorePassword, true
+                    "keyStorePassword", newSignInfo.value.keyStorePassword, true
                 ) { keyStorePassword ->
-                    newSignInfo = newSignInfo.copy(keyStorePassword = keyStorePassword)
+                    newSignInfo.value = newSignInfo.value.copy(keyStorePassword = keyStorePassword)
                 }
-                SignInfoItem("keyAlias", newSignInfo.keyAlias, false) { keyAlias ->
-                    newSignInfo = newSignInfo.copy(keyAlias = keyAlias)
+                SignInfoItem("keyAlias", newSignInfo.value.keyAlias, false) { keyAlias ->
+                    newSignInfo.value = newSignInfo.value.copy(keyAlias = keyAlias)
                 }
-                SignInfoItem("keyPassword", newSignInfo.keyPassword, true) { keyPassword ->
-                    newSignInfo = newSignInfo.copy(keyPassword = keyPassword)
+                SignInfoItem("keyPassword", newSignInfo.value.keyPassword, true) { keyPassword ->
+                    newSignInfo.value = newSignInfo.value.copy(keyPassword = keyPassword)
                 }
 
                 Row(
@@ -160,16 +159,16 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(enabled = newSignInfo.isValid(), onClick = {
+                    Button(enabled = newSignInfo.value.isValid(), onClick = {
                         // save sign info to local storage
                         val newSignInfos = mutableListOf<SignInfoBean>()
                         newSignInfos.addAll(signInfoList)
                         val indexOfSignInfo =
-                            newSignInfos.indexOfFirst { it.isSameOne(newSignInfo) }
+                            newSignInfos.indexOfFirst { it.isSameOne(newSignInfo.value) }
                         if (-1 != indexOfSignInfo) {
-                            newSignInfos[indexOfSignInfo] = newSignInfo
+                            newSignInfos[indexOfSignInfo] = newSignInfo.value
                         } else {
-                            newSignInfos.add(newSignInfo)
+                            newSignInfos.add(newSignInfo.value)
                         }
                         settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
                         scope.launch {
@@ -179,7 +178,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
                                 duration = SnackbarDuration.Short
                             )
                             if (SnackbarResult.ActionPerformed == isNeedClean) {
-                                newSignInfo = SignInfoBean()
+                                newSignInfo.value = SignInfoBean()
                             }
                         }
                     }) {
@@ -190,6 +189,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool) {
             }
         }
     }
+
 }
 
 private fun onSignInfoChanged(settings: SettingsTool, signInfoBean: SignInfoBean?) {
