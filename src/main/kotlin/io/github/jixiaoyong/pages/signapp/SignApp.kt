@@ -326,14 +326,9 @@ fun PageSignApp(
                     },
                     enabled = isEnabled,
                     title = "开始签名apk",
-                    modifier = Modifier.size(250.dp, 50.dp)
-                        .background(
-                            if (isEnabled) MaterialTheme.colors.secondary else MaterialTheme.colors.surface,
-                            shape = RoundedCornerShape(15.dp)
-                        ).padding(horizontal = 15.dp, vertical = 5.dp)
+                    modifier = Modifier.size(250.dp, 50.dp),
                 )
             }
-
         }
     }
 }
