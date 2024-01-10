@@ -35,6 +35,7 @@ fun ButtonWidget(
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.secondary,
             disabledBackgroundColor = MaterialTheme.colors.surface,
+            contentColor = MaterialTheme.colors.onSecondary,
         ),
         shape = RoundedCornerShape(10.dp),
         contentPadding = PaddingValues(horizontal = 15.dp, vertical = 10.dp),
@@ -46,7 +47,7 @@ fun ButtonWidget(
         if (content != null) {
             content()
         } else {
-            Text(title ?: "", style = TextStyle(color = MaterialTheme.colors.onSecondary))
+            Text(title ?: "")
         }
     }
 }
