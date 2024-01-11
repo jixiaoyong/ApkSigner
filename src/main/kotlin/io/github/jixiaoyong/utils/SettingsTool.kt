@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.utils
 
 import com.google.gson.reflect.TypeToken
+import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
@@ -37,16 +38,17 @@ interface KeyValueStorage {
 
 
 enum class StorageKeys {
-    APK_SIGNER_PATH,
-    ZIP_ALIGN_PATH,
-    SIGN_INFO_SELECT,
-    SIGN_INFO_LIST,
-    SIGNED_DIRECTORY,
-    SIGN_TYPE_LIST;
+    APK_SIGNER_PATH, // 签名工具路径
+    ZIP_ALIGN_PATH, // 压缩工具路径
+    SIGN_INFO_SELECT, // 选中的签名信息
+    SIGN_INFO_LIST, // 签名信息（密钥/密码等）列表
+    SIGNED_DIRECTORY, // 签名后文件保存路径
+    SIGN_TYPE_LIST; // 签名类型列表
 
     val key get() = this.name
 }
 
+@OptIn(ExperimentalSettingsApi::class)
 class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
     private val settings: Settings by lazy { Settings() }
     private val observableSettings: ObservableSettings by lazy { settings as ObservableSettings }

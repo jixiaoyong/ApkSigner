@@ -99,19 +99,23 @@ object ApkSigner {
     }
 
     /**
-     * 对齐并签名APK文件
+     * 对齐并签名APK文件，签名后的文件添加_signed后缀,即x_signed.apk
      * @param apkFilePath 待签名的apk文件绝对路径
      * @param keyStorePath 签名文件路径
      * @param keyAlias 表示 signer 在密钥库中的私钥和证书数据的别名的名称
      * @param keyStorePwd 包含 signer 私钥和证书的密钥库的密码
      * @param keyPwd signer 私钥的密码。
      * @param zipAlign 是否需要对齐
-     * @param signedApkPath 签名之后的文件输出路径，默认为apkFilePath对应的x.apk添加_signed后缀,即x_signed.apk
+     * @param signedApkDirectory 签名之后的文件输出路径，默认为apkFilePath对应的x.apk所在的文件夹
      * @return 返回结果 CommandResult 成功或失败，及信息
      */
     fun alignAndSignApk(
-        apkFilePath: String, keyStorePath: String, keyAlias: String,
-        keyStorePwd: String, keyPwd: String, signedApkPath: String? = null,
+        apkFilePath: String,
+        keyStorePath: String,
+        keyAlias: String,
+        keyStorePwd: String,
+        keyPwd: String,
+        signedApkDirectory: String? = null,
         zipAlign: Boolean = true,
         signVersions: List<SignType> = SignType.DEF_SIGN_TYPES,
         onProgress: (String) -> Unit
@@ -121,7 +125,9 @@ object ApkSigner {
             return CommandResult.Error("请先初始化相关配置")
         }
 
-        val outPutFilePath = signedApkPath ?: apkFilePath.replace(".apk", "_signed.apk")
+        val outputDirectory = signedApkDirectory ?: apkFilePath.substringBeforeLast(File.separator)
+        val outPutFilePath = outputDirectory + File.separator + apkFilePath.substringAfterLast(File.separator)
+            .replace(".apk", "_signed.apk")
         val alignedApkFilePath = if (zipAlign) {
             zipAlignApk(apkFilePath, onProgress = onProgress)
         } else {
@@ -131,7 +137,7 @@ object ApkSigner {
             try {
                 // 创建ProcessBuilder对象并设置相关属性
                 val signVersionParams = signVersions.flatMap {
-                    arrayListOf("--v${it.type}-signing-enabled","true")
+                    arrayListOf("--v${it.type}-signing-enabled", "true")
                 }.toTypedArray()
                 val processBuilder = ProcessBuilder()
                 processBuilder.command(

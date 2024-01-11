@@ -182,20 +182,21 @@ fun PageSignApp(
                         onChangePage(Routes.SignInfo)
                     })
 
+                val errorTips = "请先选择签名文件输出目录"
                 InfoItemWidget(
-                    "签名文件输出目录",
-                    signedDirectory ?: "请先选择签名文件输出目录",
+                    "签名后的文件输出目录",
+                    signedDirectory ?: errorTips,
                     buttonTitle = "修改目录",
                     onClick = {
                         scope.launch {
                             val outputDirectory =
                                 FileChooseUtil.chooseSignDirectory(
                                     window,
-                                    "请先选择签名文件输出目录",
-                                 signedDirectory?:currentApkFilePath
+                                    errorTips,
+                                    signedDirectory ?: currentApkFilePath
                                 )
                             if (outputDirectory.isNullOrBlank()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请先选择签名文件输出目录")
+                                scaffoldState.snackbarHostState.showSnackbar(errorTips)
                             } else {
                                 settings.save(StorageKeys.SIGNED_DIRECTORY, outputDirectory)
                                 scaffoldState.snackbarHostState.showSnackbar("修改成功")
@@ -285,6 +286,7 @@ fun PageSignApp(
                                 localSelectedSignInfo.keyAlias,
                                 localSelectedSignInfo.keyStorePassword,
                                 localSelectedSignInfo.keyPassword,
+                                signedApkDirectory = signedDirectory,
                                 zipAlign = false,
                                 signVersions = SignType.ALL_SIGN_TYPES.filter {
                                     apkSignType.contains(
