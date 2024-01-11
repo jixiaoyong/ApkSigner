@@ -7,12 +7,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
@@ -33,6 +41,9 @@ import javax.swing.JPanel
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
  */
+
+private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/apkSigner"
+
 @Preview
 @Composable
 fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
@@ -188,6 +199,43 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 ButtonWidget(onClick = {
                     showResetDialog = true
                 }, title = "重置", modifier = modifier)
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = 100.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val str = "这是一个本地可视化签名APK的小工具。为了避免泄漏密钥等信息，本工具不会联网。\n" +
+                        "查看最新版本请点击访问：$PROJECT_WEBSITE"
+                val startIndex = str.indexOf(PROJECT_WEBSITE)
+                val endIndex = startIndex + PROJECT_WEBSITE.length
+
+                val annotatedString = buildAnnotatedString {
+                    append(str)
+                    addStyle(
+                        style = SpanStyle(
+                            color = Color(0xff64B5F6),
+                            textDecoration = TextDecoration.Underline
+                        ), start = startIndex, end = endIndex
+                    )
+                    addStringAnnotation("URL", PROJECT_WEBSITE, startIndex, endIndex)
+                }
+                val uriHandler = LocalUriHandler.current
+                ClickableText(
+                    text = annotatedString,
+                    style = TextStyle(
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
+                    ),
+                    onClick = { offset ->
+                        annotatedString
+                            .getStringAnnotations("URL", offset, offset)
+                            .firstOrNull()?.let { stringAnnotation ->
+                                uriHandler.openUri(stringAnnotation.item)
+                            }
+                    }
+                )
             }
         }
     }
