@@ -1,12 +1,13 @@
 package io.github.jixiaoyong.pages.signInfos
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -25,16 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.round
-import androidx.compose.ui.window.Popup
+import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.gson
 import io.github.jixiaoyong.widgets.ButtonWidget
+import io.github.jixiaoyong.widgets.HoverableTooltip
 import kotlinx.coroutines.launch
 
 /**
@@ -68,10 +67,16 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                 .verticalScroll(rememberScrollState())
         ) {
 
+            var selectedSignInfoLayoutOffset by remember { mutableStateOf(Offset.Zero) }
+
             Row(
                 modifier = Modifier.padding(vertical = 10.dp)
                     .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
-                    .padding(horizontal = 15.dp, vertical = 10.dp).fillMaxWidth(),
+                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                    .fillMaxWidth()
+                    .onGloballyPositioned {
+                        selectedSignInfoLayoutOffset = it.positionInParent() + Offset(0f, it.size.height.toFloat())
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -87,7 +92,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                     modifier = Modifier.weight(1f)
                 )
                 ButtonWidget(onClick = {
-                    dropdownMenu.status = DropdownMenuState.Status.Open(Offset(50.0f, 50.0f))
+                    dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset.copy(x = 0f))
                 }, title = "重新选择签名")
             }
 
@@ -97,22 +102,35 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                     DropdownMenuItem(onClick = {
                         onSignInfoChanged(settings, it)
                         dropdownMenu.status = DropdownMenuState.Status.Closed
-                    }) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = it.keyNickName)
-                            Spacer(modifier = Modifier.weight(1f).widthIn(100.dp))
-                            IconButton(onClick = {
-                                val tempList = signInfoList.toMutableList()
-                                tempList.remove(it)
-                                settings.save(
-                                    StorageKeys.SIGN_INFO_LIST,
-                                    gson.toJson(tempList)
-                                )
-                                if (it == selectedSignInfo) {
-                                    onSignInfoChanged(settings, null)
+                    }, modifier = Modifier.widthIn(450.dp, 600.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically,) {
+                            Text(
+                                text = it.keyNickName, modifier = Modifier.weight(2f), maxLines = 1,
+                            )
+                            Text(
+                                text = it.keyStorePath,
+                                fontSize = 10.sp,
+                                modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
+                            )
+                            HoverableTooltip(
+                                description = "删除此工具存储的签名信息，不会删除apk签名文件"
+                            ) { modifier ->
+                                IconButton(
+                                    modifier = modifier,
+                                    onClick = {
+                                        val tempList = signInfoList.toMutableList()
+                                        tempList.remove(it)
+                                        settings.save(
+                                            StorageKeys.SIGN_INFO_LIST,
+                                            gson.toJson(tempList)
+                                        )
+                                        if (it == selectedSignInfo) {
+                                            onSignInfoChanged(settings, null)
+                                        }
+                                    },
+                                ) {
+                                    Icon(Icons.Default.Delete, "")
                                 }
-                            }) {
-                                Icon(Icons.Default.Delete, "")
                             }
                             IconButton(onClick = {
                                 newSignInfo.value = it
@@ -231,11 +249,6 @@ private fun SignInfoItem(
     description: String? = null,
     onChange: (String) -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered = interactionSource.collectIsHoveredAsState().value
-    var iconOffset by remember { mutableStateOf(Offset.Zero) }
-    var iconSize by remember { mutableStateOf(IntSize.Zero) }
-    val isShowDescription = description.isNullOrBlank().not()
 
     Row(
         modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
@@ -244,26 +257,12 @@ private fun SignInfoItem(
 
         Row(modifier = Modifier.weight(0.25f)) {
             Text(name)
-            if (isShowDescription) Icon(
-                Icons.Default.Info,
-                contentDescription = "description information",
-                modifier = Modifier.hoverable(interactionSource).onGloballyPositioned {
-                    iconOffset = it.positionInParent()
-                    iconSize = it.size
-                }
-            )
-            if (isShowDescription && isHovered) Popup(
-                offset = iconOffset.round() + IntOffset(
-                    iconSize.width,
-                    0
+            if (!description.isNullOrBlank()) HoverableTooltip(description = description) { modifier ->
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = "description information",
+                    modifier = modifier
                 )
-            ) {
-                Row(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(5.dp)
-                    ).padding(horizontal = 5.dp, vertical = 5.dp),
-                ) { Text(description ?: "", style = TextStyle(color = Color.White.copy(alpha = 0.5f))) }
             }
         }
         Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
