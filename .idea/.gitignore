@@ -1,3 +1,8 @@
 # 默认忽略的文件
 /shelf/
 /workspace.xml
+!/aws.xml
+!/KotlinSceneConfigState.xml
+/appInsightsSettings.xml
+/aws.xml
+/KotlinSceneConfigState.xml
