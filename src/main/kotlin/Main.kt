@@ -25,6 +25,7 @@ import io.github.jixiaoyong.pages.signapp.PageSignApp
 import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.SettingsTool
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 object Routes {
     const val SignInfo = "signInfo"
@@ -50,6 +51,15 @@ fun App(window: ComposeWindow) {
 
     val pageIndex = remember {
         mutableStateOf(Routes.SignInfo)
+    }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            val selectedSignInfo = settings.selectedSignInfoBean.first()
+            if (selectedSignInfo != null) {
+                pageIndex.value = Routes.SignApp
+            }
+        }
     }
 
     var currentApkFilePath by remember { mutableStateOf<String?>(null) }
