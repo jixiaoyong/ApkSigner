@@ -77,6 +77,7 @@ fun PageSignApp(
     val apkSignType by settings.signTypeList.collectAsState(setOf())
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
     val signedDirectory by settings.signedDirectory.collectAsState(null)
+    val isZipAlign by settings.isZipAlign.collectAsState(false)
 
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
 
@@ -240,6 +241,22 @@ fun PageSignApp(
 
                     }
                 }
+
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "是否开启对齐：",
+                        style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                        modifier = Modifier.weight(1f).padding(horizontal = 15.dp)
+                    )
+
+                    Checkbox(checked = isZipAlign, onCheckedChange = {
+                        settings.save(StorageKeys.ALIGN_ENABLE, it)
+                    })
+                }
             }
 
             Divider()
@@ -287,7 +304,7 @@ fun PageSignApp(
                                 localSelectedSignInfo.keyStorePassword,
                                 localSelectedSignInfo.keyPassword,
                                 signedApkDirectory = signedDirectory,
-                                zipAlign = false,
+                                zipAlign = isZipAlign,
                                 signVersions = SignType.ALL_SIGN_TYPES.filter {
                                     apkSignType.contains(
                                         it.type

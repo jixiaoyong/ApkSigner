@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.Settings
+import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
 import com.russhwolf.settings.set
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
@@ -28,12 +29,13 @@ interface KeyValueStorage {
 
     val apkSigner: Flow<String?>
     val zipAlign: Flow<String?>
+    val isZipAlign: Flow<Boolean>
     val signedDirectory: Flow<String?>
     val signTypeList: Flow<Set<Int>>
     val selectedSignInfoBean: Flow<SignInfoBean?>
     val signInfoBeans: Flow<List<SignInfoBean>>
     fun cleanStorage()
-    fun save(key: StorageKeys, value: String?)
+    fun save(key: StorageKeys, value: Any?)
 }
 
 
@@ -43,7 +45,8 @@ enum class StorageKeys {
     SIGN_INFO_SELECT, // 选中的签名信息
     SIGN_INFO_LIST, // 签名信息（密钥/密码等）列表
     SIGNED_DIRECTORY, // 签名后文件保存路径
-    SIGN_TYPE_LIST; // 签名类型列表
+    SIGN_TYPE_LIST, // 签名类型列表
+    ALIGN_ENABLE; // 是否开启zipalign压缩
 
     val key get() = this.name
 }
@@ -57,6 +60,8 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
         get() = observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNER_PATH.key)
     override val zipAlign: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.ZIP_ALIGN_PATH.key)
+    override val isZipAlign: Flow<Boolean>
+        get() = observableSettings.getBooleanFlow(StorageKeys.ALIGN_ENABLE.key, false)
     override val signedDirectory: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGNED_DIRECTORY.key)
     override var signTypeList: Flow<Set<Int>>
@@ -85,9 +90,9 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
                 }
         }
 
-    override fun save(key: StorageKeys, value: String?) {
+    override fun save(key: StorageKeys, value: Any?) {
         if (value != null) {
-            settings[key.key] = value
+            settings[key.key] = value.toString()
         } else {
             settings.remove(key.key)
         }
