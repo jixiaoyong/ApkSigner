@@ -34,7 +34,7 @@ object FileChooseUtil {
 
 
     /**
-     * @return 返回选择的文件完整路径
+     * @return 返回选择的文件夹完整路径
      */
     fun chooseSignDirectory(
         window: ComposeWindow,
@@ -46,6 +46,6 @@ object FileChooseUtil {
         jFileChooser.currentDirectory = oldDirectory?.let { File(it) }
         jFileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         jFileChooser.showDialog(window.glassPane, "选择")
-        return jFileChooser.selectedFile?.parent
+        return jFileChooser.currentDirectory?.absolutePath
     }
 }
