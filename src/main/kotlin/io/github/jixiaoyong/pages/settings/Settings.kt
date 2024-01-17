@@ -207,7 +207,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 100.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 90.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
