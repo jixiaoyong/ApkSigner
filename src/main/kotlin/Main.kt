@@ -3,9 +3,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,11 +18,13 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.jthemedetecor.OsThemeDetector
+import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.pages.settings.PageSettingInfo
 import io.github.jixiaoyong.pages.signInfos.PageSignInfo
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.pages.signapp.PageSignApp
 import io.github.jixiaoyong.theme.AppTheme
+import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -127,6 +129,37 @@ fun App(window: ComposeWindow) {
     }
 }
 
+@Composable
+fun LoadingPage() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator()
+        Text("Loading...")
+    }
+}
+
+@Composable
+fun AlreadyExistsPage(message: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(Icons.Default.Warning, tint = Color.Red, contentDescription = "already exists")
+        Text(message)
+        TextButton(
+            onClick = {
+                System.exit(0)
+            },
+        ) {
+            Text("退出")
+        }
+    }
+}
+
 
 fun main() = application {
     val windowState = rememberWindowState(height = 650.dp)
@@ -136,9 +169,32 @@ fun main() = application {
         icon = painterResource("/imgs/icon.png"),
         state = windowState
     ) {
+        var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
+
         LaunchedEffect(Unit) {
             window.minimumSize = window.size
+            appState = AppState.Loading
+            val isAppRunning = AppProcessUtil.isDualAppRunning("ApkSigner")
+            if (isAppRunning) {
+                appState = AppState.AlreadyExists("ApkSigner已经启动了，请不要重复启动")
+            } else {
+                appState = AppState.Success
+            }
         }
-        App(window)
+
+
+        when (appState) {
+            AppState.Idle, AppState.Loading -> {
+                LoadingPage()
+            }
+
+            is AppState.AlreadyExists -> {
+                AlreadyExistsPage((appState as AppState.AlreadyExists).message)
+            }
+
+            AppState.Success -> {
+                App(window)
+            }
+        }
     }
 }
