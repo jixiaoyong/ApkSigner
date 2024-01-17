@@ -19,6 +19,7 @@ object ApkSigner {
 
     private const val ANDROID_BUILD_TOOLS_DIR_EXAMPLE =
         "/some/directory/to/your/android/sdk/build-tools/34.0.0/"
+    private const val AOSP_NAME = "The Android Open Source Project"
 
     private lateinit var apkSignerCmdPath: String
     private lateinit var zipAlignCmdPath: String
@@ -68,6 +69,14 @@ object ApkSigner {
     }
 
     fun setupApkSigner(apkSignerPath: String): String? {
+        // 校验文件是否为AOSP提供的apk signer，而非本APP避免误操作导致无限循环启动
+        val apkSignerFile = File(apkSignerPath)
+        if (!apkSignerFile.exists()) {
+            return "apkSigner命令不存在，请重新选择。"
+        } else if (!apkSignerFile.readText().contains(AOSP_NAME)) {
+            return "apkSigner命令不是${AOSP_NAME}官方提供的，请重新选择。"
+        }
+
         return if (RunCommandUtil.runCommand(
                 "$apkSignerPath version",
                 "apk signer",

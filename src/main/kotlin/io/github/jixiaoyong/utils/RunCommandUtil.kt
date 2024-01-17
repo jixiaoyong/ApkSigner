@@ -27,6 +27,7 @@ object RunCommandUtil {
 
             process.waitFor()
         } catch (e: Exception) {
+            Logger.error("$tag error: $e")
             -1
         }
     }

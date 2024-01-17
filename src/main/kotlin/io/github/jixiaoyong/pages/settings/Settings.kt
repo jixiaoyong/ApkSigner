@@ -161,21 +161,26 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 )
             }
 
-            InfoItemWidget("apk signer目录", apkSign ?: "尚未初始化", onClick = {
-                scope.launch {
-                    val chooseFileName =
-                        FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
-                    if (chooseFileName.isNullOrBlank()) {
-                        scaffoldState.snackbarHostState.showSnackbar("请选择apksigner文件")
-                    } else {
-                        val result = ApkSigner.setupApkSigner(chooseFileName)
-                        saveApkSigner(settings, ApkSigner.apkSignerPath)
-                        scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+            InfoItemWidget("apk signer目录",
+                apkSign ?: "尚未初始化",
+                description = "请选择Android SDK中build-tools目录apksigner文件",
+                onClick = {
+                    scope.launch {
+                        val chooseFileName =
+                            FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
+                        if (chooseFileName.isNullOrBlank()) {
+                            scaffoldState.snackbarHostState.showSnackbar("请选择apksigner文件")
+                        } else {
+                            val result = ApkSigner.setupApkSigner(chooseFileName)
+                            saveApkSigner(settings, ApkSigner.apkSignerPath)
+                            scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+                        }
                     }
-                }
 
-            })
-            InfoItemWidget("zip align目录", zipAlign ?: "尚未初始化", onClick = {
+                })
+            InfoItemWidget("zipalign目录", zipAlign ?: "尚未初始化",
+                description = "请选择Android SDK中build-tools目录zipalign文件",
+                onClick = {
                 scope.launch {
                     val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
                     if (chooseFileName.isNullOrBlank()) {

@@ -5,8 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +30,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun InfoItemWidget(
     title: String,
-    description: String?,
+    value: String?,
+    description: String? = null,
     buttonTitle: String? = null,
     showChangeButton: Boolean = true,
     onClick: (() -> Unit)? = null
@@ -50,6 +54,15 @@ fun InfoItemWidget(
             Text(
                 title, style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             )
+            if (!description.isNullOrBlank()) HoverableTooltip(
+                description = description
+            ) { modifier ->
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = "description information",
+                    modifier = modifier
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             if (showChangeButton) ButtonWidget(
                 { onClick?.invoke() },
