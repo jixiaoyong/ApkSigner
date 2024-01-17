@@ -78,7 +78,7 @@ fun InfoItemWidget(
                 .padding(vertical = 10.dp, horizontal = 5.dp)
         ) {
             Text(
-                description ?: "暂无内容",
+                value ?: "暂无内容",
                 style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp)
             )
         }
