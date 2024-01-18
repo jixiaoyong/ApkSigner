@@ -1,0 +1,58 @@
+name: BUG报告单
+description: 创建一个BUG报告
+labels: ["bug"]
+title: "[BUG] 概述遇到的问题"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请提供以下必要信息以帮助我们更好地理解和解决您的问题。
+  - type: dropdown
+    id: system_type
+    attributes:
+      label: 系统类型
+      options:
+        - macOS
+        - Windows
+        - Linux
+      default: 1
+    validations:
+      required: true
+  - type: input
+    id: system_version
+    attributes:
+      label: 系统版本
+      description: 请填写您的操作系统版本
+    validations:
+      required: true
+  - type: input
+    id: software_version
+    attributes:
+      label: 软件版本
+      description: 请填写软件版本，例如1.1.0。macOS用户可以在状态栏》ApkSigner > 关于查看
+    validations:
+      required: true
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: 问题描述
+      description: 请详细描述您想要实现的功能，遇到的问题，并附上截图
+      value: |
+        ## 想要实现的功能
+
+        ## 遇到的问题
+
+        ## 尝试了如下方案，并未解决
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 复现步骤
+      description: 请以第1，2，3步操作提供复现步骤，并附上截图
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: false
