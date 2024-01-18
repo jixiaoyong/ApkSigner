@@ -9,26 +9,43 @@ import java.io.InputStreamReader
  */
 object RunCommandUtil {
 
-    fun runCommand(command: String, tag: String = "", printLog: Boolean = true, printError: Boolean = true): Int {
+    /**
+     * 执行bash命令
+     * @return 成功返回null，失败返回Exception类型错误原因
+     */
+    fun runCommand(
+        command: String,
+        tag: String = "",
+        printLog: Boolean = true,
+        printError: Boolean = true
+    ): Exception? {
         val logTag = if (tag.isBlank()) "" else "$tag: "
 
         Logger.info("$tag command: $command")
 
         return try {
             val process = Runtime.getRuntime().exec(command)
+            val logBuffer = StringBuffer()
 
             if (printLog) {
                 BufferedReader(InputStreamReader(process.inputStream)).useLines {
                     it.forEach { line ->
                         Logger.info("${logTag}$line")
+                        logBuffer.append(line).append("\n")
                     }
                 }
             }
 
-            process.waitFor()
+            val result = process.waitFor()
+            if (result == 0) {
+                null
+            } else {
+                Exception("${logTag}exit code: $result\n${logBuffer}")
+            }
+
         } catch (e: Exception) {
-            Logger.error("$tag error: $e")
-            -1
+            if (printError) Logger.error("$tag error: $e")
+            e
         }
     }
 }

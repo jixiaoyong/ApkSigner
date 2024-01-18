@@ -43,7 +43,7 @@ object ApkSigner {
             return "指定的Android SDK中build-tools目录无效或不存在，请重新选择。\n该目录一般为${ANDROID_BUILD_TOOLS_DIR_EXAMPLE}"
         }
 
-        val apkSignerPath = "$androidBuildToolsDir/apksigner"
+        val apkSignerPath = "$androidBuildToolsDir${File.separator}apksigner"
         // windows追加bat
         val apkSignerPathWithBat = if (System.getProperties().getProperty("os.name").contains("Windows")) {
             "$apkSignerPath.bat"
@@ -77,14 +77,10 @@ object ApkSigner {
             return "apkSigner命令不是${AOSP_NAME}官方提供的，请重新选择。"
         }
 
-        return if (RunCommandUtil.runCommand(
-                "$apkSignerPath version",
-                "apk signer",
-                true,
-                false
-            ) != 0
-        ) {
-            "apkSigner命令不存在，请重新选择。"
+        val result = RunCommandUtil.runCommand("$apkSignerPath version", "apk signer")
+
+        return if (result != null) {
+            "apkSigner命令检查失败，请重试（${result.message}）"
         } else {
             apkSignerCmdPath = apkSignerPath
             null
@@ -93,14 +89,15 @@ object ApkSigner {
 
     fun setupZipAlign(zipAlignPath: String): String? {
         // check os is mac/linux or windows
-        val isCommandExits = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+        val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
             File(zipAlignPath).exists()
+            null
         } else {
-            RunCommandUtil.runCommand("command -v $zipAlignPath", "zip align", true, false) == 0
+            RunCommandUtil.runCommand("command -v $zipAlignPath", "zip align")
         }
 
-        return if (!isCommandExits) {
-            "zipAlign命令不存在，请重新选择。"
+        return if (null != result) {
+            "zipAlign命令检查失败，请重试（${result.message}）"
         } else {
             zipAlignCmdPath = zipAlignPath
             null

@@ -46,6 +46,7 @@ object FileChooseUtil {
         jFileChooser.currentDirectory = oldDirectory?.let { File(it) }
         jFileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         jFileChooser.showDialog(window.glassPane, "选择")
-        return jFileChooser.currentDirectory?.absolutePath
+        // macos 选择文件夹只需点中，而不能打开，否则就会出现选中的是/xxx/a但下面返回的是/xxx/a/a的情况
+        return jFileChooser.selectedFile?.absolutePath
     }
 }
