@@ -195,6 +195,14 @@ object ApkSigner {
             } catch (e: Exception) {
                 Logger.error("签名失败", e)
                 return CommandResult.Error("${e.message}", e)
+            }finally {
+                if (zipAlign) {
+                   try {
+                       File(alignedApkFilePath).delete()
+                   }catch (e: Exception) {
+                       Logger.error("删除文件失败", e)
+                   }
+                }
             }
         }
         return CommandResult.Success(outPutFilePath)
