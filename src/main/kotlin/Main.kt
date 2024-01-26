@@ -64,7 +64,7 @@ fun App(window: ComposeWindow) {
         }
     }
 
-    var currentApkFilePath by remember { mutableStateOf<String?>(null) }
+    var currentApkFilePath by remember { mutableStateOf<List<String>>(emptyList()) }
     var isDarkTheme by remember { mutableStateOf(false) }
     val newSignInfo = remember { mutableStateOf(SignInfoBean()) }
 

@@ -24,12 +24,29 @@ object FileChooseUtil {
     ): String? {
         val fileDialog = java.awt.FileDialog(window)
         fileDialog.title = title
-        fileDialog.isVisible = true
         fileDialog.isMultipleMode = false
         filter?.let {
             fileDialog.setFilenameFilter(it)
         }
+        fileDialog.isVisible = true
         return fileDialog.files?.firstOrNull()?.absolutePath
+    }
+
+    /**
+     * 选择多个文件
+     * @return 返回选择的文件完整路径
+     */
+    fun chooseMultiFile(
+        window: ComposeWindow,
+        title: String = "请选择文件(可多选)",
+        filter: FilenameFilter? = null
+    ): List<String>? {
+        val fileDialog = java.awt.FileDialog(window)
+        fileDialog.title = title
+        fileDialog.isMultipleMode = true
+        fileDialog.filenameFilter = filter
+        fileDialog.isVisible = true
+        return fileDialog.files?.mapNotNull { it.absolutePath }
     }
 
 

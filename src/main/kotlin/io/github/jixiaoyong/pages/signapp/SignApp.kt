@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.TextStyle
@@ -25,11 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.awt.Desktop
@@ -51,8 +54,6 @@ import kotlin.math.roundToInt
  * 2. 开始签名
  * 3. 签名历史
  *
- * todo 添加可以自定义签名文件输出地址的功能
- *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
  */
@@ -61,9 +62,9 @@ import kotlin.math.roundToInt
 @Composable
 fun PageSignApp(
     window: ComposeWindow,
-    currentApkFilePath: String?,
+    currentApkFilePath: List<String>,
     settings: SettingsTool,
-    onChangeApk: (String) -> Unit,
+    onChangeApk: (List<String>) -> Unit,
     onChangePage: (String) -> Unit
 ) {
 
@@ -71,9 +72,7 @@ fun PageSignApp(
     var signLogs by remember { mutableStateOf(listOf<String>()) }
     var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
     val scaffoldState = rememberScaffoldState()
-    val isEnabled = remember(signApkResult) {
-        CommandResult.NOT_EXECUT == signApkResult
-    }
+
     val apkSignType by settings.signTypeList.collectAsState(setOf())
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
     val signedDirectory by settings.signedDirectory.collectAsState(null)
@@ -81,19 +80,40 @@ fun PageSignApp(
 
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
 
-
     val local = signInfoResult
     when (local) {
         is CommandResult.Success<*> -> {
-            AlertDialog(onDismissRequest = {
+            Popup(onDismissRequest = {
                 signInfoResult = CommandResult.NOT_EXECUT
-            }, buttons = {
-
-            }, title = { Text("查询签名结果") }, text = {
-                SelectionContainer {
-                    Text(local.result?.toString() ?: "")
+            }, alignment = Alignment.Center) {
+                Column(
+                    modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.2f))
+                        .padding(horizontal = 50.dp, vertical = 65.dp)
+                        .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp))
+                        .padding(horizontal = 20.dp, vertical = 15.dp)
+                ) {
+                    Text(
+                        "签名信息（鼠标上下滚动查看更多）",
+                        color = MaterialTheme.colors.onSurface,
+                        fontWeight = FontWeight.W800,
+                        modifier = Modifier.padding(20.dp).align(alignment = Alignment.CenterHorizontally)
+                    )
+                    Column(
+                        modifier = Modifier.weight(1f, fill = false).heightIn(max = 450.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                local.result?.toString() ?: "",
+                                color = MaterialTheme.colors.onSurface
+                            )
+                        }
+                    }
+                    TextButton(onClick = {
+                        signInfoResult = CommandResult.NOT_EXECUT
+                    }, modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) { Text("确认") }
                 }
-            })
+            }
         }
 
         is CommandResult.Error<*> -> {
@@ -103,6 +123,25 @@ fun PageSignApp(
         }
 
         else -> {}
+    }
+
+    if (local is CommandResult.EXECUTING || signApkResult is CommandResult.EXECUTING) {
+        Popup(alignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.size(150.dp)
+                        .background(color = Color.Black.copy(0.8f), shape = RoundedCornerShape(5.dp))
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(80.dp).padding(10.dp))
+                    Text("处理中……", color = Color.White.copy(0.8f))
+                }
+            }
+        }
     }
 
     Scaffold(scaffoldState = scaffoldState) {
@@ -125,15 +164,20 @@ fun PageSignApp(
                         .clickable {
                             scope.launch {
                                 val chooseFileName =
-                                    FileChooseUtil.chooseSignFile(window, "请选择要签名的apk文件")
-                                if (chooseFileName.isNullOrBlank()) {
+                                    FileChooseUtil.chooseMultiFile(
+                                        window,
+                                        "请选择要签名的apk文件",
+                                        filter = { _, name ->
+                                            name.toLowerCase(Locale.getDefault()).endsWith(".apk")
+                                        })
+                                if (chooseFileName.isNullOrEmpty()) {
                                     scaffoldState.snackbarHostState.showSnackbar("请选择要签名的apk文件")
                                 } else {
                                     onChangeApk(chooseFileName)
                                     if (!signedDirectory.isNullOrBlank()) {
                                         settings.save(
                                             StorageKeys.SIGNED_DIRECTORY,
-                                            chooseFileName.substringBeforeLast(File.separator)
+                                            chooseFileName.first().substringBeforeLast(File.separator)
                                         )
                                     }
                                     scaffoldState.snackbarHostState.showSnackbar("修改成功")
@@ -143,11 +187,10 @@ fun PageSignApp(
                     component = JPanel(),
                     onFileDrop = {
                         scope.launch {
-                            val file =
-                                it.firstOrNull {
-                                    it.lowercase(Locale.getDefault()).endsWith(".apk")
-                                }
-                            if (null == file) {
+                            val file = it.filter() {
+                                it.lowercase(Locale.getDefault()).endsWith(".apk")
+                            }
+                            if (file.isNullOrEmpty()) {
                                 scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
                             } else {
                                 onChangeApk(file)
@@ -157,21 +200,23 @@ fun PageSignApp(
                     }
                 ) {
                     Text(
-                        text = "请拖拽apk文件到这里哦\n(也可以点击这里选择apk文件)",
+                        text = "请拖拽apk文件到这里哦\n(支持多选，也可以点击这里选择apk文件)",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
                 InfoItemWidget(
-                    "当前选择的文件",
-                    currentApkFilePath ?: "请先选择apk文件",
+                    "当前选择的文件${if (currentApkFilePath.isEmpty()) "" else "(" + currentApkFilePath.size + ")"}",
+                    if (currentApkFilePath.isEmpty()) "请先选择apk文件" else currentApkFilePath.joinToString("\n"),
                     buttonTitle = "查看签名",
                     onClick = {
-                        scope.launch {
-                            if (currentApkFilePath.isNullOrBlank()) {
+                        scope.launch(Dispatchers.IO) {
+                            if (currentApkFilePath.isEmpty()) {
                                 scaffoldState.snackbarHostState.showSnackbar("请先选择apk文件")
                             } else {
-                                signInfoResult = ApkSigner.getApkSignInfo(currentApkFilePath)
+                                signInfoResult = CommandResult.EXECUTING
+                                val resultList = currentApkFilePath.map { ApkSigner.getApkSignInfo(it) }
+                                signInfoResult = mergeCommandResult(resultList, currentApkFilePath)
                             }
                         }
                     }
@@ -194,7 +239,7 @@ fun PageSignApp(
                                 FileChooseUtil.chooseSignDirectory(
                                     window,
                                     errorTips,
-                                    signedDirectory ?: currentApkFilePath
+                                    signedDirectory ?: currentApkFilePath.firstOrNull()
                                 )
                             if (outputDirectory.isNullOrBlank()) {
                                 scaffoldState.snackbarHostState.showSnackbar(errorTips)
@@ -269,11 +314,9 @@ fun PageSignApp(
             ) {
                 ButtonWidget(
                     {
-                        scope.launch {
-                            if (currentApkFilePath.isNullOrBlank() || !currentApkFilePath.lowercase(
-                                    Locale.getDefault()
-                                )
-                                    .endsWith(".apk")
+                        scope.launch(Dispatchers.IO) {
+                            if (currentApkFilePath.filter { it.lowercase(Locale.getDefault()).endsWith(".apk") }
+                                    .isNullOrEmpty()
                             ) {
                                 scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
                                 return@launch
@@ -297,6 +340,7 @@ fun PageSignApp(
                                 return@launch
                             }
 
+                            signApkResult = CommandResult.EXECUTING
                             val signResult = ApkSigner.alignAndSignApk(
                                 currentApkFilePath,
                                 localSelectedSignInfo.keyStorePath,
@@ -320,8 +364,12 @@ fun PageSignApp(
                                 }
                             )
 
-                            signApkResult = signResult
-                            if (signResult is CommandResult.Success<*> && !signResult.result?.toString()
+                            val mergedResult = mergeCommandResult(signResult, currentApkFilePath)
+                            signApkResult = mergedResult
+                            val firstSuccessSignedApk =
+                                signResult.firstOrNull { it is CommandResult.Success<*> } as CommandResult.Success<*>
+
+                            if (mergedResult is CommandResult.Success<*> && !firstSuccessSignedApk.result?.toString()
                                     .isNullOrBlank()
                             ) {
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
@@ -329,13 +377,13 @@ fun PageSignApp(
                                     "打开",
                                     SnackbarDuration.Long
                                 )
-                                val file = File(signResult.result?.toString() ?: "")
+                                val file = File(firstSuccessSignedApk.result?.toString() ?: "")
                                 if (SnackbarResult.ActionPerformed == result && file.exists()) {
                                     Desktop.getDesktop().open(file.parentFile)
                                 }
-                            } else if (signResult is CommandResult.Error<*>) {
+                            } else if (mergedResult is CommandResult.Error<*>) {
                                 scaffoldState.snackbarHostState.showSnackbar(
-                                    "签名失败：${signResult.message}",
+                                    "签名失败：${mergedResult.message}",
                                 )
                             }
 
@@ -343,7 +391,7 @@ fun PageSignApp(
                         }
 
                     },
-                    enabled = isEnabled,
+                    enabled = CommandResult.NOT_EXECUT == signApkResult,
                     title = "开始签名apk",
                     modifier = Modifier.size(250.dp, 50.dp),
                 )
@@ -351,6 +399,28 @@ fun PageSignApp(
         }
     }
 }
+
+private const val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+private fun mergeCommandResult(resultList: List<CommandResult>, pathList: List<String>) =
+
+    if (resultList.filter { it is CommandResult.Success<*> }.isNotEmpty()) {
+        val message = List(resultList.size) { index ->
+            val path = pathList.getOrNull(index)
+            val result = resultList.getOrNull(index)
+            "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + (if (result is CommandResult.Error<*>) result.message.toString()
+            else (result as CommandResult.Success<*>).result.toString())
+        }.joinToString("\n\n")
+
+        CommandResult.Success(resultList.joinToString { message })
+    } else {
+        val message = List(resultList.size) { index ->
+            val path = pathList.getOrNull(index)
+            val result = resultList.getOrNull(index)
+            "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + ((result as CommandResult.Error<*>).message.toString())
+        }.joinToString("\n\n")
+
+        CommandResult.Error(message)
+    }
 
 @Composable
 fun DropBoxPanel(

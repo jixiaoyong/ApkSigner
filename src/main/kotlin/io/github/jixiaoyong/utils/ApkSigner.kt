@@ -106,6 +106,43 @@ object ApkSigner {
 
     /**
      * 对齐并签名APK文件，签名后的文件添加_signed后缀,即x_signed.apk
+     * @param apkFilePathList 待签名的apk文件绝对路径的列表
+     * @param keyStorePath 签名文件路径
+     * @param keyAlias 表示 signer 在密钥库中的私钥和证书数据的别名的名称
+     * @param keyStorePwd 包含 signer 私钥和证书的密钥库的密码
+     * @param keyPwd signer 私钥的密码。
+     * @param zipAlign 是否需要对齐
+     * @param signedApkDirectory 签名之后的文件输出路径，默认为apkFilePath对应的x.apk所在的文件夹
+     * @return 返回结果 CommandResult 成功或失败，及信息
+     */
+    fun alignAndSignApk(
+        apkFilePathList: List<String>,
+        keyStorePath: String,
+        keyAlias: String,
+        keyStorePwd: String,
+        keyPwd: String,
+        signedApkDirectory: String? = null,
+        zipAlign: Boolean = true,
+        signVersions: List<SignType> = SignType.DEF_SIGN_TYPES,
+        onProgress: (String) -> Unit
+    ): List<CommandResult> {
+        return apkFilePathList.map {
+            alignAndSignApk(
+                it,
+                keyStorePath,
+                keyAlias,
+                keyStorePwd,
+                keyPwd,
+                signedApkDirectory,
+                zipAlign,
+                signVersions,
+                onProgress
+            )
+        }
+    }
+
+    /**
+     * 对齐并签名APK文件，签名后的文件添加_signed后缀,即x_signed.apk
      * @param apkFilePath 待签名的apk文件绝对路径
      * @param keyStorePath 签名文件路径
      * @param keyAlias 表示 signer 在密钥库中的私钥和证书数据的别名的名称
@@ -195,13 +232,13 @@ object ApkSigner {
             } catch (e: Exception) {
                 Logger.error("签名失败", e)
                 return CommandResult.Error("${e.message}", e)
-            }finally {
+            } finally {
                 if (zipAlign) {
-                   try {
-                       File(alignedApkFilePath).delete()
-                   }catch (e: Exception) {
-                       Logger.error("删除文件失败", e)
-                   }
+                    try {
+                        File(alignedApkFilePath).delete()
+                    } catch (e: Exception) {
+                        Logger.error("删除文件失败", e)
+                    }
                 }
             }
         }
@@ -305,4 +342,6 @@ sealed class CommandResult {
     class Error<T>(val message: T, val error: Exception? = null) : CommandResult()
 
     object NOT_EXECUT : CommandResult()
+
+    object EXECUTING : CommandResult()
 }
