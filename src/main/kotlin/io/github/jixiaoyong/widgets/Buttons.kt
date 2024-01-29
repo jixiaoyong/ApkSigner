@@ -1,17 +1,16 @@
 package io.github.jixiaoyong.widgets
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 /**
@@ -54,10 +53,17 @@ fun ButtonWidget(
 
 @Preview
 @Composable
-fun InfoItemWidgetPreview() {
-    ButtonWidget(onClick = {
+private fun ButtonWidgetPreview() {
+    Column {
+        ButtonWidget(onClick = {
 
-    }) {
-        Text("123")
+        }) {
+            Text("123")
+        }
+
+        ButtonWidget(onClick = {
+        }, enabled = false) {
+            Text("123")
+        }
     }
 }

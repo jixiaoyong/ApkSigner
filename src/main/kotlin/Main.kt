@@ -1,4 +1,3 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,7 +35,6 @@ object Routes {
 }
 
 @Composable
-@Preview
 fun App(window: ComposeWindow) {
     val scope = rememberCoroutineScope()
     val settings = remember {

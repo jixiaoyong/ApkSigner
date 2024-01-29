@@ -3,7 +3,6 @@ package io.github.jixiaoyong.pages.signapp
 import ApkSigner
 import CommandResult
 import Routes
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,15 +49,13 @@ import kotlin.math.roundToInt
  * @author : jixiaoyong
  * @description ：签名app的地方
  * 1. 选择/拖拽APP
- *      选择签名文件？
- * 2. 开始签名
+ * 2. 开始签名/查看签名
  * 3. 签名历史
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
  */
 
-@Preview()
 @Composable
 fun PageSignApp(
     window: ComposeWindow,

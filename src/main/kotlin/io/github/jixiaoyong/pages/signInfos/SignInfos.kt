@@ -43,7 +43,6 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
  */
-@Preview()
 @Composable
 fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: MutableState<SignInfoBean>) {
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
@@ -103,7 +102,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                         onSignInfoChanged(settings, it)
                         dropdownMenu.status = DropdownMenuState.Status.Closed
                     }, modifier = Modifier.widthIn(450.dp, 600.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically,) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = it.keyNickName, modifier = Modifier.weight(2f), maxLines = 1,
                             )
@@ -237,7 +236,6 @@ private fun onSignInfoChanged(settings: SettingsTool, signInfoBean: SignInfoBean
  * @param description 描述信息，默认为空，有值的话则会展示一个提示图标，鼠标悬浮时展示此文本内容
  * @param onChange 文本改变事件
  */
-@Preview
 @Composable
 private fun SignInfoItem(
     name: String,
@@ -291,5 +289,14 @@ private fun SignInfoItem(
                 title = buttonText
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun prev() {
+    Column {
+        SignInfoItem("Name", "Value", false) {}
+        SignInfoItem("Name", "Value", true, onClick = {}) {}
     }
 }

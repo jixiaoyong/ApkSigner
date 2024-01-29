@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
  * @date : 2023/8/19
  */
 
-@Preview
 @Composable
 fun InfoItemWidget(
     title: String,
@@ -82,5 +81,25 @@ fun InfoItemWidget(
                 style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp)
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun InfoItemWidgetPreview() {
+
+    Column {
+        InfoItemWidget(
+            title = "标题标题标题标题标题",
+            value = "内容内容内容内容内容内容内容内容内容内容内容",
+            description = "描述信息",
+            buttonTitle = "修改"
+        ) {}
+
+        InfoItemWidget(
+            title = "标题标题标题标题标题",
+            value = "内容内容内容内容内容内容内容内容内容内容内容",
+        ) {}
+
     }
 }

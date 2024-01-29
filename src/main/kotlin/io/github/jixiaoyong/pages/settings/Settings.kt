@@ -1,7 +1,6 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,7 +43,6 @@ import javax.swing.JPanel
 
 private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/apkSigner"
 
-@Preview
 @Composable
 fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
     val scaffoldState: ScaffoldState = rememberScaffoldState()
