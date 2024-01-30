@@ -31,6 +31,7 @@ import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
+import io.github.jixiaoyong.widgets.HoverableTooltip
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
@@ -273,13 +274,13 @@ fun PageSignApp(
                                 settings.signTypeList = flowOf(newTypes)
                             })
                             Text(item.name, modifier = Modifier.padding(start = 5.dp))
-                            if (!item.description.isNullOrEmpty()) Icon(Icons.Default.Info,
-                                contentDescription = item.description,
-                                modifier = Modifier.padding(end = 10.dp).size(18.dp).clickable {
-                                    scope.launch {
-                                        showToast(item.description)
-                                    }
-                                })
+                            HoverableTooltip(description = item.description) {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = "description information",
+                                    modifier = it
+                                )
+                            }
                         }
 
                     }

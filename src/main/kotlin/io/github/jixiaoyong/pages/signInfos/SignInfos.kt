@@ -109,7 +109,8 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                                 modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
                             )
                             HoverableTooltip(
-                                description = "删除此工具存储的签名信息，不会删除apk签名文件"
+                                description = "删除此工具存储的签名信息，不会删除apk签名文件",
+                                alwaysShow = true
                             ) { modifier ->
                                 IconButton(
                                     modifier = modifier,
@@ -252,7 +253,7 @@ private fun SignInfoItem(
 
         Row(modifier = Modifier.weight(0.25f)) {
             Text(name)
-            if (!description.isNullOrBlank()) HoverableTooltip(description = description) { modifier ->
+           HoverableTooltip(description = description) { modifier ->
                 Icon(
                     Icons.Default.Info,
                     contentDescription = "description information",

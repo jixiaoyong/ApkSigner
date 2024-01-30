@@ -65,16 +65,24 @@ fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable (modi
 }
 
 
+/**
+ * 在 [content] （比如一个❓按钮）之上增加一个注释，当鼠标悬浮在其上时展示
+ * [alwaysShow] 为true时，会一直展示[content]，否则只有注释不为空的时候才展示
+ */
 @Composable
-fun HoverableTooltip(description: String?, content: @Composable (modifier: Modifier) -> Unit) {
+fun HoverableTooltip(
+    description: String?,
+    alwaysShow: Boolean = false,
+    content: @Composable (modifier: Modifier) -> Unit
+) {
     if (description.isNullOrBlank()) {
-        content(Modifier)
+        if (alwaysShow) content(Modifier)
     } else {
         HoverableTooltip(
             tooltip = {
                 Row(
                     modifier = Modifier.background(
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
                         shape = RoundedCornerShape(5.dp)
                     ).padding(horizontal = 5.dp, vertical = 5.dp),
                 ) { Text(description, style = TextStyle(color = Color.White.copy(alpha = 0.5f))) }

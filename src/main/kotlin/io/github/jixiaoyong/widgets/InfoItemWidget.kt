@@ -53,7 +53,7 @@ fun InfoItemWidget(
             Text(
                 title, style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
             )
-            if (!description.isNullOrBlank()) HoverableTooltip(
+            HoverableTooltip(
                 description = description
             ) { modifier ->
                 Icon(
