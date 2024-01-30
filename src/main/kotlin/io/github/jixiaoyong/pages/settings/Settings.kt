@@ -22,9 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
-import io.github.jixiaoyong.utils.FileChooseUtil
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.launch
@@ -133,12 +131,12 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                                     oldDirectory
                                 )
                             if (chooseFileName.isNullOrBlank()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请选择build-tools目录")
+                                showToast("请选择build-tools目录",ToastConfig.DURATION.Long)
                             } else {
                                 val result = ApkSigner.init(chooseFileName)
                                 saveApkSigner(settings, ApkSigner.apkSignerPath)
                                 saveZipAlign(settings, ApkSigner.zipAlignPath)
-                                scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+                                showToast(result ?: "修改成功")
                             }
                         }
                     },
@@ -149,8 +147,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
 
                         saveApkSigner(settings, ApkSigner.apkSignerPath)
                         saveZipAlign(settings, ApkSigner.zipAlignPath)
-
-                        scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+                        showToast(result ?: "修改成功")
                     }
                 }) {
                 Text(
@@ -167,11 +164,11 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                         val chooseFileName =
                             FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
                         if (chooseFileName.isNullOrBlank()) {
-                            scaffoldState.snackbarHostState.showSnackbar("请选择apksigner文件")
+                            showToast("请选择apksigner文件",ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupApkSigner(chooseFileName)
                             saveApkSigner(settings, ApkSigner.apkSignerPath)
-                            scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+                            showToast(result ?: "修改成功")
                         }
                     }
 
@@ -179,17 +176,17 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
             InfoItemWidget("zipalign目录", zipAlign ?: "尚未初始化",
                 description = "请选择Android SDK中build-tools目录zipalign文件",
                 onClick = {
-                scope.launch {
-                    val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
-                    if (chooseFileName.isNullOrBlank()) {
-                        scaffoldState.snackbarHostState.showSnackbar("请选择zipAlign文件")
-                    } else {
-                        val result = ApkSigner.setupZipAlign(chooseFileName)
-                        saveZipAlign(settings, ApkSigner.zipAlignPath)
-                        scaffoldState.snackbarHostState.showSnackbar(result ?: "修改成功")
+                    scope.launch {
+                        val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
+                        if (chooseFileName.isNullOrBlank()) {
+                            showToast("请选择zipAlign文件",ToastConfig.DURATION.Long)
+                        } else {
+                            val result = ApkSigner.setupZipAlign(chooseFileName)
+                            saveZipAlign(settings, ApkSigner.zipAlignPath)
+                            showToast(result ?: "修改成功")
+                        }
                     }
-                }
-            })
+                })
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
 

@@ -25,6 +25,7 @@ import io.github.jixiaoyong.pages.signapp.PageSignApp
 import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.ToasterUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -73,6 +74,8 @@ fun App(window: ComposeWindow) {
         isDarkTheme = isDark
     }
 
+    ToasterUtil.init(isDarkTheme)
+
     LaunchedEffect(Unit) {
         settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
         settings.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
@@ -109,6 +112,7 @@ fun App(window: ComposeWindow) {
                 }
             }
             Divider(color = MaterialTheme.colors.surface)
+
             when (pageIndex.value) {
                 Routes.SignInfo -> PageSignInfo(window, settings, newSignInfo)
 

@@ -28,10 +28,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.jixiaoyong.utils.FileChooseUtil
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
-import io.github.jixiaoyong.utils.gson
+import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.HoverableTooltip
 import kotlinx.coroutines.launch
@@ -160,7 +157,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                             val result =
                                 FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
                             if (result.isNullOrBlank()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请选择Android签名文件")
+                                showToast("请选择Android签名文件")
                             } else {
                                 newSignInfo.value = newSignInfo.value.copy(keyStorePath = result)
                             }

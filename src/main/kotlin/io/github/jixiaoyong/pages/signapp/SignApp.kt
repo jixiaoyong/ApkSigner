@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Popup
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.Dispatchers
@@ -115,7 +116,7 @@ fun PageSignApp(
 
         is CommandResult.Error<*> -> {
             scope.launch {
-                scaffoldState.snackbarHostState.showSnackbar("查询签名失败:${local.message}")
+                showToast("查询签名失败:${local.message}")
             }
         }
 
@@ -168,7 +169,7 @@ fun PageSignApp(
                                             name.toLowerCase(Locale.getDefault()).endsWith(".apk")
                                         })
                                 if (chooseFileName.isNullOrEmpty()) {
-                                    scaffoldState.snackbarHostState.showSnackbar("请选择要签名的apk文件")
+                                    showToast("请选择要签名的apk文件")
                                 } else {
                                     onChangeApk(chooseFileName)
                                     if (!signedDirectory.isNullOrBlank()) {
@@ -177,7 +178,7 @@ fun PageSignApp(
                                             chooseFileName.first().substringBeforeLast(File.separator)
                                         )
                                     }
-                                    scaffoldState.snackbarHostState.showSnackbar("修改成功")
+                                    showToast("修改成功")
                                 }
                             }
                         },
@@ -188,10 +189,10 @@ fun PageSignApp(
                                 it.lowercase(Locale.getDefault()).endsWith(".apk")
                             }
                             if (file.isNullOrEmpty()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
+                                showToast("请先选择正确的apk文件")
                             } else {
                                 onChangeApk(file)
-                                scaffoldState.snackbarHostState.showSnackbar("选择apk文件成功")
+                                showToast("选择apk文件成功")
                             }
                         }
                     }
@@ -209,7 +210,7 @@ fun PageSignApp(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
                             if (currentApkFilePath.isEmpty()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请先选择apk文件")
+                                showToast("请先选择apk文件")
                             } else {
                                 signInfoResult = CommandResult.EXECUTING
                                 val resultList = currentApkFilePath.map { ApkSigner.getApkSignInfo(it) }
@@ -239,10 +240,10 @@ fun PageSignApp(
                                     signedDirectory ?: currentApkFilePath.firstOrNull()
                                 )
                             if (outputDirectory.isNullOrBlank()) {
-                                scaffoldState.snackbarHostState.showSnackbar(errorTips)
+                                showToast(errorTips)
                             } else {
                                 settings.save(StorageKeys.SIGNED_DIRECTORY, outputDirectory)
-                                scaffoldState.snackbarHostState.showSnackbar("修改成功")
+                                showToast("修改成功")
                             }
                         }
                     }
@@ -276,7 +277,7 @@ fun PageSignApp(
                                 contentDescription = item.description,
                                 modifier = Modifier.padding(end = 10.dp).size(18.dp).clickable {
                                     scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar(item.description)
+                                        showToast(item.description)
                                     }
                                 })
                         }
@@ -315,25 +316,25 @@ fun PageSignApp(
                             if (currentApkFilePath.filter { it.lowercase(Locale.getDefault()).endsWith(".apk") }
                                     .isNullOrEmpty()
                             ) {
-                                scaffoldState.snackbarHostState.showSnackbar("请先选择正确的apk文件")
+                                showToast("请先选择正确的apk文件")
                                 return@launch
                             }
 
                             val localSelectedSignInfo = selectedSignInfo
                             if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
                                 onChangePage(Routes.SignInfo)
-                                scaffoldState.snackbarHostState.showSnackbar("请先配置正确的签名文件")
+                                showToast("请先配置正确的签名文件")
                                 return@launch
                             }
 
                             if (!ApkSigner.isInitialized()) {
                                 onChangePage(Routes.SettingInfo)
-                                scaffoldState.snackbarHostState.showSnackbar("请先配置apksigner和zipalign路径")
+                                showToast("请先配置apksigner和zipalign路径")
                                 return@launch
                             }
 
                             if (apkSignType.isEmpty()) {
-                                scaffoldState.snackbarHostState.showSnackbar("请至少选择一种签名方式")
+                                showToast("请至少选择一种签名方式")
                                 return@launch
                             }
 
@@ -379,9 +380,7 @@ fun PageSignApp(
                                     Desktop.getDesktop().open(file.parentFile)
                                 }
                             } else if (mergedResult is CommandResult.Error<*>) {
-                                scaffoldState.snackbarHostState.showSnackbar(
-                                    "签名失败：${mergedResult.message}",
-                                )
+                                showToast("签名失败：${mergedResult.message}")
                             }
 
                             signApkResult = CommandResult.NOT_EXECUT
