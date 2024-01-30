@@ -25,8 +25,10 @@ import io.github.jixiaoyong.pages.signapp.PageSignApp
 import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object Routes {
     const val SignInfo = "signInfo"
@@ -135,7 +137,7 @@ fun LoadingPage() {
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator()
-        Text("Loading...")
+        Text("Loading...", Modifier.padding(top = 10.dp))
     }
 }
 
@@ -172,14 +174,15 @@ fun main() = application {
         LaunchedEffect(Unit) {
             window.minimumSize = window.size
             appState = AppState.Loading
-            val isAppRunning = AppProcessUtil.isDualAppRunning("ApkSigner")
-            if (isAppRunning) {
-                appState = AppState.AlreadyExists("ApkSigner已经启动了，请不要重复启动")
+            val isAppRunning = withContext(Dispatchers.IO) {
+                AppProcessUtil.isDualAppRunning("ApkSigner")
+            }
+            appState = if (isAppRunning) {
+                AppState.AlreadyExists("ApkSigner已经启动了，请不要重复启动")
             } else {
-                appState = AppState.Success
+                AppState.Success
             }
         }
-
 
         when (appState) {
             AppState.Idle, AppState.Loading -> {
