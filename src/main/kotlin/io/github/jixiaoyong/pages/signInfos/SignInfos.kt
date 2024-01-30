@@ -185,31 +185,34 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(enabled = newSignInfo.value.isValid(), onClick = {
-                        // save sign info to local storage
-                        val newSignInfos = mutableListOf<SignInfoBean>()
-                        newSignInfos.addAll(signInfoList)
-                        val indexOfSignInfo =
-                            newSignInfos.indexOfFirst { it.isSameOne(newSignInfo.value) }
-                        if (-1 != indexOfSignInfo) {
-                            newSignInfos[indexOfSignInfo] = newSignInfo.value
-                        } else {
-                            newSignInfos.add(newSignInfo.value)
-                        }
-                        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
-                        scope.launch {
-                            val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
-                                "🎉保存成功！\n请点击【重新选择签名】按钮查看，是否清除已填写内容？",
-                                actionLabel = "清空",
-                                duration = SnackbarDuration.Short
-                            )
-                            if (SnackbarResult.ActionPerformed == isNeedClean) {
-                                newSignInfo.value = SignInfoBean()
+                    ButtonWidget(
+                        enabled = newSignInfo.value.isValid(),
+                        onClick = {
+                            // save sign info to local storage
+                            val newSignInfos = mutableListOf<SignInfoBean>()
+                            newSignInfos.addAll(signInfoList)
+                            val indexOfSignInfo =
+                                newSignInfos.indexOfFirst { it.isSameOne(newSignInfo.value) }
+                            if (-1 != indexOfSignInfo) {
+                                newSignInfos[indexOfSignInfo] = newSignInfo.value
+                            } else {
+                                newSignInfos.add(newSignInfo.value)
                             }
-                        }
-                    }) {
-                        Text("保存新签名文件")
-                    }
+                            settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
+                            scope.launch {
+                                val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
+                                    "🎉保存成功！\n请点击【重新选择签名】按钮查看，是否清除已填写内容？",
+                                    actionLabel = "清空",
+                                    duration = SnackbarDuration.Short
+                                )
+                                if (SnackbarResult.ActionPerformed == isNeedClean) {
+                                    newSignInfo.value = SignInfoBean()
+                                }
+                            }
+                        },
+                        title = "保存新签名文件",
+                        modifier = Modifier.size(250.dp, 50.dp)
+                    )
                 }
 
             }
@@ -253,7 +256,7 @@ private fun SignInfoItem(
 
         Row(modifier = Modifier.weight(0.25f)) {
             Text(name)
-           HoverableTooltip(description = description) { modifier ->
+            HoverableTooltip(description = description) { modifier ->
                 Icon(
                     Icons.Default.Info,
                     contentDescription = "description information",

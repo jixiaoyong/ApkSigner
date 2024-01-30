@@ -131,7 +131,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                                     oldDirectory
                                 )
                             if (chooseFileName.isNullOrBlank()) {
-                                showToast("请选择build-tools目录",ToastConfig.DURATION.Long)
+                                showToast("请选择build-tools目录", ToastConfig.DURATION.Long)
                             } else {
                                 val result = ApkSigner.init(chooseFileName)
                                 saveApkSigner(settings, ApkSigner.apkSignerPath)
@@ -164,7 +164,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                         val chooseFileName =
                             FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
                         if (chooseFileName.isNullOrBlank()) {
-                            showToast("请选择apksigner文件",ToastConfig.DURATION.Long)
+                            showToast("请选择apksigner文件", ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupApkSigner(chooseFileName)
                             saveApkSigner(settings, ApkSigner.apkSignerPath)
@@ -179,7 +179,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                     scope.launch {
                         val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
                         if (chooseFileName.isNullOrBlank()) {
-                            showToast("请选择zipAlign文件",ToastConfig.DURATION.Long)
+                            showToast("请选择zipAlign文件", ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupZipAlign(chooseFileName)
                             saveZipAlign(settings, ApkSigner.zipAlignPath)
@@ -189,16 +189,11 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 })
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-
-                val modifier = Modifier.size(250.dp, 50.dp)
-                    .background(
-                        MaterialTheme.colors.secondary,
-                        shape = RoundedCornerShape(15.dp)
-                    ).padding(horizontal = 15.dp, vertical = 5.dp)
-
-                ButtonWidget(onClick = {
-                    showResetDialog = true
-                }, title = "重置", modifier = modifier)
+                ButtonWidget(
+                    onClick = { showResetDialog = true },
+                    title = "重置",
+                    modifier = Modifier.size(250.dp, 50.dp)
+                )
             }
 
             Column(

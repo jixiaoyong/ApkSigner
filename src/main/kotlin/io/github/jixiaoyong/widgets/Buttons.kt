@@ -4,6 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -31,15 +32,10 @@ fun ButtonWidget(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary,
-            disabledBackgroundColor = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSecondary,
-        ),
+        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
         shape = RoundedCornerShape(10.dp),
         contentPadding = PaddingValues(horizontal = 15.dp, vertical = 10.dp),
-        modifier = modifier ?: Modifier
-            .padding(horizontal = 5.dp),
+        modifier = (modifier ?: Modifier).padding(horizontal = 5.dp).widthIn(100.dp),
         enabled = enabled,
         elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
     ) {
@@ -57,7 +53,7 @@ private fun ButtonWidgetPreview() {
     Column {
         ButtonWidget(onClick = {
 
-        }) {
+        }, modifier = Modifier.widthIn(300.dp)) {
             Text("123")
         }
 
