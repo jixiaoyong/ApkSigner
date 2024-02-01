@@ -1,3 +1,4 @@
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,10 +27,12 @@ import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.ToasterUtil
+import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.system.exitProcess
 
 object Routes {
     const val SignInfo = "signInfo"
@@ -147,19 +150,28 @@ fun LoadingPage() {
 
 @Composable
 fun AlreadyExistsPage(message: String) {
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
-        Icon(Icons.Default.Warning, tint = Color.Red, contentDescription = "already exists")
-        Text(message)
-        TextButton(
-            onClick = {
-                System.exit(0)
-            },
+        Column(
+            modifier = Modifier.widthIn(300.dp).heightIn(200.dp).background(
+                MaterialTheme.colors.surface.copy(0.8f),
+                RoundedCornerShape(10.dp)
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("退出")
+            Icon(
+                Icons.Default.Warning,
+                tint = Color.Red,
+                contentDescription = "already exists",
+                modifier = Modifier.size(50.dp)
+            )
+            Text(message, Modifier.padding(vertical = 20.dp))
+            ButtonWidget(onClick = { exitProcess(0) }) {
+                Text("退出")
+            }
         }
     }
 }
@@ -202,4 +214,16 @@ fun main() = application {
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun PrevLoading() {
+    LoadingPage()
+}
+
+@Preview
+@Composable
+private fun PrevAlreadyExists() {
+    AlreadyExistsPage("ApkSigner已经启动了，请不要重复启动")
 }
