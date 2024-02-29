@@ -1,4 +1,7 @@
 import io.github.jixiaoyong.pages.signapp.SignType
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -115,7 +118,7 @@ object ApkSigner {
      * @param signedApkDirectory 签名之后的文件输出路径，默认为apkFilePath对应的x.apk所在的文件夹
      * @return 返回结果 CommandResult 成功或失败，及信息
      */
-    fun alignAndSignApk(
+    suspend fun alignAndSignApk(
         apkFilePathList: List<String>,
         keyStorePath: String,
         keyAlias: String,
@@ -125,20 +128,24 @@ object ApkSigner {
         zipAlign: Boolean = true,
         signVersions: List<SignType> = SignType.DEF_SIGN_TYPES,
         onProgress: (String) -> Unit
-    ): List<CommandResult> {
-        return apkFilePathList.map {
-            alignAndSignApk(
-                it,
-                keyStorePath,
-                keyAlias,
-                keyStorePwd,
-                keyPwd,
-                signedApkDirectory,
-                zipAlign,
-                signVersions,
-                onProgress
-            )
+    ): List<CommandResult> = coroutineScope {
+        val deferredList = apkFilePathList.map {
+            async {
+                alignAndSignApk(
+                    it,
+                    keyStorePath,
+                    keyAlias,
+                    keyStorePwd,
+                    keyPwd,
+                    signedApkDirectory,
+                    zipAlign,
+                    signVersions,
+                    onProgress
+                )
+            }
         }
+
+        deferredList.awaitAll()
     }
 
     /**

@@ -1,3 +1,4 @@
+import org.gradle.api.internal.plugins.StartScriptTemplateBindingFactory.windows
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -26,6 +27,7 @@ dependencies {
     implementation("com.russhwolf:multiplatform-settings-serialization:$multiplatformSettings")
     implementation("com.russhwolf:multiplatform-settings-coroutines:$multiplatformSettings")
     implementation("com.github.Dansoftowner:jSystemThemeDetector:3.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
 
 compose.desktop {
