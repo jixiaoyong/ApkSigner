@@ -398,6 +398,20 @@ fun PageSignApp(
 }
 
 private const val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+
+/**
+* 根据给定的 [pathList] 将给定的 [CommandResult] 列表合并为单个 [CommandResult]。
+ *
+ * 如果给定的[resultList]至少包含一个[CommandResult.Success]，则返回一个[CommandResult.Success]，
+ * 其中结果是所有成功结果的串联字符串，以换行符分隔。
+ *
+ * 如果给定的[resultList]不包含[CommandResult.Success]，则返回[CommandResult.Error]，
+ * 其中结果是所有错误消息的串联字符串，以换行符分隔。
+ *
+ * @param resultList 要合并的 [CommandResult] 列表
+ * @param pathList [resultList]中每个[CommandResult]对应的路径列表
+ * @return 单个 [CommandResult]，它是合并给定 [resultList] 的结果
+ */
 private fun mergeCommandResult(resultList: List<CommandResult>, pathList: List<String>) =
 
     if (resultList.filter { it is CommandResult.Success<*> }.isNotEmpty()) {

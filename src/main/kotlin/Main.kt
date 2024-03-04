@@ -43,9 +43,7 @@ object Routes {
 @Composable
 fun App(window: ComposeWindow) {
     val scope = rememberCoroutineScope()
-    val settings = remember {
-        SettingsTool(scope)
-    }
+    val settings = remember { SettingsTool(scope) }
 
     val routes = remember {
         listOf(
@@ -55,9 +53,10 @@ fun App(window: ComposeWindow) {
         )
     }
 
-    val pageIndex = remember {
-        mutableStateOf(Routes.SignInfo)
-    }
+    val pageIndex = remember { mutableStateOf(Routes.SignInfo) }
+    var currentApkFilePath by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isDarkTheme by remember { mutableStateOf(false) }
+    val newSignInfo = remember { mutableStateOf(SignInfoBean()) }
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -68,20 +67,29 @@ fun App(window: ComposeWindow) {
         }
     }
 
-    var currentApkFilePath by remember { mutableStateOf<List<String>>(emptyList()) }
-    var isDarkTheme by remember { mutableStateOf(false) }
-    val newSignInfo = remember { mutableStateOf(SignInfoBean()) }
+    DisposableEffect(Unit) {
+        val listener: (Boolean) -> Unit = { isDark: Boolean ->
+            isDarkTheme = isDark
+        }
 
-    val detector: OsThemeDetector = OsThemeDetector.getDetector()
-    detector.registerListener { isDark ->
-        isDarkTheme = isDark
+        var detector: OsThemeDetector? = null
+        scope.launch(Dispatchers.Default) {
+            detector = OsThemeDetector.getDetector()
+            detector?.registerListener(listener)
+        }
+
+        onDispose {
+            detector?.removeListener(listener)
+        }
     }
 
     ToasterUtil.init(isDarkTheme)
 
     LaunchedEffect(Unit) {
-        settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
-        settings.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
+        withContext(Dispatchers.IO) {
+            settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
+            settings.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
+        }
     }
 
     AppTheme(darkTheme = isDarkTheme) {
@@ -201,7 +209,7 @@ fun main() = application {
         }
 
         when (appState) {
-            AppState.Idle, AppState.Loading -> {
+            is AppState.Idle, AppState.Loading -> {
                 LoadingPage()
             }
 
