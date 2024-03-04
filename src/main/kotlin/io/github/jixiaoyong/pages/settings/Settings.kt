@@ -49,6 +49,14 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
     val apkSign by settings.apkSigner.collectAsState(null)
     val zipAlign by settings.zipAlign.collectAsState(null)
     var showResetDialog by remember { mutableStateOf(false) }
+    var version = "未知"
+    LaunchedEffect(Unit) {
+        scope.launch {
+            // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
+            version = System.getProperty("jpackage.app-version") ?: version
+        }
+    }
+
 
     if (showResetDialog) {
         var resetSignInfo by remember { mutableStateOf(false) }
@@ -202,7 +210,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val str = "这是一个本地可视化签名APK的小工具。为了避免泄漏密钥等信息，本工具不会联网。\n" +
-                        "查看最新版本请点击访问：$PROJECT_WEBSITE"
+                        "当前版本：$version，查看最新版本请点击访问：$PROJECT_WEBSITE"
                 val startIndex = str.indexOf(PROJECT_WEBSITE)
                 val endIndex = startIndex + PROJECT_WEBSITE.length
 
