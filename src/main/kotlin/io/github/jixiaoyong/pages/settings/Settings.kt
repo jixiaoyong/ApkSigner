@@ -50,11 +50,10 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
     val zipAlign by settings.zipAlign.collectAsState(null)
     var showResetDialog by remember { mutableStateOf(false) }
     var version = "未知"
+
     LaunchedEffect(Unit) {
-        scope.launch {
-            // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
-            version = System.getProperty("jpackage.app-version") ?: version
-        }
+        // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
+        version = System.getProperty("jpackage.app-version") ?: version
     }
 
 
