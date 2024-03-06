@@ -27,5 +27,5 @@ sealed class AppState {
     /**
      * 已经存在，是否还要启动
      */
-    data class AlreadyExists(val message: String) : AppState()
+    object AlreadyExists : AppState()
 }

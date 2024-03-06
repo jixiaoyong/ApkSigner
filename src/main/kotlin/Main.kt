@@ -157,7 +157,7 @@ fun LoadingPage() {
 }
 
 @Composable
-fun AlreadyExistsPage(message: String) {
+fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -176,9 +176,14 @@ fun AlreadyExistsPage(message: String) {
                 contentDescription = "already exists",
                 modifier = Modifier.size(50.dp)
             )
-            Text(message, Modifier.padding(vertical = 20.dp))
-            ButtonWidget(onClick = { exitProcess(0) }) {
-                Text("退出")
+            Text("ApkSigner已经启动了，请不要重复启动", Modifier.padding(vertical = 20.dp))
+            Row {
+                ButtonWidget(onClick = { exitProcess(0) }) {
+                    Text("退出")
+                }
+                ButtonWidget(onClick = tryAgainFunc) {
+                    Text("重试")
+                }
             }
         }
     }
@@ -194,15 +199,19 @@ fun main() = application {
         state = windowState
     ) {
         var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
+        var checkDualRunning by remember { mutableStateOf(true) }
 
         LaunchedEffect(Unit) {
             window.minimumSize = window.size
+        }
+
+        LaunchedEffect(checkDualRunning) {
             appState = AppState.Loading
             val isAppRunning = withContext(Dispatchers.IO) {
                 AppProcessUtil.isDualAppRunning("ApkSigner")
             }
             appState = if (isAppRunning) {
-                AppState.AlreadyExists("ApkSigner已经启动了，请不要重复启动")
+                AppState.AlreadyExists
             } else {
                 AppState.Success
             }
@@ -214,7 +223,9 @@ fun main() = application {
             }
 
             is AppState.AlreadyExists -> {
-                AlreadyExistsPage((appState as AppState.AlreadyExists).message)
+                AlreadyExistsPage {
+                    checkDualRunning = !checkDualRunning
+                }
             }
 
             AppState.Success -> {
@@ -223,6 +234,7 @@ fun main() = application {
         }
     }
 }
+
 
 @Preview
 @Composable
@@ -233,5 +245,5 @@ private fun PrevLoading() {
 @Preview
 @Composable
 private fun PrevAlreadyExists() {
-    AlreadyExistsPage("ApkSigner已经启动了，请不要重复启动")
+    AlreadyExistsPage {}
 }
