@@ -20,6 +20,8 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,9 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.awt.Desktop
-import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
-import java.awt.datatransfer.StringSelection
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
@@ -73,6 +73,8 @@ fun PageSignApp(
     var signLogs by remember { mutableStateOf(listOf<String>()) }
     var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
     val scaffoldState = rememberScaffoldState()
+
+    val clipboard = LocalClipboardManager.current
 
     val apkSignType by settings.signTypeList.collectAsState(setOf())
     val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
@@ -397,9 +399,7 @@ fun PageSignApp(
                                     SnackbarDuration.Indefinite
                                 )
                                 if (SnackbarResult.ActionPerformed == result) {
-                                    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-                                    val stringSelection = StringSelection("${mergedResult.message}")
-                                    clipboard.setContents(stringSelection, null)
+                                    clipboard.setText(AnnotatedString("${mergedResult.message}"))
                                 }
                             }
 
