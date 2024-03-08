@@ -21,6 +21,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
@@ -39,7 +40,7 @@ import javax.swing.JPanel
  * @date : 2023/8/18
  */
 
-private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/apkSigner"
+private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/ApkSigner"
 
 @Composable
 fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
@@ -195,7 +196,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                     }
                 })
 
-            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
                     onClick = { showResetDialog = true },
                     title = "重置",
@@ -204,7 +205,7 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = 90.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -228,7 +229,8 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                     text = annotatedString,
                     style = TextStyle(
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f)
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                     ),
                     onClick = { offset ->
                         annotatedString
