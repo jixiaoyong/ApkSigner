@@ -24,11 +24,14 @@ A tool for Android developers to sign their applications with GUI software.
 <br/>
 <br/>
 
-工作中打包的某些 APK 在 360 加固时提示“没有签名”，但 360 加固提供的签名过程又过于繁琐，故此开发这样一个小工具，使用图形界面来签名 APK 文件。
+工作中打包的某些 APK 在 360 加固时提示“没有签名”，但 360 加固提供的签名过程又过于繁琐，故此开发这样一个小工具，使用图形界面来签名
+APK 文件。
 
 本软件基于 JetBrains Compose Multiplatform 开发，支持 macOS、Windows、Linux。
 
-我日常开发主要基于 macOS，因此在 Windows 和 Linux 上可能存在一些尚未发现的兼容性问题。如果你发现了这样的问题，敬请[告知](https://github.com/jixiaoyong/ApkSigner/issues)，我会尽可能适配。同时也非常欢迎你提交[PR](https://github.com/jixiaoyong/ApkSigner/pulls)。
+我日常开发主要基于 macOS，因此在 Windows 和 Linux
+上可能存在一些尚未发现的兼容性问题。如果你发现了这样的问题，敬请[告知](https://github.com/jixiaoyong/ApkSigner/issues)
+，我会尽可能适配。同时也非常欢迎你提交[PR](https://github.com/jixiaoyong/ApkSigner/pulls)。
 
 ## 主要功能
 
@@ -93,8 +96,23 @@ packageReleaseDistributionForCurrentOS
 
 ## License
 
-本软件（[ApkSigner](https://github.com/jixiaoyong/ApkSigner)）是自由软件：你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，无论是[版本 3 许可证](./LICENSE)，还是（按你的决定）任何以后版都可以。
+Copyright (C) JI,XIAOYONG
 
-发布 [ApkSigner](https://github.com/jixiaoyong/ApkSigner) 是希望它能有用，但是并无保障;甚至连可销售和符合某个特定的目的都不保证。请参看 GNU 通用公共许可证，了解详情。
+本软件（[ApkSigner](https://github.com/jixiaoyong/ApkSigner)）是自由软件：你可以再分发之和/或依照由自由软件基金会发布的 GNU
+通用公共许可证修改之，无论是[版本 3 许可证](./LICENSE)，还是（按你的决定）任何以后版都可以。
+
+发布 [ApkSigner](https://github.com/jixiaoyong/ApkSigner) 是希望它能有用，但是并无保障;甚至连可销售和符合某个特定的目的都不保证。请参看
+GNU 通用公共许可证，了解详情。
 
 你应该随程序获得一份 GNU 通用公共许可证的复本。如果没有，请看 <https://www.gnu.org/licenses/>。
+
+### 附加条款
+
+在不违反上述条款的基础之上，如果你想要基于此项目制作、分发你自己的软件版本，还需要遵守如下条款：
+
+* **保留作者信息**：使用、复制、修改或分发本项目的源代码时，必须保留原作者的姓名和联系信息。
+* **Logo使用限制**
+  ：未经原作者明确书面许可，不得使用、复制、修改或分发本项目的 Logo。
+* **源码链接**：在使用、复制、修改或分发本项目的源代码、软件作品时，必须在显著位置提供指向原项目源码网址的链接。文本内容为“本项目基于
+  JI,XIAOYONG 的开源项目 ApkSigner 开发，你可以免费在 https://github.com/jixiaoyong/ApkSigner 获取项目源代码”。
+
