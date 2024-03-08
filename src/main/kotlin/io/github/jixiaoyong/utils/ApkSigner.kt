@@ -217,6 +217,7 @@ object ApkSigner {
 
                 // 读取输出流并打印到控制台
                 var line: String? = null
+                var totalResult =StringBuffer()
                 while (reader.readLine().also {
                         if (null != it) {
                             line = it
@@ -225,6 +226,7 @@ object ApkSigner {
                     line?.let {
                         Logger.info(it)
                         onProgress(it)
+                        totalResult.append(it)
                     }
                 }
 
@@ -234,7 +236,7 @@ object ApkSigner {
                 return if (0 == exitCode) {
                     CommandResult.Success(outPutFilePath)
                 } else {
-                    CommandResult.Error("$line")
+                    CommandResult.Error(totalResult.toString())
                 }
             } catch (e: Exception) {
                 Logger.error("签名失败", e)

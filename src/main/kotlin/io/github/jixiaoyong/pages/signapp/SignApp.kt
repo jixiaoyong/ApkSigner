@@ -37,7 +37,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.awt.Desktop
+import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.StringSelection
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
@@ -374,9 +376,9 @@ fun PageSignApp(
                             val mergedResult = mergeCommandResult(signResult, currentApkFilePath)
                             signApkResult = mergedResult
                             val firstSuccessSignedApk =
-                                signResult.firstOrNull { it is CommandResult.Success<*> } as CommandResult.Success<*>
+                                signResult.firstOrNull { it is CommandResult.Success<*> } as CommandResult.Success<*>?
 
-                            if (mergedResult is CommandResult.Success<*> && !firstSuccessSignedApk.result?.toString()
+                            if (mergedResult is CommandResult.Success<*> && !firstSuccessSignedApk?.result?.toString()
                                     .isNullOrBlank()
                             ) {
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
@@ -384,12 +386,21 @@ fun PageSignApp(
                                     "打开",
                                     SnackbarDuration.Long
                                 )
-                                val file = File(firstSuccessSignedApk.result?.toString() ?: "")
+                                val file = File(firstSuccessSignedApk?.result?.toString() ?: "")
                                 if (SnackbarResult.ActionPerformed == result && file.exists()) {
                                     Desktop.getDesktop().open(file.parentFile)
                                 }
                             } else if (mergedResult is CommandResult.Error<*>) {
-                                showToast("签名失败：${mergedResult.message}")
+                                val result = scaffoldState.snackbarHostState.showSnackbar(
+                                    "签名失败，：${mergedResult.message}",
+                                    "复制错误信息",
+                                    SnackbarDuration.Indefinite
+                                )
+                                if (SnackbarResult.ActionPerformed == result) {
+                                    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                                    val stringSelection = StringSelection("${mergedResult.message}")
+                                    clipboard.setContents(stringSelection, null)
+                                }
                             }
 
                             signApkResult = CommandResult.NOT_EXECUT
