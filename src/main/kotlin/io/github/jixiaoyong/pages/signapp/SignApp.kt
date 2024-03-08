@@ -252,7 +252,11 @@ fun PageSignApp(
 
                 Text(
                     "签名方案：",
-                    style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colors.onPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
                 )
                 Row(
@@ -293,7 +297,11 @@ fun PageSignApp(
                 ) {
                     Text(
                         "是否开启对齐：",
-                        style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colors.onPrimary
+                        ),
                         modifier = Modifier.weight(1f).padding(horizontal = 15.dp)
                     )
 
@@ -400,7 +408,7 @@ fun PageSignApp(
 private const val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
 
 /**
-* 根据给定的 [pathList] 将给定的 [CommandResult] 列表合并为单个 [CommandResult]。
+ * 根据给定的 [pathList] 将给定的 [CommandResult] 列表合并为单个 [CommandResult]。
  *
  * 如果给定的[resultList]至少包含一个[CommandResult.Success]，则返回一个[CommandResult.Success]，
  * 其中结果是所有成功结果的串联字符串，以换行符分隔。

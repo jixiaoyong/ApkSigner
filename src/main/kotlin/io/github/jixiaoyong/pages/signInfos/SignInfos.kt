@@ -77,7 +77,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
             ) {
                 Text(
                     "当前签名: ", style = TextStyle(
-                        fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onSurface
+                        fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onPrimary
                     )
                 )
                 Text(
@@ -85,7 +85,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).padding(start = 10.dp)
                 )
                 ButtonWidget(onClick = {
                     dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset.copy(x = 0f))
@@ -210,7 +210,7 @@ fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: Mut
                                 }
                             }
                         },
-                        title = "保存新签名文件",
+                        title = "保存新签名信息",
                         modifier = Modifier.size(250.dp, 50.dp)
                     )
                 }
@@ -255,7 +255,7 @@ private fun SignInfoItem(
     ) {
 
         Row(modifier = Modifier.weight(0.25f)) {
-            Text(name)
+            Text(name,color = MaterialTheme.colors.onPrimary)
             HoverableTooltip(description = description) { modifier ->
                 Icon(
                     Icons.Default.Info,

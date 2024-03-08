@@ -51,7 +51,12 @@ fun InfoItemWidget(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                title, style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                title,
+                style = TextStyle(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colors.onPrimary
+                )
             )
             HoverableTooltip(
                 description = description
@@ -74,7 +79,7 @@ fun InfoItemWidget(
                     MaterialTheme.colors.background,
                     RoundedCornerShape(bottomEnd = rounderRadius, bottomStart = rounderRadius)
                 )
-                .padding(vertical = 10.dp, horizontal = 5.dp)
+                .padding(vertical = 10.dp, horizontal = 10.dp)
         ) {
             Text(
                 value ?: "暂无内容",
