@@ -120,6 +120,6 @@ jobs:
           gh release create ${{ steps.get_version.outputs.version }}
           ./dist/*/*
           --target prerelease
-          --notes $'**【警告⚠️WARNING】**\n这个是开发版本，一般与prerelease分支代码保持同步，仅用于修复验证BUG、体验最新功能。\n日常使用请使用其他release版本。\n\n${{ steps.changelog.outputs.prerelease }}'
+          --notes $'**【警告⚠️WARNING】**\n\n这个是开发版本，一般与prerelease分支代码保持同步，仅用于修复验证BUG、体验最新功能。\n日常使用请使用其他release版本。\n\n${{ steps.changelog.outputs.changelog }}'
           --title "ApkSigner ${{ steps.get_version.outputs.version }}"
           --prerelease
