@@ -99,7 +99,7 @@ jobs:
         id: get_version
         run: |
           VERSION=$(awk -F'"' '/packageVersion =/ {print $2}' build.gradle.kts)
-          DATE=$(date +%Y%m%d)
+          DATE=$(date +%Y%m%d%H%M%S)
           echo "version=v$VERSION-$DATE-alpha" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
