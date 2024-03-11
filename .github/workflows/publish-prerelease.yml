@@ -92,6 +92,15 @@ jobs:
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v2
+        with:
+          ref: prerelease
+
+      - name: Get Prerelease Version
+        id: get_version
+        run: |
+          VERSION=$(awk -F'"' '/packageVersion =/ {print $2}' build.gradle.kts)
+          DATE=$(date +%Y%m%d)
+          echo "version=v$VERSION-$DATE-alpha" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v3
@@ -101,13 +110,16 @@ jobs:
       - name: Auto Changelog
         uses: ardalanamini/auto-changelog@v4.0.0
         id: changelog
+        with:
+          release-name: ${{ steps.get_version.outputs.version }}
 
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
-          gh release create ${{ github.ref_name }}
+          gh release create ${{ steps.get_version.outputs.version }}
           ./dist/*/*
-          --notes "**【警告⚠️WARNING】**\n这个是开发版本，一般与prerelease分支代码保持同步，仅用于修复验证BUG、体验最新功能。\n日常使用请使用其他release版本。\n\n${{ steps.changelog.outputs.changelog }}"
-          --title "ApkSigner ${{ github.ref_name }} Alpha"
+          --target prerelease
+          --notes "**【警告⚠️WARNING】**\n这个是开发版本，一般与prerelease分支代码保持同步，仅用于修复验证BUG、体验最新功能。\n日常使用请使用其他release版本。\n\n${{ steps.changelog.outputs.prerelease }}"
+          --title "ApkSigner ${{ steps.get_version.outputs.version }}"
           --prerelease
