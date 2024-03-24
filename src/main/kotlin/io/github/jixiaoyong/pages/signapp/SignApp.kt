@@ -2,6 +2,7 @@ package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
 import CommandResult
+import Logger
 import Routes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,10 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import io.github.jixiaoyong.utils.FileChooseUtil
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
-import io.github.jixiaoyong.utils.showToast
+import io.github.jixiaoyong.pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.HoverableTooltip
 import io.github.jixiaoyong.widgets.InfoItemWidget
@@ -56,6 +55,10 @@ import kotlin.math.roundToInt
  * 2. 开始签名/查看签名
  * 3. 签名历史
  *
+ * 自动匹配apk签名的逻辑：
+ * 1. 当前只选中了一个apk
+ * 2. apk在apkSignatureMap中有对应的签名，并且该签名在signInfoBeans中有效
+ *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/18
  */
@@ -63,12 +66,11 @@ import kotlin.math.roundToInt
 @Composable
 fun PageSignApp(
     window: ComposeWindow,
-    currentApkFilePath: List<String>,
     settings: SettingsTool,
-    onChangeApk: (List<String>) -> Unit,
+    currentApkFilePathState: MutableState<List<String>>,
+    currentSingleApkPackageName: MutableState<String?>,
     onChangePage: (String) -> Unit
 ) {
-
     val scope = rememberCoroutineScope()
     var signLogs by remember { mutableStateOf(listOf<String>()) }
     var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
@@ -77,11 +79,53 @@ fun PageSignApp(
     val clipboard = LocalClipboardManager.current
 
     val apkSignType by settings.signTypeList.collectAsState(setOf())
-    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+    val globalSelectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+    val signInfoBeans by settings.signInfoBeans.collectAsState(null)
+    val apkSignatureMap by settings.apkSignatureMap.collectAsState(emptyMap())
     val signedDirectory by settings.signedDirectory.collectAsState(null)
     val isZipAlign by settings.isZipAlign.collectAsState(false)
+    val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
+    val currentApkFilePath by currentApkFilePathState
+
+    var currentSignInfo by remember { mutableStateOf<SignInfoBean?>(null) }
 
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
+
+
+    val changeCurrentApk: suspend (List<String>) -> Unit = { apkFiles ->
+        signApkResult = CommandResult.EXECUTING
+
+        // 每次重新选择apk的时候重置此标志
+        val apkPackageName = if (1 != apkFiles.size) {
+            null
+        } else {
+            ApkSigner.getApkPackageName(apkFiles.firstOrNull())
+        }
+        signApkResult = CommandResult.NOT_EXECUT
+
+        currentSingleApkPackageName.value = apkPackageName
+        currentApkFilePathState.value = apkFiles
+        showToast("修改成功")
+    }
+
+    LaunchedEffect(
+        signInfoBeans,
+        globalSelectedSignInfo,
+        currentSingleApkPackageName.value,
+        isAutoMatchSignature,
+        apkSignatureMap
+    ) {
+        val apkPackageName = currentSingleApkPackageName.value
+        currentSignInfo = if (null == apkPackageName || !isAutoMatchSignature) {
+            globalSelectedSignInfo
+        } else {
+            apkSignatureMap.get(apkPackageName)?.let { id ->
+                signInfoBeans?.find { it.isValid() && it.id == id }
+            } ?: globalSelectedSignInfo
+        }
+
+        Logger.log("apkPackageName:$apkPackageName currentSignInfo:$currentSignInfo ")
+    }
 
     val local = signInfoResult
     when (local) {
@@ -176,14 +220,13 @@ fun PageSignApp(
                                 if (chooseFileName.isNullOrEmpty()) {
                                     showToast("请选择要签名的apk文件")
                                 } else {
-                                    onChangeApk(chooseFileName)
                                     if (!signedDirectory.isNullOrBlank()) {
                                         settings.save(
                                             StorageKeys.SIGNED_DIRECTORY,
                                             chooseFileName.first().substringBeforeLast(File.separator)
                                         )
                                     }
-                                    showToast("修改成功")
+                                    changeCurrentApk(chooseFileName)
                                 }
                             }
                         },
@@ -196,8 +239,7 @@ fun PageSignApp(
                             if (file.isNullOrEmpty()) {
                                 showToast("请先选择正确的apk文件")
                             } else {
-                                onChangeApk(file)
-                                showToast("选择apk文件成功")
+                                changeCurrentApk(file)
                             }
                         }
                     }
@@ -225,10 +267,11 @@ fun PageSignApp(
                     }
                 )
                 InfoItemWidget(
-                    "当前选择的签名文件",
-                    selectedSignInfo?.toString() ?: "暂无",
+                    "当前的签名文件",
+                    currentSignInfo?.toString() ?: "暂无",
                     onClick = {
                         onChangePage(Routes.SignInfo)
+                        removeApkSignature(currentSingleApkPackageName.value, apkSignatureMap, settings)
                     })
 
                 val errorTips = "请先选择签名文件输出目录"
@@ -333,7 +376,7 @@ fun PageSignApp(
                                 return@launch
                             }
 
-                            val localSelectedSignInfo = selectedSignInfo
+                            val localSelectedSignInfo = currentSignInfo
                             if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
                                 onChangePage(Routes.SignInfo)
                                 showToast("请先配置正确的签名文件")
@@ -383,6 +426,19 @@ fun PageSignApp(
                             if (mergedResult is CommandResult.Success<*> && !firstSuccessSignedApk?.result?.toString()
                                     .isNullOrBlank()
                             ) {
+
+                                launch(Dispatchers.IO) {
+                                    if (isAutoMatchSignature && 1 == currentApkFilePath.size) {
+                                        //  将当前签名和apk包名关联
+                                        updateApkSignatureMap(
+                                            currentSingleApkPackageName.value,
+                                            localSelectedSignInfo,
+                                            apkSignatureMap,
+                                            settings
+                                        )
+                                    }
+                                }
+
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
                                     "签名成功，是否打开签名后的文件？",
                                     "打开",
@@ -414,6 +470,33 @@ fun PageSignApp(
             }
         }
     }
+}
+
+private fun updateApkSignatureMap(
+    packageName: String?,
+    localSelectedSignInfo: SignInfoBean,
+    apkSignatureMap: Map<String, Long>,
+    settings: SettingsTool
+) {
+    if (null == packageName || !localSelectedSignInfo.isValid()) {
+        return
+    }
+
+    val newMap = apkSignatureMap.toMutableMap()
+    newMap[packageName] = localSelectedSignInfo.id
+    settings.save(StorageKeys.APK_SIGNATURE_MAP, gson.toJson(newMap))
+}
+
+private fun removeApkSignature(
+    packageName: String?, apkSignatureMap: Map<String, Long>,
+    settings: SettingsTool
+) {
+    if (null == packageName) {
+        return
+    }
+    val newMap = apkSignatureMap.toMutableMap()
+    newMap.remove(packageName)
+    settings.save(StorageKeys.APK_SIGNATURE_MAP, gson.toJson(newMap))
 }
 
 private const val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"

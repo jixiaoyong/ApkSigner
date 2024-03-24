@@ -34,6 +34,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
 
+/**
+ * todo add ViewModel support
+ */
+
 object Routes {
     const val SignInfo = "signInfo"
     const val SignApp = "signApp"
@@ -54,7 +58,9 @@ fun App(window: ComposeWindow) {
     }
 
     val pageIndex = remember { mutableStateOf(Routes.SignInfo) }
-    var currentApkFilePath by remember { mutableStateOf<List<String>>(emptyList()) }
+    // 将选择的apk信息提级避免切换页面时丢失
+    val currentApkFilePath = remember { mutableStateOf<List<String>>(emptyList()) }
+    val currentSingleApkPackageName = remember { mutableStateOf<String?>(null) }
     var isDarkTheme by remember { mutableStateOf(false) }
     val newSignInfo = remember { mutableStateOf(SignInfoBean()) }
 
@@ -89,6 +95,7 @@ fun App(window: ComposeWindow) {
         withContext(Dispatchers.IO) {
             settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
             settings.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
+            settings.aapt.first()?.let { ApkSigner.setupAapt(it) }
         }
     }
 
@@ -129,11 +136,10 @@ fun App(window: ComposeWindow) {
 
                 Routes.SignApp -> PageSignApp(
                     window,
-                    currentApkFilePath,
                     settings,
-                    {
-                        currentApkFilePath = it
-                    }) { route ->
+                    currentApkFilePath,
+                    currentSingleApkPackageName
+                ) { route ->
                     pageIndex.value = route
                 }
 

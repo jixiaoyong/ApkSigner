@@ -29,11 +29,14 @@ interface KeyValueStorage {
 
     val apkSigner: Flow<String?>
     val zipAlign: Flow<String?>
+    val aapt: Flow<String?>
     val isZipAlign: Flow<Boolean>
+    val isAutoMatchSignature: Flow<Boolean>
     val signedDirectory: Flow<String?>
     val signTypeList: Flow<Set<Int>>
     val selectedSignInfoBean: Flow<SignInfoBean?>
     val signInfoBeans: Flow<List<SignInfoBean>>
+    val apkSignatureMap: Flow<Map<String, Long>> // apk和对应签名信息的map，key为apk包名，value为SignInfoBean.id
     fun cleanStorage()
     fun save(key: StorageKeys, value: Any?)
 }
@@ -42,11 +45,14 @@ interface KeyValueStorage {
 enum class StorageKeys {
     APK_SIGNER_PATH, // 签名工具路径
     ZIP_ALIGN_PATH, // 压缩工具路径
+    AAPT_PATH, // aapt工具路径
     SIGN_INFO_SELECT, // 选中的签名信息
     SIGN_INFO_LIST, // 签名信息（密钥/密码等）列表
     SIGNED_DIRECTORY, // 签名后文件保存路径
     SIGN_TYPE_LIST, // 签名类型列表
-    ALIGN_ENABLE; // 是否开启zipalign压缩
+    ALIGN_ENABLE, // 是否开启zipalign压缩
+    APK_SIGNATURE_MAP, // apk包名和对应签名id的map
+    AUTO_MATCH_SIGNATURE; // 是否自动匹配签名信息
 
     val key get() = this.name
 }
@@ -58,10 +64,14 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
 
     override val apkSigner: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNER_PATH.key)
+    override val aapt: Flow<String?>
+        get() = observableSettings.getStringOrNullFlow(StorageKeys.AAPT_PATH.key)
     override val zipAlign: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.ZIP_ALIGN_PATH.key)
     override val isZipAlign: Flow<Boolean>
         get() = observableSettings.getBooleanFlow(StorageKeys.ALIGN_ENABLE.key, false)
+    override val isAutoMatchSignature: Flow<Boolean>
+        get() = observableSettings.getBooleanFlow(StorageKeys.AUTO_MATCH_SIGNATURE.key, false)
     override val signedDirectory: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGNED_DIRECTORY.key)
     override var signTypeList: Flow<Set<Int>>
@@ -82,9 +92,17 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
 
     override val signInfoBeans: Flow<List<SignInfoBean>>
         get() {
-            val listType: TypeToken<List<SignInfoBean>> =
-                object : TypeToken<List<SignInfoBean>>() {}
+            val listType: TypeToken<List<SignInfoBean>> = object : TypeToken<List<SignInfoBean>>() {}
             return observableSettings.getStringOrNullFlow(StorageKeys.SIGN_INFO_LIST.key)
+                .filterNotNull().map {
+                    gson.fromJson(it, listType)
+                }
+        }
+
+    override val apkSignatureMap: Flow<Map<String, Long>>
+        get() {
+            val listType: TypeToken<Map<String, Long>> = object : TypeToken<Map<String, Long>>() {}
+            return observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNATURE_MAP.key)
                 .filterNotNull().map {
                     gson.fromJson(it, listType)
                 }

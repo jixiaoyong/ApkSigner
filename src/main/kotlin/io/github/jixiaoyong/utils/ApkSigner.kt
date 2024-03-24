@@ -1,7 +1,5 @@
 import io.github.jixiaoyong.pages.signapp.SignType
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -26,9 +24,11 @@ object ApkSigner {
 
     private lateinit var apkSignerCmdPath: String
     private lateinit var zipAlignCmdPath: String
+    private lateinit var aaptCmdPath: String
 
     val apkSignerPath get() = if (::apkSignerCmdPath.isInitialized) apkSignerCmdPath else null
     val zipAlignPath get() = if (::zipAlignCmdPath.isInitialized) zipAlignCmdPath else null
+    val aaptPath get() = if (::aaptCmdPath.isInitialized) aaptCmdPath else null
 
     fun isInitialized(): Boolean {
         return (::apkSignerCmdPath.isInitialized && ::zipAlignCmdPath.isInitialized)
@@ -57,6 +57,7 @@ object ApkSigner {
         if (null != apkSignerResult) {
             return apkSignerResult
         }
+
         val zipAlignPath = "$androidBuildToolsDir${File.separator}zipalign"
         // windows追加exe
         val zipAlignPathWithExe = if (System.getProperties().getProperty("os.name").contains("Windows")) {
@@ -67,6 +68,18 @@ object ApkSigner {
         val zipAlignResult = setupZipAlign(zipAlignPathWithExe)
         if (null != zipAlignResult) {
             return zipAlignResult
+        }
+
+        val aaptPath = "$androidBuildToolsDir${File.separator}aapt"
+        // windows追加exe
+        val aaptPathExe = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+            "$aaptPath.exe"
+        } else {
+            aaptPath
+        }
+        val aaptResult = setupAapt(aaptPathExe)
+        if (null != aaptResult) {
+            return aaptResult
         }
         return null
     }
@@ -103,6 +116,47 @@ object ApkSigner {
             "zipAlign命令检查失败，请重试（${result.message}）"
         } else {
             zipAlignCmdPath = zipAlignPath
+            null
+        }
+    }
+
+    fun setupAapt(aaptPath: String): String? {
+        // check os is mac/linux or windows
+        val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
+            File(aaptPath).exists()
+            null
+        } else {
+            RunCommandUtil.runCommand("command -v $aaptPath", "aapt")
+        }
+
+        return if (null != result) {
+            "aapt命令检查失败，请重试（${result.message}）"
+        } else {
+            aaptCmdPath = aaptPath
+            null
+        }
+    }
+
+
+    /**
+     * 获取当前apk文件的包名
+     */
+    suspend fun getApkPackageName(apkFilePath: String?): String?{
+        if (apkFilePath.isNullOrBlank()) {
+            return null
+        }
+        val result = withContext(Dispatchers.IO) {
+            RunCommandUtil.runCommandWithResult(
+                "$aaptPath dump badging $apkFilePath | grep 'package: name'",
+                "apk signer"
+            )
+        }
+        return if (result is CommandResult.Success<*>) {
+            val commandResult = result.result?.toString()
+            val regex = "package: name='(.*?)'".toRegex()
+            val matchResult = commandResult?.let { regex.find(it) }
+            matchResult?.groups?.get(1)?.value
+        } else {
             null
         }
     }
@@ -217,7 +271,7 @@ object ApkSigner {
 
                 // 读取输出流并打印到控制台
                 var line: String? = null
-                var totalResult =StringBuffer()
+                val totalResult = StringBuffer()
                 while (reader.readLine().also {
                         if (null != it) {
                             line = it

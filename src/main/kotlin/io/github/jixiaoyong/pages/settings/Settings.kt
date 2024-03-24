@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,8 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
 
     val apkSign by settings.apkSigner.collectAsState(null)
     val zipAlign by settings.zipAlign.collectAsState(null)
+    val aapt by settings.aapt.collectAsState(null)
+    val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
     var showResetDialog by remember { mutableStateOf(false) }
     var version = "未知"
 
@@ -141,21 +144,14 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                             if (chooseFileName.isNullOrBlank()) {
                                 showToast("请选择build-tools目录", ToastConfig.DURATION.Long)
                             } else {
-                                val result = ApkSigner.init(chooseFileName)
-                                saveApkSigner(settings, ApkSigner.apkSignerPath)
-                                saveZipAlign(settings, ApkSigner.zipAlignPath)
-                                showToast(result ?: "修改成功")
+                                setupBuildToolsConfig(chooseFileName, settings)
                             }
                         }
                     },
                 component = JPanel(),
                 onFileDrop = {
                     scope.launch {
-                        val result = ApkSigner.init(it.first())
-
-                        saveApkSigner(settings, ApkSigner.apkSignerPath)
-                        saveZipAlign(settings, ApkSigner.zipAlignPath)
-                        showToast(result ?: "修改成功")
+                        setupBuildToolsConfig(it.first(), settings)
                     }
                 }) {
                 Text(
@@ -195,6 +191,46 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
                         }
                     }
                 })
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f, true)) {
+                    Text(
+                        "是否自动匹配签名",
+                        style = TextStyle(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colors.onPrimary
+                        )
+                    )
+                    Text("当只有一个apk文件时，则自动尝试匹配上次使用的签名信息")
+                }
+                Switch(
+                    isAutoMatchSignature,
+                    { autoMatch ->
+                        settings.save(StorageKeys.AUTO_MATCH_SIGNATURE, autoMatch)
+                    },
+                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.secondary)
+                )
+            }
+
+            if (isAutoMatchSignature) InfoItemWidget("aapt目录", aapt ?: "尚未初始化",
+                description = "若要自动匹配签名，请正确配置Android SDK中build-tools目录aapt文件",
+                onClick = {
+                    scope.launch {
+                        val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择aapt文件")
+                        if (chooseFileName.isNullOrBlank()) {
+                            showToast("请选择aapt文件", ToastConfig.DURATION.Long)
+                        } else {
+                            val result = ApkSigner.setupAapt(chooseFileName)
+                            saveAapt(settings, ApkSigner.aaptPath)
+                            showToast(result ?: "修改成功")
+                        }
+                    }
+                })
+
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
@@ -246,10 +282,22 @@ fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
 
 }
 
+private fun setupBuildToolsConfig(it: String, settings: SettingsTool) {
+    val result = ApkSigner.init(it)
+    saveApkSigner(settings, ApkSigner.apkSignerPath)
+    saveZipAlign(settings, ApkSigner.zipAlignPath)
+    saveAapt(settings, ApkSigner.aaptPath)
+    showToast(result ?: "修改成功")
+}
+
 private fun saveApkSigner(settings: SettingsTool, apkSigner: String?) {
     settings.save(StorageKeys.APK_SIGNER_PATH, apkSigner)
 }
 
 private fun saveZipAlign(settings: SettingsTool, zipAlign: String?) {
     settings.save(StorageKeys.ZIP_ALIGN_PATH, zipAlign)
+}
+
+private fun saveAapt(settings: SettingsTool, aapt: String?) {
+    settings.save(StorageKeys.AAPT_PATH, aapt)
 }

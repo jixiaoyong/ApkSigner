@@ -48,4 +48,41 @@ object RunCommandUtil {
             e
         }
     }
+
+    fun runCommandWithResult(
+        command: String,
+        tag: String = "",
+        printLog: Boolean = true,
+        printError: Boolean = true
+    ): CommandResult {
+        val logTag = if (tag.isBlank()) "" else "$tag: "
+
+        Logger.info("$tag command: $command")
+
+        return try {
+            val process = Runtime.getRuntime().exec(command)
+            val logBuffer = StringBuffer()
+
+            if (printLog) {
+                BufferedReader(InputStreamReader(process.inputStream)).useLines {
+                    it.forEach { line ->
+                        Logger.info("${logTag}$line")
+                        logBuffer.append(line).append("\n")
+                    }
+                }
+            }
+
+            val result = process.waitFor()
+            if (result == 0) {
+                CommandResult.Success(logBuffer.toString())
+            } else {
+                CommandResult.Error("${logTag}exit code: $result\n${logBuffer}")
+            }
+
+        } catch (e: Exception) {
+            if (printError) Logger.error("$tag error: $e")
+            CommandResult.Error("$tag error: $e", e)
+        }
+    }
+
 }
