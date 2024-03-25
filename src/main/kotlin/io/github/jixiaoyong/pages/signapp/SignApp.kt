@@ -2,8 +2,9 @@ package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
 import CommandResult
+import LocalSettings
+import LocalWindow
 import Logger
-import Routes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import io.github.jixiaoyong.pages.Routes
 import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
@@ -65,18 +67,20 @@ import kotlin.math.roundToInt
 
 @Composable
 fun PageSignApp(
-    window: ComposeWindow,
-    settings: SettingsTool,
-    currentApkFilePathState: MutableState<List<String>>,
-    currentSingleApkPackageName: MutableState<String?>,
+    viewModel: SignAppViewModel,
     onChangePage: (String) -> Unit
 ) {
+    val settings = LocalSettings.current
+
     val scope = rememberCoroutineScope()
     var signLogs by remember { mutableStateOf(listOf<String>()) }
     var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
     val scaffoldState = rememberScaffoldState()
-
+    val window = LocalWindow.current
     val clipboard = LocalClipboardManager.current
+
+    val currentApkFilePathState = viewModel.currentApkFilePath
+    val currentSingleApkPackageName = viewModel.currentSingleApkPackageName
 
     val apkSignType by settings.signTypeList.collectAsState(setOf())
     val globalSelectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)

@@ -1,6 +1,8 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
+import LocalSettings
+import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,7 +14,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
@@ -44,16 +46,20 @@ import javax.swing.JPanel
 private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/ApkSigner"
 
 @Composable
-fun PageSettingInfo(window: ComposeWindow, settings: SettingsTool) {
+fun PageSettingInfo() {
     val scaffoldState: ScaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val window = LocalWindow.current
+    val settings = LocalSettings.current
+
+    val viewModel = viewModel { SettingInfoViewModel() }
+    var version by viewModel.version
 
     val apkSign by settings.apkSigner.collectAsState(null)
     val zipAlign by settings.zipAlign.collectAsState(null)
     val aapt by settings.aapt.collectAsState(null)
     val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
     var showResetDialog by remember { mutableStateOf(false) }
-    var version = "未知"
 
     LaunchedEffect(Unit) {
         // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值

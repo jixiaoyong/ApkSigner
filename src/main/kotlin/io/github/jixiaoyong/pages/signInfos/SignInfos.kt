@@ -1,5 +1,7 @@
 package io.github.jixiaoyong.pages.signInfos
 
+import LocalSettings
+import LocalWindow
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +18,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -41,11 +42,17 @@ import kotlinx.coroutines.launch
  * @date : 2023/8/18
  */
 @Composable
-fun PageSignInfo(window: ComposeWindow, settings: SettingsTool, newSignInfo: MutableState<SignInfoBean>) {
-    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
-    val signInfoList by settings.signInfoBeans.collectAsState(listOf())
+fun PageSignInfo(viewModel: SignInfoViewModel) {
+    val settings = LocalSettings.current
+    val window = LocalWindow.current
+
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+
+    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
+    val signInfoList by settings.signInfoBeans.collectAsState(listOf())
+
+    val newSignInfo = viewModel.newSignInfo
 
     val dropdownMenu = remember { DropdownMenuState() }
 
@@ -255,7 +262,7 @@ private fun SignInfoItem(
     ) {
 
         Row(modifier = Modifier.weight(0.25f)) {
-            Text(name,color = MaterialTheme.colors.onPrimary)
+            Text(name, color = MaterialTheme.colors.onPrimary)
             HoverableTooltip(description = description) { modifier ->
                 Icon(
                     Icons.Default.Info,
