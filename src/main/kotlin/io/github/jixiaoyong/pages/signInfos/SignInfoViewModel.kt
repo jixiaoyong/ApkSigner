@@ -3,6 +3,7 @@ package io.github.jixiaoyong.pages.signInfos
 import Logger
 import androidx.compose.runtime.mutableStateOf
 import io.github.jixiaoyong.base.BaseViewModel
+import io.github.jixiaoyong.beans.SignInfoBean
 
 /**
  * @author : jixiaoyong

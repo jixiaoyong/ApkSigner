@@ -1,7 +1,6 @@
 package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
-import CommandResult
 import LocalSettings
 import LocalWindow
 import Logger
@@ -30,8 +29,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import io.github.jixiaoyong.beans.CommandResult
+import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.pages.Routes
-import io.github.jixiaoyong.pages.signInfos.SignInfoBean
 import io.github.jixiaoyong.utils.*
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.HoverableTooltip
@@ -79,7 +79,7 @@ fun PageSignApp(
     val window = LocalWindow.current
     val clipboard = LocalClipboardManager.current
 
-    val currentApkFilePathState = viewModel.currentApkFilePath
+    var currentApkFilePath by viewModel.currentApkFilePath
     val currentSingleApkPackageName = viewModel.currentSingleApkPackageName
 
     val apkSignType by settings.signTypeList.collectAsState(setOf())
@@ -89,12 +89,9 @@ fun PageSignApp(
     val signedDirectory by settings.signedDirectory.collectAsState(null)
     val isZipAlign by settings.isZipAlign.collectAsState(false)
     val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
-    val currentApkFilePath by currentApkFilePathState
 
     var currentSignInfo by remember { mutableStateOf<SignInfoBean?>(null) }
-
     var signInfoResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
-
 
     val changeCurrentApk: suspend (List<String>) -> Unit = { apkFiles ->
         signApkResult = CommandResult.EXECUTING
@@ -108,7 +105,7 @@ fun PageSignApp(
         signApkResult = CommandResult.NOT_EXECUT
 
         currentSingleApkPackageName.value = apkPackageName
-        currentApkFilePathState.value = apkFiles
+        currentApkFilePath = apkFiles
         showToast("修改成功")
     }
 

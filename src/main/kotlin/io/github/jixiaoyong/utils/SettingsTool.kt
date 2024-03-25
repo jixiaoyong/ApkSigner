@@ -7,7 +7,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
 import com.russhwolf.settings.set
-import io.github.jixiaoyong.pages.signInfos.SignInfoBean
+import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.pages.signapp.SignType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

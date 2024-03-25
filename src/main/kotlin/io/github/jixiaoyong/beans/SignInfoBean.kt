@@ -1,4 +1,4 @@
-package io.github.jixiaoyong.pages.signInfos
+package io.github.jixiaoyong.beans
 
 /**
  * 签名信息bean类

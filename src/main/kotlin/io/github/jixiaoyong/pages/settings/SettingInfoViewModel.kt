@@ -15,6 +15,9 @@ class SettingInfoViewModel : BaseViewModel() {
     val version = mutableStateOf("未知")
 
     override fun onInit() {
-
+        // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
+        System.getProperty("jpackage.app-version")?.let {
+            version.value = it
+        }
     }
 }

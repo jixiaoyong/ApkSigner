@@ -126,8 +126,6 @@ fun App() {
 
                 Routes.SettingInfo -> PageSettingInfo()
             }
-
         }
-
     }
 }

@@ -15,6 +15,7 @@ object AppProcessUtil {
     // APP的进程数，macOS上面是1，windows上面是2（app启动一次会打开两个进程）
     const val DEFAULT_PROCESS_COUNT = 1
     const val DEFAULT_PROCESS_COUNT_WIN = 2
+
     fun isDualAppRunning(appName: String): Boolean {
         val appName = appName.toLowerCase()
         val osName = System.getProperty("os.name").toLowerCase()

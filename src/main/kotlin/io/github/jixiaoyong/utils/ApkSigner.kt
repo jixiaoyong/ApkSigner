@@ -1,3 +1,4 @@
+import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.pages.signapp.SignType
 import kotlinx.coroutines.*
 import java.io.BufferedReader
@@ -170,7 +171,7 @@ object ApkSigner {
      * @param keyPwd signer 私钥的密码。
      * @param zipAlign 是否需要对齐
      * @param signedApkDirectory 签名之后的文件输出路径，默认为apkFilePath对应的x.apk所在的文件夹
-     * @return 返回结果 CommandResult 成功或失败，及信息
+     * @return 返回结果 io.github.jixiaoyong.beans.CommandResult 成功或失败，及信息
      */
     suspend fun alignAndSignApk(
         apkFilePathList: List<String>,
@@ -211,7 +212,7 @@ object ApkSigner {
      * @param keyPwd signer 私钥的密码。
      * @param zipAlign 是否需要对齐
      * @param signedApkDirectory 签名之后的文件输出路径，默认为apkFilePath对应的x.apk所在的文件夹
-     * @return 返回结果 CommandResult 成功或失败，及信息
+     * @return 返回结果 io.github.jixiaoyong.beans.CommandResult 成功或失败，及信息
      */
     fun alignAndSignApk(
         apkFilePath: String,
@@ -400,11 +401,3 @@ object ApkSigner {
     }
 }
 
-sealed class CommandResult {
-    class Success<T>(val result: T) : CommandResult()
-    class Error<T>(val message: T, val error: Exception? = null) : CommandResult()
-
-    object NOT_EXECUT : CommandResult()
-
-    object EXECUTING : CommandResult()
-}

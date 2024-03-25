@@ -53,19 +53,13 @@ fun PageSettingInfo() {
     val settings = LocalSettings.current
 
     val viewModel = viewModel { SettingInfoViewModel() }
-    var version by viewModel.version
+    val version by viewModel.version
 
     val apkSign by settings.apkSigner.collectAsState(null)
     val zipAlign by settings.zipAlign.collectAsState(null)
     val aapt by settings.aapt.collectAsState(null)
     val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
     var showResetDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
-        version = System.getProperty("jpackage.app-version") ?: version
-    }
-
 
     if (showResetDialog) {
         var resetSignInfo by remember { mutableStateOf(false) }
