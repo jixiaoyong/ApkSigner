@@ -1,6 +1,5 @@
 package io.github.jixiaoyong.pages
 
-import ApkSigner
 import LocalSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,9 +24,7 @@ import io.github.jixiaoyong.pages.signapp.SignAppViewModel
 import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.ToasterUtil
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * @author : jixiaoyong
@@ -41,23 +38,14 @@ fun App() {
     val settings = LocalSettings.current
 
     val scope = rememberCoroutineScope()
-    val viewModel = viewModel { MainViewModel() }
+    val viewModel = viewModel { MainViewModel(settings) }
 
     var isDarkTheme by viewModel.isDarkTheme
-    val pageIndex by viewModel.currentIndex
+    val pageIndex by viewModel.currentIndex.collectAsState()
 
     // 将viewModel放在这里避免切换页面时丢失
     val signInfoViewModel = viewModel { SignInfoViewModel() }
     val signAppViewModel = viewModel { SignAppViewModel() }
-
-    LaunchedEffect(Unit) {
-        scope.launch {
-            val selectedSignInfo = settings.selectedSignInfoBean.first()
-            if (selectedSignInfo != null) {
-                viewModel.changePage(Routes.SignApp)
-            }
-        }
-    }
 
     DisposableEffect(Unit) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->
@@ -77,39 +65,37 @@ fun App() {
 
     ToasterUtil.init(isDarkTheme)
 
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            settings.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
-            settings.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
-            settings.aapt.first()?.let { ApkSigner.setupAapt(it) }
-        }
-    }
-
     AppTheme(darkTheme = isDarkTheme) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
-                modifier = Modifier.fillMaxWidth()
-                    .heightIn(min = 65.dp)
-                    .background(MaterialTheme.colors.background)
-                    .padding(horizontal = 2.dp),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .heightIn(min = 65.dp)
+                        .background(MaterialTheme.colors.background)
+                        .padding(horizontal = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 for (route in viewModel.routes) {
                     val isActive = route.second == pageIndex
-                    val backgroundColor = if (isActive) MaterialTheme.colors.secondary
-                    else MaterialTheme.colors.surface
+                    val backgroundColor =
+                        if (isActive) {
+                            MaterialTheme.colors.secondary
+                        } else {
+                            MaterialTheme.colors.surface
+                        }
                     val textColor = if (isActive) Color.White else MaterialTheme.colors.onPrimary
                     Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 1.dp)
-                            .background(backgroundColor, RoundedCornerShape(5.dp))
-                            .clickable {
-                                viewModel.changePage(route.second)
-                            }.padding(vertical = 15.dp),
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .padding(horizontal = 1.dp)
+                                .background(backgroundColor, RoundedCornerShape(5.dp))
+                                .clickable {
+                                    viewModel.changePage(route.second)
+                                }.padding(vertical = 15.dp),
                         horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(route.first, style = TextStyle(color = textColor))
                     }
@@ -120,9 +106,10 @@ fun App() {
             when (pageIndex) {
                 Routes.SignInfo -> PageSignInfo(signInfoViewModel)
 
-                Routes.SignApp -> PageSignApp(signAppViewModel) { route ->
-                    viewModel.changePage(route)
-                }
+                Routes.SignApp ->
+                    PageSignApp(signAppViewModel) { route ->
+                        viewModel.changePage(route)
+                    }
 
                 Routes.SettingInfo -> PageSettingInfo()
             }

@@ -28,68 +28,67 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
 
-/**
- * todo add ViewModel support
- */
-
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
 
-fun main() = application {
-    val windowState = rememberWindowState(height = 650.dp)
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "APK Signer",
-        icon = painterResource("/imgs/icon.png"),
-        state = windowState
-    ) {
-        var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
-        var checkDualRunning by remember { mutableStateOf(true) }
-
-        LaunchedEffect(Unit) {
-            window.minimumSize = window.size
-        }
-        CompositionLocalProvider(
-            LocalWindow provides window, LocalSettings provides SettingsTool(scope = MainScope())
+fun main() =
+    application {
+        val windowState = rememberWindowState(height = 650.dp)
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "APK Signer",
+            icon = painterResource("/imgs/icon.png"),
+            state = windowState,
         ) {
-            LaunchedEffect(checkDualRunning) {
-                appState = AppState.Loading
-                val isAppRunning = withContext(Dispatchers.IO) {
-                    AppProcessUtil.isDualAppRunning("ApkSigner")
-                }
-                appState = if (isAppRunning) {
-                    AppState.AlreadyExists
-                } else {
-                    AppState.Success
-                }
+            var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
+            var checkDualRunning by remember { mutableStateOf(true) }
+
+            LaunchedEffect(Unit) {
+                window.minimumSize = window.size
             }
-
-            when (appState) {
-                is AppState.Idle, AppState.Loading -> {
-                    LoadingPage()
+            CompositionLocalProvider(
+                LocalWindow provides window,
+                LocalSettings provides SettingsTool(scope = MainScope()),
+            ) {
+                LaunchedEffect(checkDualRunning) {
+                    appState = AppState.Loading
+                    val isAppRunning =
+                        withContext(Dispatchers.IO) {
+                            AppProcessUtil.isDualAppRunning("ApkSigner")
+                        }
+                    appState =
+                        if (isAppRunning) {
+                            AppState.AlreadyExists
+                        } else {
+                            AppState.Success
+                        }
                 }
 
-                is AppState.AlreadyExists -> {
-                    AlreadyExistsPage {
-                        checkDualRunning = !checkDualRunning
+                when (appState) {
+                    is AppState.Idle, AppState.Loading -> {
+                        LoadingPage()
                     }
-                }
 
-                AppState.Success -> {
-                    App()
+                    is AppState.AlreadyExists -> {
+                        AlreadyExistsPage {
+                            checkDualRunning = !checkDualRunning
+                        }
+                    }
+
+                    AppState.Success -> {
+                        App()
+                    }
                 }
             }
         }
     }
-}
-
 
 @Composable
 fun LoadingPage() {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         CircularProgressIndicator()
         Text("Loading...", Modifier.padding(top = 10.dp))
@@ -99,18 +98,23 @@ fun LoadingPage() {
 @Composable
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier.widthIn(300.dp).heightIn(200.dp).background(
-                MaterialTheme.colors.surface.copy(0.8f), RoundedCornerShape(10.dp)
-            ), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            modifier =
+                Modifier.widthIn(300.dp).heightIn(200.dp).background(
+                    MaterialTheme.colors.surface.copy(0.8f),
+                    RoundedCornerShape(10.dp),
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 Icons.Default.Warning,
                 tint = Color.Red,
                 contentDescription = "already exists",
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(50.dp),
             )
             Text("ApkSigner已经启动了，请不要重复启动", Modifier.padding(vertical = 20.dp))
             Row {
@@ -124,7 +128,6 @@ fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
         }
     }
 }
-
 
 @Preview
 @Composable
