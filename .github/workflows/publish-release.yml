@@ -95,6 +95,8 @@ jobs:
       - name: Auto Changelog
         uses: ardalanamini/auto-changelog@v4.0.0
         id  : changelog
+        with:
+          mention-authors: false
 
       - name: Publish Release
         env:

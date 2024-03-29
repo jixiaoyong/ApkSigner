@@ -112,6 +112,7 @@ jobs:
         id: changelog
         with:
           release-name: ${{ steps.get_version.outputs.version }}
+          mention-authors: false
 
       - name: Publish Release
         env:
