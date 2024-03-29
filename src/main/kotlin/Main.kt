@@ -24,7 +24,6 @@ import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
 
@@ -48,7 +47,7 @@ fun main() =
             }
             CompositionLocalProvider(
                 LocalWindow provides window,
-                LocalSettings provides SettingsTool(scope = MainScope()),
+                LocalSettings provides SettingsTool(scope = rememberCoroutineScope()),
             ) {
                 LaunchedEffect(checkDualRunning) {
                     appState = AppState.Loading

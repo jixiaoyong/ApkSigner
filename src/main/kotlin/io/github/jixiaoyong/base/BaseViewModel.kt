@@ -19,7 +19,7 @@ abstract class BaseViewModel {
 
     protected val viewModelScope = CoroutineScope(job)
 
-    abstract fun onInit()
+    open fun onInit(){}
 
     open fun onCleared() {
         job.cancel()

@@ -14,7 +14,7 @@ repositories {
     google()
     maven("https://jitpack.io")
 }
-val multiplatformSettings = "1.0.0"
+val multiplatformSettings = "1.1.1"
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
     // compose.desktop.currentOs should be used in launcher-sourceSet

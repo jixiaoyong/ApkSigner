@@ -45,7 +45,7 @@ fun App() {
 
     // 将viewModel放在这里避免切换页面时丢失
     val signInfoViewModel = viewModel { SignInfoViewModel() }
-    val signAppViewModel = viewModel { SignAppViewModel() }
+    val signAppViewModel = viewModel { SignAppViewModel(settings) }
 
     DisposableEffect(Unit) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->
