@@ -8,7 +8,7 @@ import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
 import com.russhwolf.settings.set
 import io.github.jixiaoyong.beans.SignInfoBean
-import io.github.jixiaoyong.pages.signapp.SignType
+import io.github.jixiaoyong.beans.SignType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull

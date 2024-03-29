@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
+import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignInfoBean
@@ -18,11 +19,12 @@ import kotlinx.coroutines.launch
  * @date : 25/3/2024
  */
 class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
+    private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
     val uiState = uiStateFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SignAppState())
 
-    init {
+    override fun onInit() {
         combine(
             settings.signTypeList,
             settings.selectedSignInfoBean,
@@ -33,16 +35,37 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
             uiStateFlow.value.copy(
                 apkSignType = signTypeList,
                 globalSelectedSignInfo = selectedSignInfoBean,
-                signInfoBeans = signInfoBeans,
+                allSignInfoBeans = signInfoBeans,
                 apkSignatureMap = apkSignatureMap,
-                signedDirectory = signedDirectory
+                signedOutputDirectory = signedDirectory
             )
         }
             .combine(settings.isZipAlign) { state, isZipAlign -> state.copy(isZipAlign = isZipAlign) }
-            .combine(settings.isAutoMatchSignature) { state, isAutoMatchSignature -> state.copy(isAutoMatchSignature = isAutoMatchSignature) }
+            .combine(settings.isAutoMatchSignature) { state, isAutoMatchSignature ->
+                state.copy(isAutoMatchSignature = isAutoMatchSignature)
+            }
             .onEach {
                 uiStateFlow.value = it
             }.launchIn(viewModelScope)
+
+        // 监听并更新当前apk对应的签名信息
+        uiStateFlow.distinctUntilChanged { old, new ->
+            return@distinctUntilChanged (old.allSignInfoBeans == new.allSignInfoBeans
+                    && old.globalSelectedSignInfo == new.globalSelectedSignInfo
+                    && old.apkPackageName == new.apkPackageName
+                    && old.isAutoMatchSignature == new.isAutoMatchSignature
+                    && old.apkSignatureMap == new.apkSignatureMap)
+        }.onEach { uiState ->
+            val currentSignInfo = if (null == uiState.apkPackageName || !uiState.isAutoMatchSignature) {
+                uiState.globalSelectedSignInfo
+            } else {
+                uiState.apkSignatureMap.get(uiState.apkPackageName)?.let { id ->
+                    uiState.allSignInfoBeans?.find { it.isValid() && it.id == id }
+                } ?: uiState.globalSelectedSignInfo
+            }
+            uiStateFlow.emit(uiState.copy(currentSignInfo = currentSignInfo))
+            Logger.log("apkPackageName:${uiState.apkPackageName} currentSignInfo:$currentSignInfo ")
+        }.launchIn(viewModelScope)
 
     }
 
@@ -55,8 +78,10 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
         }
         uiStateFlow.emit(
             uiStateFlow.value.copy(
-                currentApkFilePath = apkFilePath,
-                currentSingleApkPackageName = apkPackageName
+                apkFilePaths = apkFilePath,
+                apkPackageName = apkPackageName,
+                apkSignedResult = CommandResult.NOT_EXECUT,
+                signedLogs = emptyList()
             )
         )
     }
@@ -97,7 +122,14 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
         settings.signTypeList = flowOf(newTypes)
     }
 
-    private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+    fun changeSignApkResult(signApkResult: CommandResult) {
+        viewModelScope.launch { uiStateFlow.emit(uiStateFlow.value.copy(apkSignedResult = signApkResult)) }
+    }
+
+    fun updateSignedLogs(logs: List<String>) {
+        viewModelScope.launch { uiStateFlow.emit(uiStateFlow.value.copy(signedLogs = logs)) }
+    }
+
 
     /**
      * 根据给定的 [pathList] 将给定的 [CommandResult] 列表合并为单个 [CommandResult]。
@@ -137,17 +169,17 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
 }
 
 data class SignAppState(
-    val currentApkFilePath: List<String> = emptyList(),
-    val currentSingleApkPackageName: String? = null,
-    val signLogs: List<String> = emptyList(),
+    val apkFilePaths: List<String> = emptyList(),
+    val apkPackageName: String? = null,
+    val signedLogs: List<String> = emptyList(),
     val apkSignType: Set<Int> = emptySet(),
     val globalSelectedSignInfo: SignInfoBean? = null,
-    val signInfoBeans: List<SignInfoBean>? = null,
+    val allSignInfoBeans: List<SignInfoBean>? = null,
     val apkSignatureMap: Map<String, Long> = emptyMap(),
-    val signedDirectory: String? = null,
-    val signApkResult: CommandResult = CommandResult.NOT_EXECUT,
+    val signedOutputDirectory: String? = null,
+    val apkSignedResult: CommandResult = CommandResult.NOT_EXECUT,
     val isZipAlign: Boolean = false,
     val isAutoMatchSignature: Boolean = false,
     val currentSignInfo: SignInfoBean? = null,
-    val signInfoResult: CommandResult = CommandResult.NOT_EXECUT
+    val signInfoResult: CommandResult = CommandResult.NOT_EXECUT,
 )

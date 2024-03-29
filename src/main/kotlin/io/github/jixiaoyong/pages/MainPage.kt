@@ -44,7 +44,7 @@ fun App() {
     val pageIndex by viewModel.currentIndex.collectAsState()
 
     // 将viewModel放在这里避免切换页面时丢失
-    val signInfoViewModel = viewModel { SignInfoViewModel() }
+    val signInfoViewModel = viewModel { SignInfoViewModel(settings) }
     val signAppViewModel = viewModel { SignAppViewModel(settings) }
 
     DisposableEffect(Unit) {

@@ -1,9 +1,11 @@
 package io.github.jixiaoyong.pages.signInfos
 
-import Logger
-import androidx.compose.runtime.mutableStateOf
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.SignInfoBean
+import io.github.jixiaoyong.utils.SettingsTool
+import io.github.jixiaoyong.utils.StorageKeys
+import io.github.jixiaoyong.utils.gson
+import kotlinx.coroutines.flow.*
 
 /**
  * @author : jixiaoyong
@@ -12,16 +14,76 @@ import io.github.jixiaoyong.beans.SignInfoBean
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignInfoViewModel : BaseViewModel() {
-    val newSignInfo = mutableStateOf(SignInfoBean())
+class SignInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
+
+    private val uiStateFlow: MutableStateFlow<SignInfoUiState> = MutableStateFlow(SignInfoUiState())
+    val uiState = uiStateFlow.asStateFlow()
 
     override fun onInit() {
 
+        combine(settings.signInfoBeans, settings.selectedSignInfoBean) { signInfoBeans, selectedSignInfoBean ->
+            uiStateFlow.value.copy(
+                signInfoList = signInfoBeans,
+                selectedSignInfo = selectedSignInfoBean
+            )
+        }.onEach { uiStateFlow.emit(it) }.launchIn(viewModelScope)
+
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        Logger.log("$this  cleared")
+
+    fun updateNewSignInfo(
+        keyNickName: String? = null,
+        keyStorePath: String? = null,
+        keyStorePassword: String? = null,
+        keyAlias: String? = null,
+        keyPassword: String? = null,
+    ) {
+        val oldSignInfo = uiStateFlow.value.newSignInfo
+        updateNewSignInfo(
+            oldSignInfo.copy(
+                keyNickName = keyNickName ?: oldSignInfo.keyNickName,
+                keyStorePath = keyStorePath ?: oldSignInfo.keyStorePath,
+                keyStorePassword = keyStorePassword ?: oldSignInfo.keyStorePassword,
+                keyAlias = keyAlias ?: oldSignInfo.keyAlias,
+                keyPassword = keyPassword ?: oldSignInfo.keyPassword
+            )
+        )
     }
 
+    fun updateNewSignInfo(signInfoBean: SignInfoBean) {
+        uiStateFlow.value = uiStateFlow.value.copy(newSignInfo = signInfoBean)
+    }
+
+    fun saveSelectedSignInfo(signInfoBean: SignInfoBean?) {
+        val json = if (null == signInfoBean) null else gson.toJson(signInfoBean)
+        settings.save(StorageKeys.SIGN_INFO_SELECT, json)
+    }
+
+    fun removeSignInfo(signInfo: SignInfoBean) {
+        val tempList = uiStateFlow.value.signInfoList.toMutableList()
+        tempList.remove(signInfo)
+        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(tempList))
+        if (signInfo == uiStateFlow.value.selectedSignInfo) {
+            saveSelectedSignInfo(null)
+        }
+    }
+
+    // save sign info to local storage
+    fun saveNewSignInfo(newSignInfo: SignInfoBean) {
+        val newSignInfos = mutableListOf<SignInfoBean>()
+        newSignInfos.addAll(uiStateFlow.value.signInfoList)
+        val indexOfSignInfo = newSignInfos.indexOfFirst { it.isSameOne(newSignInfo) }
+        if (-1 != indexOfSignInfo) {
+            newSignInfos[indexOfSignInfo] = newSignInfo
+        } else {
+            newSignInfos.add(newSignInfo)
+        }
+        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
+    }
 }
+
+data class SignInfoUiState(
+    val newSignInfo: SignInfoBean = SignInfoBean(),
+    val signInfoList: List<SignInfoBean> = listOf(),
+    val selectedSignInfo: SignInfoBean? = null,
+)

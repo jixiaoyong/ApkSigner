@@ -11,7 +11,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,39 +55,17 @@ fun PageSettingInfo() {
     val window = LocalWindow.current
     val settings = LocalSettings.current
 
-    val viewModel = viewModel { SettingInfoViewModel() }
-    val version by viewModel.version
+    val viewModel = viewModel { SettingInfoViewModel(settings) }
+    val uiState by viewModel.uiState.collectAsState()
+    val resetConfig = uiState.resetInfo
 
-    val apkSign by settings.apkSigner.collectAsState(null)
-    val zipAlign by settings.zipAlign.collectAsState(null)
-    val aapt by settings.aapt.collectAsState(null)
-    val isAutoMatchSignature by settings.isAutoMatchSignature.collectAsState(false)
-    var showResetDialog by remember { mutableStateOf(false) }
-
-    if (showResetDialog) {
-        var resetSignInfo by remember { mutableStateOf(false) }
-        var resetApkTools by remember { mutableStateOf(false) }
-        var resetSignTypes by remember { mutableStateOf(false) }
-        var resetSignedDirectory by remember { mutableStateOf(false) }
+    if (resetConfig.showResetDialog) {
         AlertDialog(onDismissRequest = {
-            showResetDialog = false
+            viewModel.toggleResetDialog()
         }, confirmButton = {
             ButtonWidget(onClick = {
-                showResetDialog = false
-                if (resetSignInfo) {
-                    settings.save(StorageKeys.SIGN_INFO_LIST, null)
-                    settings.save(StorageKeys.SIGN_INFO_SELECT, null)
-                }
-                if (resetApkTools) {
-                    settings.save(StorageKeys.APK_SIGNER_PATH, null)
-                    settings.save(StorageKeys.ZIP_ALIGN_PATH, null)
-                }
-                if (resetSignTypes) {
-                    settings.save(StorageKeys.SIGN_TYPE_LIST, null)
-                }
-                if (resetSignedDirectory) {
-                    settings.save(StorageKeys.SIGNED_DIRECTORY, null)
-                }
+                viewModel.runRestConfig()
+                showToast("重置成功")
             }, title = "确定")
 
         }, title = {
@@ -94,26 +75,28 @@ fun PageSettingInfo() {
                 Text("重置会清除以下内容，请谨慎操作")
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = resetSignInfo,
-                        onCheckedChange = { resetSignInfo = !resetSignInfo })
+                        checked = resetConfig.resetSignInfo,
+                        onCheckedChange = {
+                            viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
+                        })
                     Text("签名信息")
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = resetApkTools,
-                        onCheckedChange = { resetApkTools = !resetApkTools })
+                        checked = resetConfig.resetApkTools,
+                        onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
                     Text("签名工具配置(不会删除文件)")
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = resetSignTypes,
-                        onCheckedChange = { resetSignTypes = !resetSignTypes })
+                        checked = resetConfig.resetSignTypes,
+                        onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
                     Text("签名方案")
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = resetSignedDirectory,
-                        onCheckedChange = { resetSignedDirectory = !resetSignedDirectory })
+                        checked = resetConfig.resetSignedDirectory,
+                        onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
                     Text("签名文件输出目录")
                 }
             }
@@ -127,14 +110,11 @@ fun PageSettingInfo() {
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(
-                        color = MaterialTheme.colors.surface,
-                        shape = RoundedCornerShape(15.dp)
-                    )
+                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
                     .padding(15.dp)
                     .clickable {
                         scope.launch {
-                            val oldDirectory = apkSign?.substringBeforeLast(File.separator)
+                            val oldDirectory = uiState.apkSign?.substringBeforeLast(File.separator)
                             val chooseFileName =
                                 FileChooseUtil.chooseSignDirectory(
                                     window,
@@ -144,16 +124,12 @@ fun PageSettingInfo() {
                             if (chooseFileName.isNullOrBlank()) {
                                 showToast("请选择build-tools目录", ToastConfig.DURATION.Long)
                             } else {
-                                setupBuildToolsConfig(chooseFileName, settings)
+                                viewModel.setupBuildToolsConfig(chooseFileName)
                             }
                         }
                     },
                 component = JPanel(),
-                onFileDrop = {
-                    scope.launch {
-                        setupBuildToolsConfig(it.first(), settings)
-                    }
-                }) {
+                onFileDrop = { scope.launch { viewModel.setupBuildToolsConfig(it.first()) } }) {
                 Text(
                     text = "请拖拽Android SDK的build-tools的子文件夹到这里，以一次性修改apkSigner和zipAlign目录",
                     modifier = Modifier.align(alignment = Alignment.Center)
@@ -161,7 +137,7 @@ fun PageSettingInfo() {
             }
 
             InfoItemWidget("apk signer目录",
-                apkSign ?: "尚未初始化",
+                uiState.apkSign ?: "尚未初始化",
                 description = "请选择Android SDK中build-tools目录apksigner文件",
                 onClick = {
                     scope.launch {
@@ -171,13 +147,13 @@ fun PageSettingInfo() {
                             showToast("请选择apksigner文件", ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupApkSigner(chooseFileName)
-                            saveApkSigner(settings, ApkSigner.apkSignerPath)
+                            viewModel.saveApkSigner(ApkSigner.apkSignerPath)
                             showToast(result ?: "修改成功")
                         }
                     }
 
                 })
-            InfoItemWidget("zipalign目录", zipAlign ?: "尚未初始化",
+            InfoItemWidget("zipalign目录", uiState.zipAlign ?: "尚未初始化",
                 description = "请选择Android SDK中build-tools目录zipalign文件",
                 onClick = {
                     scope.launch {
@@ -186,7 +162,7 @@ fun PageSettingInfo() {
                             showToast("请选择zipAlign文件", ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupZipAlign(chooseFileName)
-                            saveZipAlign(settings, ApkSigner.zipAlignPath)
+                            viewModel.saveZipAlign(ApkSigner.zipAlignPath)
                             showToast(result ?: "修改成功")
                         }
                     }
@@ -208,15 +184,13 @@ fun PageSettingInfo() {
                     Text("当只有一个apk文件时，则自动尝试匹配上次使用的签名信息")
                 }
                 Switch(
-                    isAutoMatchSignature,
-                    { autoMatch ->
-                        settings.save(StorageKeys.AUTO_MATCH_SIGNATURE, autoMatch)
-                    },
+                    uiState.isAutoMatchSignature,
+                    { autoMatch -> viewModel.saveAutoMatchSignature(autoMatch) },
                     colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.secondary)
                 )
             }
 
-            if (isAutoMatchSignature) InfoItemWidget("aapt目录", aapt ?: "尚未初始化",
+            if (uiState.isAutoMatchSignature) InfoItemWidget("aapt目录", uiState.aapt ?: "尚未初始化",
                 description = "若要自动匹配签名，请正确配置Android SDK中build-tools目录aapt文件",
                 onClick = {
                     scope.launch {
@@ -225,7 +199,7 @@ fun PageSettingInfo() {
                             showToast("请选择aapt文件", ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupAapt(chooseFileName)
-                            saveAapt(settings, ApkSigner.aaptPath)
+                            viewModel.saveAapt(ApkSigner.aaptPath)
                             showToast(result ?: "修改成功")
                         }
                     }
@@ -234,7 +208,7 @@ fun PageSettingInfo() {
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
-                    onClick = { showResetDialog = true },
+                    onClick = { viewModel.toggleResetDialog() },
                     title = "重置",
                     modifier = Modifier.size(250.dp, 50.dp)
                 )
@@ -246,7 +220,7 @@ fun PageSettingInfo() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val str = "这是一个本地可视化签名APK的小工具。为了避免泄漏密钥等信息，本工具不会联网。\n" +
-                        "当前版本：$version，查看最新版本请点击访问：$PROJECT_WEBSITE"
+                        "当前版本：${uiState.version}，查看最新版本请点击访问：$PROJECT_WEBSITE"
                 val startIndex = str.indexOf(PROJECT_WEBSITE)
                 val endIndex = startIndex + PROJECT_WEBSITE.length
 
@@ -280,24 +254,4 @@ fun PageSettingInfo() {
         }
     }
 
-}
-
-private fun setupBuildToolsConfig(it: String, settings: SettingsTool) {
-    val result = ApkSigner.init(it)
-    saveApkSigner(settings, ApkSigner.apkSignerPath)
-    saveZipAlign(settings, ApkSigner.zipAlignPath)
-    saveAapt(settings, ApkSigner.aaptPath)
-    showToast(result ?: "修改成功")
-}
-
-private fun saveApkSigner(settings: SettingsTool, apkSigner: String?) {
-    settings.save(StorageKeys.APK_SIGNER_PATH, apkSigner)
-}
-
-private fun saveZipAlign(settings: SettingsTool, zipAlign: String?) {
-    settings.save(StorageKeys.ZIP_ALIGN_PATH, zipAlign)
-}
-
-private fun saveAapt(settings: SettingsTool, aapt: String?) {
-    settings.save(StorageKeys.AAPT_PATH, aapt)
 }

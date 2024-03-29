@@ -1,4 +1,4 @@
-package io.github.jixiaoyong.pages.signapp
+package io.github.jixiaoyong.beans
 
 /**
  * @author : jixiaoyong

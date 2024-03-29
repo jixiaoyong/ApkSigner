@@ -1,5 +1,5 @@
 import io.github.jixiaoyong.beans.CommandResult
-import io.github.jixiaoyong.pages.signapp.SignType
+import io.github.jixiaoyong.beans.SignType
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File

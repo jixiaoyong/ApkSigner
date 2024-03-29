@@ -2,7 +2,6 @@ package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
 import LocalWindow
-import Logger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,13 +12,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -29,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import io.github.jixiaoyong.beans.CommandResult
-import io.github.jixiaoyong.beans.SignInfoBean
+import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.pages.Routes
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.showToast
@@ -39,15 +38,9 @@ import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.Desktop
-import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DropTarget
-import java.awt.dnd.DropTargetAdapter
-import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.util.*
 import javax.swing.JPanel
-import kotlin.math.roundToInt
 
 /**
  * @author : jixiaoyong
@@ -75,42 +68,9 @@ fun PageSignApp(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
-    var signLogs by remember { mutableStateOf(listOf<String>()) }
-    var signApkResult: CommandResult by remember { mutableStateOf(CommandResult.NOT_EXECUT) }
-
     val uiState by viewModel.uiState.collectAsState()
 
-    val currentApkFilePath = uiState.currentApkFilePath
-    val currentSingleApkPackageName = uiState.currentSingleApkPackageName
-    val signedDirectory = uiState.signedDirectory
-
-    var currentSignInfo by remember { mutableStateOf<SignInfoBean?>(null) }
-
-    val changeCurrentApk: suspend (List<String>) -> Unit = { apkFiles ->
-        signApkResult = CommandResult.EXECUTING
-        viewModel.changeApkFilePath(apkFiles)
-        signApkResult = CommandResult.NOT_EXECUT
-        showToast("修改成功")
-    }
-
-    LaunchedEffect(
-        uiState.signInfoBeans,
-        uiState.globalSelectedSignInfo,
-        currentSingleApkPackageName,
-        uiState.isAutoMatchSignature,
-        uiState.apkSignatureMap
-    ) {
-        val apkPackageName = currentSingleApkPackageName
-        currentSignInfo = if (null == apkPackageName || !uiState.isAutoMatchSignature) {
-            uiState.globalSelectedSignInfo
-        } else {
-            uiState.apkSignatureMap.get(apkPackageName)?.let { id ->
-                uiState.signInfoBeans?.find { it.isValid() && it.id == id }
-            } ?: uiState.globalSelectedSignInfo
-        }
-
-        Logger.log("apkPackageName:$apkPackageName currentSignInfo:$currentSignInfo ")
-    }
+    val currentApkFilePath = uiState.apkFilePaths
 
     val local = uiState.signInfoResult
     when (local) {
@@ -157,7 +117,7 @@ fun PageSignApp(
         else -> {}
     }
 
-    if (local is CommandResult.EXECUTING || signApkResult is CommandResult.EXECUTING) {
+    if (local is CommandResult.EXECUTING) {
         Popup(alignment = Alignment.Center) {
             Box(
                 modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.2f)),
@@ -205,12 +165,13 @@ fun PageSignApp(
                                 if (chooseFileName.isNullOrEmpty()) {
                                     showToast("请选择要签名的apk文件")
                                 } else {
-                                    if (!signedDirectory.isNullOrBlank()) {
+                                    if (!uiState.signedOutputDirectory.isNullOrBlank()) {
                                         viewModel.saveSignedOutputDirectory(
                                             chooseFileName.first().substringBeforeLast(File.separator)
                                         )
                                     }
-                                    changeCurrentApk(chooseFileName)
+                                    viewModel.changeApkFilePath(chooseFileName)
+                                    showToast("修改成功")
                                 }
                             }
                         },
@@ -220,10 +181,11 @@ fun PageSignApp(
                             val file = it.filter() {
                                 it.lowercase(Locale.getDefault()).endsWith(".apk")
                             }
-                            if (file.isNullOrEmpty()) {
+                            if (file.isEmpty()) {
                                 showToast("请先选择正确的apk文件")
                             } else {
-                                changeCurrentApk(file)
+                                viewModel.changeApkFilePath(file)
+                                showToast("修改成功")
                             }
                         }
                     }
@@ -253,16 +215,16 @@ fun PageSignApp(
                 )
                 InfoItemWidget(
                     "当前的签名文件",
-                    currentSignInfo?.toString() ?: "暂无",
+                    uiState.currentSignInfo?.toString() ?: "暂无",
                     onClick = {
                         onChangePage(Routes.SignInfo)
-                        viewModel.removeApkSignature(currentSingleApkPackageName)
+                        viewModel.removeApkSignature(uiState.apkPackageName)
                     })
 
                 val errorTips = "请先选择签名文件输出目录"
                 InfoItemWidget(
                     "签名后的文件输出目录",
-                    signedDirectory ?: errorTips,
+                    uiState.signedOutputDirectory ?: errorTips,
                     buttonTitle = "修改目录",
                     onClick = {
                         scope.launch {
@@ -270,7 +232,7 @@ fun PageSignApp(
                                 FileChooseUtil.chooseSignDirectory(
                                     window,
                                     errorTips,
-                                    signedDirectory ?: currentApkFilePath.firstOrNull()
+                                    uiState.signedOutputDirectory ?: currentApkFilePath.firstOrNull()
                                 )
                             if (outputDirectory.isNullOrBlank()) {
                                 showToast(errorTips)
@@ -355,13 +317,13 @@ fun PageSignApp(
                     {
                         scope.launch(Dispatchers.IO) {
                             if (currentApkFilePath.filter { it.lowercase(Locale.getDefault()).endsWith(".apk") }
-                                    .isNullOrEmpty()
+                                    .isEmpty()
                             ) {
                                 showToast("请先选择正确的apk文件")
                                 return@launch
                             }
 
-                            val localSelectedSignInfo = currentSignInfo
+                            val localSelectedSignInfo = uiState.currentSignInfo
                             if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
                                 onChangePage(Routes.SignInfo)
                                 showToast("请先配置正确的签名文件")
@@ -379,30 +341,32 @@ fun PageSignApp(
                                 return@launch
                             }
 
-                            signApkResult = CommandResult.EXECUTING
+                            viewModel.changeSignApkResult(CommandResult.EXECUTING)
                             val signResult = ApkSigner.alignAndSignApk(
                                 currentApkFilePath,
                                 localSelectedSignInfo.keyStorePath,
                                 localSelectedSignInfo.keyAlias,
                                 localSelectedSignInfo.keyStorePassword,
                                 localSelectedSignInfo.keyPassword,
-                                signedApkDirectory = signedDirectory,
+                                signedApkDirectory = uiState.signedOutputDirectory,
                                 zipAlign = uiState.isZipAlign,
                                 signVersions = SignType.ALL_SIGN_TYPES.filter {
                                     uiState.apkSignType.contains(it.type)
                                 },
                                 onProgress = { line ->
                                     scope.launch {
-                                        signLogs = mutableListOf<String>().apply {
-                                            addAll(signLogs)
+                                        val old = uiState.signedLogs
+                                        val newLogs = mutableListOf<String>().apply {
+                                            addAll(old)
                                             add(line)
                                         }
+                                        viewModel.updateSignedLogs(newLogs)
                                     }
                                 }
                             )
 
                             val mergedResult = viewModel.mergeCommandResult(signResult, currentApkFilePath)
-                            signApkResult = mergedResult
+                            viewModel.changeSignApkResult(mergedResult)
                             val firstSuccessSignedApk =
                                 signResult.firstOrNull { it is CommandResult.Success<*> } as CommandResult.Success<*>?
 
@@ -414,7 +378,7 @@ fun PageSignApp(
                                     if (uiState.isAutoMatchSignature && 1 == currentApkFilePath.size) {
                                         //  将当前签名和apk包名关联
                                         viewModel.updateApkSignatureMap(
-                                            currentSingleApkPackageName,
+                                            uiState.apkPackageName,
                                             localSelectedSignInfo,
                                         )
                                     }
@@ -439,12 +403,11 @@ fun PageSignApp(
                                     clipboard.setText(AnnotatedString("${mergedResult.message}"))
                                 }
                             }
-
-                            signApkResult = CommandResult.NOT_EXECUT
+                            viewModel.changeSignApkResult(CommandResult.NOT_EXECUT)
                         }
 
                     },
-                    enabled = CommandResult.NOT_EXECUT == signApkResult,
+                    enabled = CommandResult.NOT_EXECUT == uiState.apkSignedResult,
                     title = "开始签名apk",
                     modifier = Modifier.size(250.dp, 50.dp),
                 )
@@ -452,80 +415,3 @@ fun PageSignApp(
         }
     }
 }
-
-
-@Composable
-fun DropBoxPanel(
-    window: ComposeWindow,
-    modifier: Modifier = Modifier,
-    component: JPanel = JPanel(),
-    onFileDrop: (List<String>) -> Unit,
-    content: @Composable BoxScope.() -> Unit
-) {
-
-    val dropBoundsBean = remember {
-        mutableStateOf(DropBoundsBean())
-    }
-
-    Box(modifier = modifier.onPlaced {
-        dropBoundsBean.value = DropBoundsBean(
-            x = it.positionInWindow().x,
-            y = it.positionInWindow().y,
-            width = it.size.width,
-            height = it.size.height
-        )
-    }) {
-        LaunchedEffect(true) {
-            component.setBounds(
-                dropBoundsBean.value.x.roundToInt(),
-                dropBoundsBean.value.y.roundToInt(),
-                dropBoundsBean.value.width,
-                dropBoundsBean.value.height
-            )
-            window.contentPane.add(component)
-
-            object : DropTarget(component, object : DropTargetAdapter() {
-                override fun drop(event: DropTargetDropEvent) {
-
-                    event.acceptDrop(DnDConstants.ACTION_REFERENCE)
-                    val dataFlavors = event.transferable.transferDataFlavors
-                    dataFlavors.forEach {
-                        if (it == DataFlavor.javaFileListFlavor) {
-                            val list = event.transferable.getTransferData(it) as List<*>
-
-                            val pathList = mutableListOf<String>()
-                            list.forEach { filePath ->
-                                pathList.add(filePath.toString())
-                            }
-                            onFileDrop(pathList)
-                        }
-                    }
-                    event.dropComplete(true)
-                }
-            }) {
-
-            }
-        }
-
-        SideEffect {
-            component.setBounds(
-                dropBoundsBean.value.x.roundToInt(),
-                dropBoundsBean.value.y.roundToInt(),
-                dropBoundsBean.value.width,
-                dropBoundsBean.value.height
-            )
-        }
-
-        DisposableEffect(true) {
-            onDispose {
-                window.contentPane.remove(component)
-            }
-        }
-
-        content()
-    }
-}
-
-data class DropBoundsBean(
-    var x: Float = 0f, var y: Float = 0f, var width: Int = 0, var height: Int = 0
-)

@@ -1,36 +1,30 @@
 package io.github.jixiaoyong.pages.signInfos
 
-import LocalSettings
 import LocalWindow
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.beans.SignInfoBean
-import io.github.jixiaoyong.utils.*
+import io.github.jixiaoyong.utils.FileChooseUtil
+import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.HoverableTooltip
 import kotlinx.coroutines.launch
@@ -44,24 +38,20 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun PageSignInfo(viewModel: SignInfoViewModel) {
-    val settings = LocalSettings.current
     val window = LocalWindow.current
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
-    val selectedSignInfo by settings.selectedSignInfoBean.collectAsState(null)
-    val signInfoList by settings.signInfoBeans.collectAsState(listOf())
-
-    val newSignInfo = viewModel.newSignInfo
-
+    val uiState by viewModel.uiState.collectAsState()
+    val newSignInfo = uiState.newSignInfo
     val dropdownMenu = remember { DropdownMenuState() }
 
-    LaunchedEffect(Unit) {
-        val firstSignInfo = signInfoList.firstOrNull()
-        if (selectedSignInfo?.isValid() != true && firstSignInfo?.isValid() == true) {
-            // select first sign key if no one was selected or selected one isn't valid.
-            onSignInfoChanged(settings, firstSignInfo)
+    LaunchedEffect(uiState.signInfoList) {
+        val firstSignInfo = uiState.signInfoList.firstOrNull()
+        if (uiState.selectedSignInfo?.isValid() != true && firstSignInfo?.isValid() == true) {
+            // select first sign key if no one is selected or selected one isn't valid.
+            viewModel.saveSelectedSignInfo(firstSignInfo)
         }
     }
 
@@ -84,12 +74,11 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "当前签名: ", style = TextStyle(
-                        fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onPrimary
-                    )
+                    "当前签名: ",
+                    style = TextStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onPrimary)
                 )
                 Text(
-                    selectedSignInfo?.toString() ?: "暂无",
+                    uiState.selectedSignInfo?.toString() ?: "暂无",
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -102,15 +91,13 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
 
             DropdownMenu(dropdownMenu,
                 onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed }) {
-                signInfoList.forEach {
+                uiState.signInfoList.forEach {
                     DropdownMenuItem(onClick = {
-                        onSignInfoChanged(settings, it)
+                        viewModel.saveSelectedSignInfo(it)
                         dropdownMenu.status = DropdownMenuState.Status.Closed
                     }, modifier = Modifier.widthIn(450.dp, 600.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = it.keyNickName, modifier = Modifier.weight(2f), maxLines = 1,
-                            )
+                            Text(text = it.keyNickName, modifier = Modifier.weight(2f), maxLines = 1)
                             Text(
                                 text = it.keyStorePath,
                                 fontSize = 10.sp,
@@ -120,26 +107,11 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                 description = "删除此工具存储的签名信息，不会删除apk签名文件",
                                 alwaysShow = true
                             ) { modifier ->
-                                IconButton(
-                                    modifier = modifier,
-                                    onClick = {
-                                        val tempList = signInfoList.toMutableList()
-                                        tempList.remove(it)
-                                        settings.save(
-                                            StorageKeys.SIGN_INFO_LIST,
-                                            gson.toJson(tempList)
-                                        )
-                                        if (it == selectedSignInfo) {
-                                            onSignInfoChanged(settings, null)
-                                        }
-                                    },
-                                ) {
+                                IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
                                     Icon(Icons.Default.Delete, "")
                                 }
                             }
-                            IconButton(onClick = {
-                                newSignInfo.value = it
-                            }) {
+                            IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
                                 Icon(Icons.Default.Edit, "edit")
                             }
                         }
@@ -154,38 +126,37 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
             ) {
                 SignInfoItem(
                     "签名别名",
-                    newSignInfo.value.keyNickName,
+                    newSignInfo.keyNickName,
                     false,
                     description = "备注名称，用来区分多个不同签名"
                 ) { nickName ->
-                    newSignInfo.value = newSignInfo.value.copy(keyNickName = nickName)
+                    viewModel.updateNewSignInfo(keyNickName = nickName)
                 }
                 SignInfoItem(
-                    "文件路径", newSignInfo.value.keyStorePath, false, onClick = {
+                    "文件路径", newSignInfo.keyStorePath, false, onClick = {
                         scope.launch {
-                            val result =
-                                FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
+                            val result = FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
                             if (result.isNullOrBlank()) {
                                 showToast("请选择Android签名文件")
                             } else {
-                                newSignInfo.value = newSignInfo.value.copy(keyStorePath = result)
+                                viewModel.updateNewSignInfo(keyStorePath = result)
                             }
                         }
                     }, buttonText = "选择文件", description = "签名文件的绝对路径"
                 ) { keyStorePath ->
-                    newSignInfo.value = newSignInfo.value.copy(keyStorePath = keyStorePath)
+                    viewModel.updateNewSignInfo(keyStorePath = keyStorePath)
                 }
 
                 SignInfoItem(
-                    "keyStorePassword", newSignInfo.value.keyStorePassword, true
+                    "keyStorePassword", newSignInfo.keyStorePassword, true
                 ) { keyStorePassword ->
-                    newSignInfo.value = newSignInfo.value.copy(keyStorePassword = keyStorePassword)
+                    viewModel.updateNewSignInfo(keyStorePassword = keyStorePassword)
                 }
-                SignInfoItem("keyAlias", newSignInfo.value.keyAlias, false) { keyAlias ->
-                    newSignInfo.value = newSignInfo.value.copy(keyAlias = keyAlias)
+                SignInfoItem("keyAlias", newSignInfo.keyAlias, false) { keyAlias ->
+                    viewModel.updateNewSignInfo(keyAlias = keyAlias)
                 }
-                SignInfoItem("keyPassword", newSignInfo.value.keyPassword, true) { keyPassword ->
-                    newSignInfo.value = newSignInfo.value.copy(keyPassword = keyPassword)
+                SignInfoItem("keyPassword", newSignInfo.keyPassword, true) { keyPassword ->
+                    viewModel.updateNewSignInfo(keyPassword = keyPassword)
                 }
 
                 Row(
@@ -194,27 +165,17 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ButtonWidget(
-                        enabled = newSignInfo.value.isValid(),
+                        enabled = newSignInfo.isValid(),
                         onClick = {
-                            // save sign info to local storage
-                            val newSignInfos = mutableListOf<SignInfoBean>()
-                            newSignInfos.addAll(signInfoList)
-                            val indexOfSignInfo =
-                                newSignInfos.indexOfFirst { it.isSameOne(newSignInfo.value) }
-                            if (-1 != indexOfSignInfo) {
-                                newSignInfos[indexOfSignInfo] = newSignInfo.value
-                            } else {
-                                newSignInfos.add(newSignInfo.value)
-                            }
-                            settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
                             scope.launch {
+                                viewModel.saveNewSignInfo(newSignInfo)
                                 val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
                                     "🎉保存成功！\n请点击【重新选择签名】按钮查看，是否清除已填写内容？",
                                     actionLabel = "清空",
                                     duration = SnackbarDuration.Short
                                 )
                                 if (SnackbarResult.ActionPerformed == isNeedClean) {
-                                    newSignInfo.value = SignInfoBean()
+                                    viewModel.updateNewSignInfo(SignInfoBean())
                                 }
                             }
                         },
@@ -227,85 +188,4 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
         }
     }
 
-}
-
-private fun onSignInfoChanged(settings: SettingsTool, signInfoBean: SignInfoBean?) {
-    val json = if (null == signInfoBean) null else gson.toJson(signInfoBean)
-    settings.save(StorageKeys.SIGN_INFO_SELECT, json)
-}
-
-/**
- * 通用的签名信息收集组件
- * @param name 收集的信息名称
- * @param value 收集的信息值
- * @param isPwd 是否为密码类型
- * @param modifier Modifier
- * @param onClick 点击事件
- * @param buttonText 按钮文本
- * @param description 描述信息，默认为空，有值的话则会展示一个提示图标，鼠标悬浮时展示此文本内容
- * @param onChange 文本改变事件
- */
-@Composable
-private fun SignInfoItem(
-    name: String,
-    value: String,
-    isPwd: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
-    buttonText: String = "修改",
-    description: String? = null,
-    onChange: (String) -> Unit
-) {
-
-    Row(
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Row(modifier = Modifier.weight(0.25f)) {
-            Text(name, color = MaterialTheme.colors.onPrimary)
-            HoverableTooltip(description = description) { modifier ->
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = "description information",
-                    modifier = modifier
-                )
-            }
-        }
-        Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
-            TextField(
-                value,
-                onValueChange = onChange,
-                modifier = Modifier.weight(1f).border(
-                    1.dp,
-                    color = MaterialTheme.colors.secondary,
-                    shape = RoundedCornerShape(5.dp)
-                ),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.colors.background,
-                    focusedBorderColor = Color.Transparent,
-                    disabledBorderColor = Color.Transparent,
-                    focusedLabelColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    unfocusedLabelColor = Color.Transparent,
-                ),
-                keyboardOptions =
-                if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
-                shape = RoundedCornerShape(size = 15.dp),
-            )
-            if (null != onClick) ButtonWidget(
-                onClick = onClick,
-                title = buttonText
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun prev() {
-    Column {
-        SignInfoItem("Name", "Value", false) {}
-        SignInfoItem("Name", "Value", true, onClick = {}) {}
-    }
 }
