@@ -1,5 +1,6 @@
 package io.github.jixiaoyong.pages.settings
 
+import ApkSigner
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
@@ -59,12 +60,13 @@ class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel()
         resetSignTypes: Boolean? = null,
         resetSignedDirectory: Boolean? = null,
     ) {
+        val oldResetInfo = uiStateFlow.value.resetInfo
         uiStateFlow.value = uiStateFlow.value.copy(
-            resetInfo = uiStateFlow.value.resetInfo.copy(
-                resetSignInfo = resetSignInfo ?: uiStateFlow.value.resetInfo.resetSignInfo,
-                resetApkTools = resetApkTools ?: uiStateFlow.value.resetInfo.resetApkTools,
-                resetSignTypes = resetSignTypes ?: uiStateFlow.value.resetInfo.resetSignTypes,
-                resetSignedDirectory = resetSignedDirectory ?: uiStateFlow.value.resetInfo.resetSignedDirectory
+            resetInfo = oldResetInfo.copy(
+                resetSignInfo = resetSignInfo ?: oldResetInfo.resetSignInfo,
+                resetApkTools = resetApkTools ?: oldResetInfo.resetApkTools,
+                resetSignTypes = resetSignTypes ?: oldResetInfo.resetSignTypes,
+                resetSignedDirectory = resetSignedDirectory ?: oldResetInfo.resetSignedDirectory
             )
         )
     }

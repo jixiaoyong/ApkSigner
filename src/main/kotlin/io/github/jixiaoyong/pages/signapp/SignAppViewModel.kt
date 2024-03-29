@@ -31,22 +31,21 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
             settings.signInfoBeans,
             settings.apkSignatureMap,
             settings.signedDirectory,
-        ) { signTypeList, selectedSignInfoBean, signInfoBeans, apkSignatureMap, signedDirectory ->
+            settings.isZipAlign,
+            settings.isAutoMatchSignature
+        ) { params ->
             uiStateFlow.value.copy(
-                apkSignType = signTypeList,
-                globalSelectedSignInfo = selectedSignInfoBean,
-                allSignInfoBeans = signInfoBeans,
-                apkSignatureMap = apkSignatureMap,
-                signedOutputDirectory = signedDirectory
+                apkSignType = params[0] as Set<Int>,
+                globalSelectedSignInfo = params[1] as SignInfoBean?,
+                allSignInfoBeans = params[2] as List<SignInfoBean>?,
+                apkSignatureMap = params[3] as Map<String, Long>,
+                signedOutputDirectory = params[4] as String?,
+                isZipAlign = params[5] as Boolean,
+                isAutoMatchSignature = params[6] as Boolean
             )
-        }
-            .combine(settings.isZipAlign) { state, isZipAlign -> state.copy(isZipAlign = isZipAlign) }
-            .combine(settings.isAutoMatchSignature) { state, isAutoMatchSignature ->
-                state.copy(isAutoMatchSignature = isAutoMatchSignature)
-            }
-            .onEach {
-                uiStateFlow.value = it
-            }.launchIn(viewModelScope)
+        }.onEach {
+            uiStateFlow.value = it
+        }.launchIn(viewModelScope)
 
         // 监听并更新当前apk对应的签名信息
         uiStateFlow.distinctUntilChanged { old, new ->
