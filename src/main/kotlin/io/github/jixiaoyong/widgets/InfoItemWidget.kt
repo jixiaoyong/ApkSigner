@@ -9,7 +9,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,20 +36,20 @@ fun InfoItemWidget(
     Column(modifier = Modifier.padding(horizontal = 5.dp).padding(top = 5.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
-                .background(Color(0xffE7E7E7), RoundedCornerShape(5.dp)).padding(5.dp),
+                .background(MaterialTheme.colors.secondaryVariant, RoundedCornerShape(5.dp)).padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 Text(
                     title,
                     style = TextStyle(
-                        fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colors.onPrimary
+                        fontWeight = FontWeight.ExtraBold, fontSize = 16.sp
                     )
                 )
 
                 if (!description.isNullOrBlank()) Text(
                     description,
-                    style = TextStyle(color = Color(0xff808080), fontSize = 12.sp)
+                    style = TextStyle(color = MaterialTheme.colors.onSecondary, fontSize = 12.sp)
                 )
             }
 
@@ -79,7 +78,6 @@ fun InfoItemWidget(
                     style = TextStyle(
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colors.onPrimary
                     )
                 )
             }

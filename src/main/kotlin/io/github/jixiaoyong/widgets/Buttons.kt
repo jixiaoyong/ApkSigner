@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -32,16 +32,16 @@ fun ButtonWidget(
     content: (@Composable () -> Unit)? = null
 ) {
 
-    val activeBackgroundColor = if (isHighlight) Color(0xff007AFF) else Color(0xffF2F2F7)
-    val activeContentColor = if (isHighlight) Color.White else Color(0xff007AFF)
+    val activeBackgroundColor = if (isHighlight) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+    val activeContentColor = if (isHighlight) MaterialTheme.colors.onPrimary else MaterialTheme.colors.primary
 
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = activeBackgroundColor,
-            disabledBackgroundColor = Color(0xffF2F2F7),
+            disabledBackgroundColor = MaterialTheme.colors.surface,
             contentColor = activeContentColor,
-            disabledContentColor = Color(0xFFBABEBE),
+            disabledContentColor = MaterialTheme.colors.secondary,
         ),
         shape = RoundedCornerShape(20.dp),
         contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp),

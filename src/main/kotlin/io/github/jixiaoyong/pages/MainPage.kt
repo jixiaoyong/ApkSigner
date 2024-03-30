@@ -6,12 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.jthemedetecor.OsThemeDetector
 import io.github.jixiaoyong.base.viewModel
@@ -65,12 +65,12 @@ fun App() {
     ToasterUtil.init(isDarkTheme)
 
     AppTheme(darkTheme = isDarkTheme) {
-        Column(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier =
                 Modifier.fillMaxWidth()
                     .heightIn(min = 65.dp)
-                    .background(Color(0xFFE7E7E7))
+                    .background(MaterialTheme.colors.secondaryVariant)
                     .padding(horizontal = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
@@ -79,11 +79,10 @@ fun App() {
                     val isActive = route.third == pageIndex
                     val backgroundColor =
                         if (isActive) {
-                            Color(0xffc0c4c4)
+                            MaterialTheme.colors.secondary
                         } else {
                             Color.Transparent
                         }
-                    val textColor = Color.Black
                     Row(
                         modifier =
                         Modifier
@@ -99,10 +98,10 @@ fun App() {
                         Icon(
                             route.first,
                             contentDescription = route.second,
-                            tint = Color(0xff007AFF),
+                            tint = MaterialTheme.colors.primary,
                             modifier = Modifier.padding(end = 5.dp).size(18.dp)
                         )
-                        Text(route.second, style = TextStyle(color = textColor))
+                        Text(route.second)
                     }
                 }
             }

@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
@@ -76,18 +75,30 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
             ) {
                 Text(
                     "当前签名: ",
-                    style = TextStyle(fontWeight = FontWeight.Bold, color = Color(0xff007AFF), fontSize = 16.sp)
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.primary,
+                        fontSize = 16.sp
+                    )
                 )
                 Text(
                     uiState.selectedSignInfo?.keyNickName ?: "暂无",
-                    style = TextStyle(lineBreak = LineBreak.Paragraph, color = Color.Black, fontSize = 16.sp),
+                    style = TextStyle(
+                        lineBreak = LineBreak.Paragraph,
+                        color = MaterialTheme.colors.onBackground,
+                        fontSize = 16.sp
+                    ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(horizontal = 10.dp)
                 )
                 Text(
                     uiState.selectedSignInfo?.keyStorePath ?: "",
-                    style = TextStyle(lineBreak = LineBreak.Paragraph, color =  Color(0xff808080), fontSize = 16.sp),
+                    style = TextStyle(
+                        lineBreak = LineBreak.Paragraph,
+                        color = MaterialTheme.colors.secondary,
+                        fontSize = 16.sp
+                    ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -104,12 +115,16 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 DropdownMenu(
                     dropdownMenu,
                     onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed },
-                    modifier = Modifier.background(Color.White.copy(0.8f), shape = RoundedCornerShape(10.dp))
-                        .border(1.dp, Color(0xFFBABEBE), shape = RoundedCornerShape(10.dp))
+                    modifier = Modifier.background(
+                        MaterialTheme.colors.background.copy(0.8f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                        .border(1.dp, MaterialTheme.colors.secondary, shape = RoundedCornerShape(10.dp))
                 ) {
                     uiState.signInfoList.forEach {
                         val isSelected = uiState.selectedSignInfo == it
-                        val textColor = if (isSelected) Color(0xff007AFF) else Color(0xff000000)
+                        val textColor = if (isSelected) MaterialTheme.colors.primary
+                        else MaterialTheme.colors.onBackground
                         DropdownMenuItem(
                             onClick = {
                                 viewModel.saveSelectedSignInfo(it)
@@ -148,7 +163,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 }
             }
 
-            Divider(modifier = Modifier.background(color = Color(0xFFBABEBE).copy(0.65f)))
+            Divider(modifier = Modifier.background(color = MaterialTheme.colors.secondary.copy(0.65f)))
 
             Column(modifier = Modifier.padding(vertical = 25.dp).fillMaxWidth()) {
                 SignInfoItem(

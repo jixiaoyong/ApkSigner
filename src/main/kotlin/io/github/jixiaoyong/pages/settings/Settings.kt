@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -33,6 +32,7 @@ import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.ToastConfig
 import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
+import io.github.jixiaoyong.widgets.CheckBox
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.launch
 import java.io.File
@@ -62,47 +62,46 @@ fun PageSettingInfo() {
     val resetConfig = uiState.resetInfo
 
     if (resetConfig.showResetDialog) {
-        AlertDialog(onDismissRequest = {
-            viewModel.toggleResetDialog()
-        }, confirmButton = {
-            ButtonWidget(onClick = {
-                viewModel.runRestConfig()
-                showToast("重置成功")
-            }, title = "确定")
+        MaterialTheme(
+            typography = MaterialTheme.typography.copy(
+                body1 = TextStyle.Default.copy(color = MaterialTheme.colors.onBackground)
+            ),
+        ) {
+            AlertDialog(onDismissRequest = {
+                viewModel.toggleResetDialog()
+            }, confirmButton = {
+                ButtonWidget(onClick = {
+                    viewModel.runRestConfig()
+                    showToast("重置成功")
+                }, title = "确定")
 
-        }, title = {
-            Text("确定重置吗")
-        }, text = {
-            Column {
-                Text("重置会清除以下内容，请谨慎操作")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
+            }, title = {
+                Text("确定重置吗")
+            }, text = {
+                Column {
+                    Text("重置会清除以下内容，请谨慎操作")
+                    CheckBox(
                         checked = resetConfig.resetSignInfo,
+                        title = "签名信息",
                         onCheckedChange = {
                             viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
                         })
-                    Text("签名信息")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
+                    CheckBox(
                         checked = resetConfig.resetApkTools,
+                        title = "签名工具配置(不会删除文件)",
                         onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
-                    Text("签名工具配置(不会删除文件)")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
+
+                    CheckBox(
                         checked = resetConfig.resetSignTypes,
+                        title = "签名方案",
                         onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
-                    Text("签名方案")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
+                    CheckBox(
                         checked = resetConfig.resetSignedDirectory,
+                        title = "签名文件输出目录",
                         onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
-                    Text("签名文件输出目录")
                 }
-            }
-        })
+            })
+        }
     }
 
     Scaffold(scaffoldState = scaffoldState) {
@@ -112,7 +111,7 @@ fun PageSettingInfo() {
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = Color(0xffF2F2F7), shape = RoundedCornerShape(10.dp))
+                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp))
                     .padding(15.dp)
                     .clickable {
                         scope.launch {
@@ -134,7 +133,7 @@ fun PageSettingInfo() {
                 onFileDrop = { scope.launch { viewModel.setupBuildToolsConfig(it.first()) } }) {
                 Text(
                     text = "请拖拽Android SDK的build-tools的子文件夹到这里，以一次性修改apkSigner和zipAlign目录",
-                    color = Color(0xFFBABEBE),
+                    color = MaterialTheme.colors.onSurface,
                     modifier = Modifier.align(alignment = Alignment.Center)
                 )
             }
@@ -178,21 +177,21 @@ fun PageSettingInfo() {
                 Column(modifier = Modifier.weight(1f, true)) {
                     Text(
                         "是否自动匹配签名",
-                        style = TextStyle(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colors.onPrimary
-                        )
+                        style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                     )
                     Text(
                         "当只有一个apk文件时，则自动尝试匹配上次使用的签名信息",
-                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 12.sp, color = Color(0xff808080))
+                        style = TextStyle(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colors.onSecondary
+                        )
                     )
                 }
                 Switch(
                     uiState.isAutoMatchSignature,
                     { autoMatch -> viewModel.saveAutoMatchSignature(autoMatch) },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xff007AFF))
+                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
                 )
             }
 
@@ -234,7 +233,7 @@ fun PageSettingInfo() {
                     append(str)
                     addStyle(
                         style = SpanStyle(
-                            color = Color(0xff007AFF),
+                            color = MaterialTheme.colors.primary,
                             textDecoration = TextDecoration.Underline
                         ), start = startIndex, end = endIndex
                     )
@@ -246,7 +245,7 @@ fun PageSettingInfo() {
                     style = TextStyle(
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                        color = MaterialTheme.colors.onSecondary.copy(alpha = 0.5f)
                     ),
                     onClick = { offset ->
                         annotatedString

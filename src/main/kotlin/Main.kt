@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -102,16 +101,16 @@ fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
     ) {
         Column(
             modifier =
-                Modifier.widthIn(300.dp).heightIn(200.dp).background(
-                    MaterialTheme.colors.surface.copy(0.8f),
-                    RoundedCornerShape(10.dp),
-                ),
+            Modifier.widthIn(300.dp).heightIn(200.dp).background(
+                MaterialTheme.colors.surface.copy(0.8f),
+                RoundedCornerShape(10.dp),
+            ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 Icons.Default.Warning,
-                tint = Color.Red,
+                tint = MaterialTheme.colors.error,
                 contentDescription = "already exists",
                 modifier = Modifier.size(50.dp),
             )

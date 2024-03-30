@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -31,6 +30,7 @@ import io.github.jixiaoyong.pages.Routes
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
+import io.github.jixiaoyong.widgets.CheckBox
 import io.github.jixiaoyong.widgets.HoverableTooltip
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.Dispatchers
@@ -77,9 +77,9 @@ fun PageSignApp(
                 viewModel.changeSignInfo(CommandResult.NOT_EXECUT)
             }, alignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxSize().background(color = Color.Black.copy(0.56f))
+                    modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.56f))
                         .padding(horizontal = 50.dp, vertical = 65.dp)
-                        .background(Color.White, shape = RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colors.background, shape = RoundedCornerShape(10.dp))
                         .padding(horizontal = 20.dp, vertical = 15.dp)
                 ) {
                     Text(
@@ -104,7 +104,7 @@ fun PageSignApp(
                     }, modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) {
                         Text(
                             "确认",
-                            color = Color(0xff007AFF)
+                            color = MaterialTheme.colors.primary
                         )
                     }
                 }
@@ -128,12 +128,15 @@ fun PageSignApp(
             ) {
                 Column(
                     modifier = Modifier.size(150.dp)
-                        .background(color = Color.Black.copy(0.8f), shape = RoundedCornerShape(5.dp))
+                        .background(
+                            color = MaterialTheme.colors.onBackground.copy(0.8f),
+                            shape = RoundedCornerShape(5.dp)
+                        )
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(80.dp).padding(10.dp))
-                    Text("处理中……", color = Color.White.copy(0.8f))
+                    Text("处理中……", color = MaterialTheme.colors.onPrimary.copy(0.8f))
                 }
             }
         }
@@ -151,7 +154,10 @@ fun PageSignApp(
                 DropBoxPanel(
                     window,
                     modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                        .background(color = Color(0xffF2F2F7), shape = RoundedCornerShape(10.dp))
+                        .background(
+                            color = MaterialTheme.colors.surface,
+                            shape = RoundedCornerShape(10.dp)
+                        )
                         .padding(15.dp)
                         .clickable {
                             scope.launch {
@@ -193,7 +199,7 @@ fun PageSignApp(
                     Text(
                         text = "请拖拽apk文件到这里\n(支持多选，也可以点击这里选择apk文件)",
                         textAlign = TextAlign.Center,
-                        color = Color(0xFFBABEBE),
+                        color = MaterialTheme.colors.onSurface,
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
@@ -254,8 +260,9 @@ fun PageSignApp(
                         SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
                             val isSelected = uiState.apkSignType.contains(item.type)
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(checked = isSelected,
-                                    colors = CheckboxDefaults.colors(checkedColor = Color(0xff007AFF)),
+                                CheckBox(
+                                    checked = isSelected,
+                                    title = item.name,
                                     onCheckedChange = {
                                         val newTypes = mutableSetOf<Int>()
                                         newTypes.addAll(uiState.apkSignType)
@@ -267,7 +274,6 @@ fun PageSignApp(
 
                                         viewModel.changeApkSignType(newTypes)
                                     })
-                                Text(item.name, color = Color.Black)
                                 HoverableTooltip(description = item.description)
                             }
                         }
@@ -284,13 +290,12 @@ fun PageSignApp(
                         style = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
-                            color = MaterialTheme.colors.onPrimary
                         ),
                         modifier = Modifier.weight(1f).padding(start = 10.dp)
                     )
 
                     Switch(checked = uiState.isZipAlign,
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xff007AFF)),
+                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary),
                         onCheckedChange = {
                             viewModel.changeZipAlign(it)
                         })
@@ -300,9 +305,7 @@ fun PageSignApp(
             Divider()
 
             Row(
-                modifier = Modifier.fillMaxWidth()
-                    .background(color = Color.White.copy(0.8f))
-                    .padding(5.dp),
+                modifier = Modifier.fillMaxWidth().padding(5.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 val signedButtonEnable = (CommandResult.NOT_EXECUT == uiState.apkSignedResult) &&

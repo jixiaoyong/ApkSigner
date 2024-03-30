@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -86,10 +85,15 @@ fun HoverableTooltip(
             tooltip = {
                 Row(
                     modifier = Modifier.background(
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.8f),
+                        color = MaterialTheme.colors.onSurface,
                         shape = RoundedCornerShape(5.dp)
                     ).padding(horizontal = 5.dp, vertical = 5.dp),
-                ) { Text(description, style = TextStyle(color = Color.White.copy(alpha = 0.5f))) }
+                ) {
+                    Text(
+                        description,
+                        style = TextStyle(color = MaterialTheme.colors.secondaryVariant)
+                    )
+                }
             },
             content = content
         )
@@ -103,7 +107,7 @@ fun HoverableTooltip(description: String?, imageVector: ImageVector = Icons.Defa
             imageVector,
             contentDescription = description,
             modifier = modifier,
-            tint = Color(0xff7A7A7A)
+            tint = MaterialTheme.colors.onSecondary
         )
     }
 }

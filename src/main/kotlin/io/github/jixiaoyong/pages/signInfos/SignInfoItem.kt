@@ -60,12 +60,11 @@ fun SignInfoItem(
         Column(modifier = Modifier.weight(0.25f)) {
             Text(
                 name,
-                color = MaterialTheme.colors.onPrimary,
                 fontWeight = FontWeight.Bold,
             )
             if (!description.isNullOrBlank()) Text(
                 description,
-                style = TextStyle(color = Color(0xff808080), fontSize = 12.sp)
+                style = TextStyle(color = MaterialTheme.colors.secondary, fontSize = 12.sp)
             )
         }
         Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
@@ -74,7 +73,11 @@ fun SignInfoItem(
                 value,
                 onValueChange = onChange,
                 modifier = Modifier.weight(1f)
-                    .border(1.dp, Color(if (isFocused) 0xff007AFF else 0xFFBABEBE), shape = RoundedCornerShape(10.dp))
+                    .border(
+                        1.dp,
+                        if (isFocused) MaterialTheme.colors.primary else MaterialTheme.colors.secondary,
+                        shape = RoundedCornerShape(10.dp)
+                    )
                     .onFocusChanged {
                         isFocused = it.isFocused
                     },
