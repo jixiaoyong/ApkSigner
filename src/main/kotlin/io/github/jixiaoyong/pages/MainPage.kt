@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages
 
 import LocalSettings
+import LocalStrings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,9 +36,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun App() {
     val settings = LocalSettings.current
+    val i18nString = LocalStrings.current
 
     val scope = rememberCoroutineScope()
-    val viewModel = viewModel { MainViewModel(settings) }
+    val viewModel = viewModel { MainViewModel(settings, i18nString.strings) }
 
     var isDarkTheme by viewModel.isDarkTheme
     val pageIndex by viewModel.currentIndex.collectAsState()
@@ -57,7 +59,6 @@ fun App() {
             detector?.registerListener(listener)
             detector?.isDark?.let {
                 isDarkTheme = it
-
             }
         }
 

@@ -17,7 +17,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import cafe.adriel.lyricist.Lyricist
+import cafe.adriel.lyricist.rememberStrings
 import io.github.jixiaoyong.beans.AppState
+import io.github.jixiaoyong.i18n.EnStrings
+import io.github.jixiaoyong.i18n.Locales
+import io.github.jixiaoyong.i18n.Strings
+import io.github.jixiaoyong.i18n.ZhStrings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
@@ -28,6 +34,7 @@ import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
+val LocalStrings = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
 
 fun main() =
     application {
@@ -41,19 +48,21 @@ fun main() =
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
 
+            val lyricist = rememberStrings(mapOf(Locales.ZH to ZhStrings, Locales.EN to EnStrings))
+
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
             }
             CompositionLocalProvider(
                 LocalWindow provides window,
                 LocalSettings provides SettingsTool(scope = rememberCoroutineScope()),
+                LocalStrings provides lyricist
             ) {
                 LaunchedEffect(checkDualRunning) {
                     appState = AppState.Loading
-                    val isAppRunning =
-                        withContext(Dispatchers.IO) {
-                            AppProcessUtil.isDualAppRunning("ApkSigner")
-                        }
+                    val isAppRunning = withContext(Dispatchers.IO) {
+                        AppProcessUtil.isDualAppRunning("ApkSigner")
+                    }
                     appState =
                         if (isAppRunning) {
                             AppState.AlreadyExists
@@ -89,12 +98,13 @@ fun LoadingPage() {
         verticalArrangement = Arrangement.Center,
     ) {
         CircularProgressIndicator()
-        Text("Loading...", Modifier.padding(top = 10.dp))
+        Text(LocalStrings.current.strings.loading, Modifier.padding(top = 10.dp))
     }
 }
 
 @Composable
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
+    val i18nString = LocalStrings.current.strings
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -114,13 +124,13 @@ fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
                 contentDescription = "already exists",
                 modifier = Modifier.size(50.dp),
             )
-            Text("ApkSigner已经启动了，请不要重复启动", Modifier.padding(vertical = 20.dp))
+            Text(i18nString.alreadyRunning, Modifier.padding(vertical = 20.dp))
             Row {
                 ButtonWidget(onClick = { exitProcess(0) }) {
-                    Text("退出")
+                    Text(i18nString.exit)
                 }
                 ButtonWidget(onClick = tryAgainFunc) {
-                    Text("重试")
+                    Text(i18nString.retry)
                 }
             }
         }
