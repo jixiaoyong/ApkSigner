@@ -36,7 +36,7 @@ fun InfoItemWidget(
     val rounderRadius = 10.dp
     Column(modifier = Modifier.padding(horizontal = 5.dp).padding(top = 5.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                 .background(Color(0xffE7E7E7), RoundedCornerShape(5.dp)).padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -58,7 +58,8 @@ fun InfoItemWidget(
 
             if (showChangeButton) ButtonWidget(
                 { onClick?.invoke() },
-                title = buttonTitle ?: "修改"
+                title = buttonTitle ?: "修改",
+                modifier = Modifier.height(30.dp)
             )
         }
 
@@ -75,7 +76,11 @@ fun InfoItemWidget(
             ) {
                 Text(
                     value ?: "暂无内容",
-                    style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color.Gray)
+                    style = TextStyle(
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colors.onPrimary
+                    )
                 )
             }
         }

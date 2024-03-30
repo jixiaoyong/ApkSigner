@@ -44,7 +44,7 @@ fun ButtonWidget(
             disabledContentColor = Color(0xFFBABEBE),
         ),
         shape = RoundedCornerShape(20.dp),
-        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 10.dp),
+        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp),
         modifier = (modifier ?: Modifier).padding(horizontal = 5.dp).widthIn(100.dp),
         enabled = enabled,
         elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),

@@ -186,7 +186,7 @@ fun PageSettingInfo() {
                     )
                     Text(
                         "当只有一个apk文件时，则自动尝试匹配上次使用的签名信息",
-                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color.Gray)
+                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 12.sp, color = Color(0xff808080))
                     )
                 }
                 Switch(
