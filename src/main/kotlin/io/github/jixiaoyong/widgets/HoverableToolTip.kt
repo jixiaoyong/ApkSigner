@@ -5,13 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -88,6 +92,18 @@ fun HoverableTooltip(
                 ) { Text(description, style = TextStyle(color = Color.White.copy(alpha = 0.5f))) }
             },
             content = content
+        )
+    }
+}
+
+@Composable
+fun HoverableTooltip(description: String?, imageVector: ImageVector = Icons.Default.Info, alwaysShow: Boolean = false) {
+    HoverableTooltip(description = description, alwaysShow = alwaysShow) { modifier ->
+        Icon(
+            imageVector,
+            contentDescription = description,
+            modifier = modifier,
+            tint = Color(0xff7A7A7A)
         )
     }
 }

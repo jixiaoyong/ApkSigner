@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
-import io.github.jixiaoyong.utils.*
+import io.github.jixiaoyong.utils.FileChooseUtil
+import io.github.jixiaoyong.utils.ToastConfig
+import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.InfoItemWidget
 import kotlinx.coroutines.launch
@@ -110,7 +112,7 @@ fun PageSettingInfo() {
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
+                    .background(color = Color(0xffF2F2F7), shape = RoundedCornerShape(10.dp))
                     .padding(15.dp)
                     .clickable {
                         scope.launch {
@@ -132,6 +134,7 @@ fun PageSettingInfo() {
                 onFileDrop = { scope.launch { viewModel.setupBuildToolsConfig(it.first()) } }) {
                 Text(
                     text = "请拖拽Android SDK的build-tools的子文件夹到这里，以一次性修改apkSigner和zipAlign目录",
+                    color = Color(0xFFBABEBE),
                     modifier = Modifier.align(alignment = Alignment.Center)
                 )
             }
@@ -170,7 +173,7 @@ fun PageSettingInfo() {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
             ) {
                 Column(modifier = Modifier.weight(1f, true)) {
                     Text(
@@ -181,12 +184,15 @@ fun PageSettingInfo() {
                             color = MaterialTheme.colors.onPrimary
                         )
                     )
-                    Text("当只有一个apk文件时，则自动尝试匹配上次使用的签名信息")
+                    Text(
+                        "当只有一个apk文件时，则自动尝试匹配上次使用的签名信息",
+                        style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color.Gray)
+                    )
                 }
                 Switch(
                     uiState.isAutoMatchSignature,
                     { autoMatch -> viewModel.saveAutoMatchSignature(autoMatch) },
-                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.secondary)
+                    colors = SwitchDefaults.colors(checkedThumbColor = Color(0xff007AFF))
                 )
             }
 
@@ -228,7 +234,7 @@ fun PageSettingInfo() {
                     append(str)
                     addStyle(
                         style = SpanStyle(
-                            color = Color(0xff64B5F6),
+                            color = Color(0xff007AFF),
                             textDecoration = TextDecoration.Underline
                         ), start = startIndex, end = endIndex
                     )

@@ -5,8 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,42 +65,47 @@ fun App() {
     ToasterUtil.init(isDarkTheme)
 
     AppTheme(darkTheme = isDarkTheme) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
             Row(
                 modifier =
-                    Modifier.fillMaxWidth()
-                        .heightIn(min = 65.dp)
-                        .background(MaterialTheme.colors.background)
-                        .padding(horizontal = 2.dp),
+                Modifier.fillMaxWidth()
+                    .heightIn(min = 65.dp)
+                    .background(Color(0xFFE7E7E7))
+                    .padding(horizontal = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 for (route in viewModel.routes) {
-                    val isActive = route.second == pageIndex
+                    val isActive = route.third == pageIndex
                     val backgroundColor =
                         if (isActive) {
-                            MaterialTheme.colors.secondary
+                            Color(0xffc0c4c4)
                         } else {
-                            MaterialTheme.colors.surface
+                            Color.Transparent
                         }
-                    val textColor = if (isActive) Color.White else MaterialTheme.colors.onPrimary
+                    val textColor = Color.Black
                     Row(
                         modifier =
-                            Modifier
-                                .weight(1f)
-                                .padding(horizontal = 1.dp)
-                                .background(backgroundColor, RoundedCornerShape(5.dp))
-                                .clickable {
-                                    viewModel.changePage(route.second)
-                                }.padding(vertical = 15.dp),
+                        Modifier
+                            .weight(1f)
+                            .padding(horizontal = 1.dp)
+                            .background(backgroundColor, RoundedCornerShape(5.dp))
+                            .clickable {
+                                viewModel.changePage(route.third)
+                            }.padding(vertical = 15.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(route.first, style = TextStyle(color = textColor))
+                        Icon(
+                            route.first,
+                            contentDescription = route.second,
+                            tint = Color(0xff007AFF),
+                            modifier = Modifier.padding(end = 5.dp).size(18.dp)
+                        )
+                        Text(route.second, style = TextStyle(color = textColor))
                     }
                 }
             }
-            Divider(color = MaterialTheme.colors.surface)
 
             when (pageIndex) {
                 Routes.SignInfo -> PageSignInfo(signInfoViewModel)

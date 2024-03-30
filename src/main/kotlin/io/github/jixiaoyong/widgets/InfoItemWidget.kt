@@ -2,17 +2,14 @@ package io.github.jixiaoyong.widgets
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,58 +30,54 @@ fun InfoItemWidget(
     description: String? = null,
     buttonTitle: String? = null,
     showChangeButton: Boolean = true,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
 ) {
-    val headerBackground = MaterialTheme.colors.surface
     val rounderRadius = 10.dp
-    Column(
-        modifier = Modifier.padding(vertical = 5.dp)
-            .background(color = MaterialTheme.colors.background, shape = RoundedCornerShape(rounderRadius))
-            .padding(horizontal = 15.dp, vertical = 5.dp)
-            .border(1.dp, color = headerBackground, shape = RoundedCornerShape(rounderRadius))
-    ) {
+    Column(modifier = Modifier.padding(horizontal = 5.dp).padding(top = 5.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 35.dp).background(
-                color = headerBackground,
-                shape = RoundedCornerShape(topStart = rounderRadius, topEnd = rounderRadius)
-            ).padding(5.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)
+                .background(Color(0xffE7E7E7), RoundedCornerShape(5.dp)).padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                title,
-                style = TextStyle(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colors.onPrimary
+            Column {
+                Text(
+                    title,
+                    style = TextStyle(
+                        fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colors.onPrimary
+                    )
                 )
-            )
-            HoverableTooltip(
-                description = description
-            ) { modifier ->
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = "description information",
-                    modifier = modifier
+
+                if (!description.isNullOrBlank()) Text(
+                    description,
+                    style = TextStyle(color = Color(0xff808080), fontSize = 12.sp)
                 )
             }
+
             Spacer(modifier = Modifier.weight(1f))
+
             if (showChangeButton) ButtonWidget(
                 { onClick?.invoke() },
                 title = buttonTitle ?: "修改"
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .background(
-                    MaterialTheme.colors.background,
-                    RoundedCornerShape(bottomEnd = rounderRadius, bottomStart = rounderRadius)
+
+        if (null != content) {
+            content()
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .background(
+                        MaterialTheme.colors.background,
+                        RoundedCornerShape(bottomEnd = rounderRadius, bottomStart = rounderRadius)
+                    )
+                    .padding(vertical = 15.dp, horizontal = 10.dp)
+            ) {
+                Text(
+                    value ?: "暂无内容",
+                    style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color.Gray)
                 )
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-        ) {
-            Text(
-                value ?: "暂无内容",
-                style = TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp)
-            )
+            }
         }
     }
 }

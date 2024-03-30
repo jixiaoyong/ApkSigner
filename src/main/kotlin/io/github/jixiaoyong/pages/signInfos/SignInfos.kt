@@ -2,6 +2,7 @@ package io.github.jixiaoyong.pages.signInfos
 
 import LocalWindow
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
@@ -57,16 +59,15 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 30.dp, vertical = 10.dp)
                 .verticalScroll(rememberScrollState())
         ) {
 
             var selectedSignInfoLayoutOffset by remember { mutableStateOf(Offset.Zero) }
 
             Row(
-                modifier = Modifier.padding(vertical = 10.dp)
-                    .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(15.dp))
-                    .padding(horizontal = 15.dp, vertical = 10.dp)
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
                     .fillMaxWidth()
                     .onGloballyPositioned {
                         selectedSignInfoLayoutOffset = it.positionInParent() + Offset(0f, it.size.height.toFloat())
@@ -75,60 +76,86 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
             ) {
                 Text(
                     "当前签名: ",
-                    style = TextStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colors.onPrimary)
+                    style = TextStyle(fontWeight = FontWeight.Bold, color = Color(0xff007AFF), fontSize = 16.sp)
                 )
                 Text(
-                    uiState.selectedSignInfo?.toString() ?: "暂无",
-                    style = TextStyle(lineBreak = LineBreak.Paragraph),
+                    uiState.selectedSignInfo?.keyNickName ?: "暂无",
+                    style = TextStyle(lineBreak = LineBreak.Paragraph, color = Color.Black, fontSize = 16.sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).padding(start = 10.dp)
+                    modifier = Modifier.padding(horizontal = 10.dp)
                 )
-                ButtonWidget(onClick = {
-                    dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset.copy(x = 0f))
-                }, title = "重新选择签名")
+                Text(
+                    uiState.selectedSignInfo?.keyStorePath ?: "",
+                    style = TextStyle(lineBreak = LineBreak.Paragraph, color =  Color(0xff808080), fontSize = 16.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                ButtonWidget(
+                    onClick = {
+                        dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset)
+                    },
+                    title = "重新选择签名",
+                )
             }
 
-            DropdownMenu(dropdownMenu,
-                onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed }) {
-                uiState.signInfoList.forEach {
-                    DropdownMenuItem(onClick = {
-                        viewModel.saveSelectedSignInfo(it)
-                        dropdownMenu.status = DropdownMenuState.Status.Closed
-                    }, modifier = Modifier.widthIn(450.dp, 600.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = it.keyNickName, modifier = Modifier.weight(2f), maxLines = 1)
-                            Text(
-                                text = it.keyStorePath,
-                                fontSize = 10.sp,
-                                modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
-                            )
-                            HoverableTooltip(
-                                description = "删除此工具存储的签名信息，不会删除apk签名文件",
-                                alwaysShow = true
-                            ) { modifier ->
-                                IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
-                                    Icon(Icons.Default.Delete, "")
+            MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(10.dp))) {
+                DropdownMenu(
+                    dropdownMenu,
+                    onDismissRequest = { dropdownMenu.status = DropdownMenuState.Status.Closed },
+                    modifier = Modifier.background(Color.White.copy(0.8f), shape = RoundedCornerShape(10.dp))
+                        .border(1.dp, Color(0xFFBABEBE), shape = RoundedCornerShape(10.dp))
+                ) {
+                    uiState.signInfoList.forEach {
+                        val isSelected = uiState.selectedSignInfo == it
+                        val textColor = if (isSelected) Color(0xff007AFF) else Color(0xff000000)
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.saveSelectedSignInfo(it)
+                                dropdownMenu.status = DropdownMenuState.Status.Closed
+                            },
+                            modifier = Modifier.widthIn(450.dp, 600.dp),
+
+                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = it.keyNickName,
+                                    modifier = Modifier.weight(2f),
+                                    maxLines = 1,
+                                    color = textColor
+                                )
+                                Text(
+                                    text = it.keyStorePath,
+                                    fontSize = 10.sp,
+                                    color = textColor,
+                                    modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
+                                )
+                                HoverableTooltip(
+                                    description = "删除此工具存储的签名信息，不会删除apk签名文件",
+                                    alwaysShow = true
+                                ) { modifier ->
+                                    IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
+                                        Icon(Icons.Default.Delete, "")
+                                    }
                                 }
-                            }
-                            IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
-                                Icon(Icons.Default.Edit, "edit")
+                                IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
+                                    Icon(Icons.Default.Edit, "edit")
+                                }
                             }
                         }
                     }
                 }
             }
 
-            Column(
-                modifier = Modifier.padding(vertical = 10.dp)
-                    .background(MaterialTheme.colors.surface, RoundedCornerShape(15.dp))
-                    .padding(horizontal = 15.dp, vertical = 15.dp).fillMaxWidth()
-            ) {
+            Divider(modifier = Modifier.background(color = Color(0xFFBABEBE).copy(0.65f)))
+
+            Column(modifier = Modifier.padding(vertical = 25.dp).fillMaxWidth()) {
                 SignInfoItem(
                     "签名别名",
                     newSignInfo.keyNickName,
                     false,
-                    description = "备注名称，用来区分多个不同签名"
+                    description = "备注名称，用来区分不同签名"
                 ) { nickName ->
                     viewModel.updateNewSignInfo(keyNickName = nickName)
                 }
@@ -142,7 +169,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                 viewModel.updateNewSignInfo(keyStorePath = result)
                             }
                         }
-                    }, buttonText = "选择文件", description = "签名文件的绝对路径"
+                    }, buttonText = "选择文件", description = "签名文件的有效绝对路径"
                 ) { keyStorePath ->
                     viewModel.updateNewSignInfo(keyStorePath = keyStorePath)
                 }
@@ -160,12 +187,15 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ButtonWidget(
                         enabled = newSignInfo.isValid(),
+                        title = "保存新签名信息",
+                        isHighlight = true,
+                        modifier = Modifier.size(250.dp, 50.dp),
                         onClick = {
                             scope.launch {
                                 viewModel.saveNewSignInfo(newSignInfo)
@@ -179,8 +209,6 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                 }
                             }
                         },
-                        title = "保存新签名信息",
-                        modifier = Modifier.size(250.dp, 50.dp)
                     )
                 }
 

@@ -9,16 +9,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.jixiaoyong.widgets.ButtonWidget
-import io.github.jixiaoyong.widgets.HoverableTooltip
 
 /**
  * @author : jixiaoyong
@@ -52,31 +53,33 @@ fun SignInfoItem(
 ) {
 
     Row(
-        modifier = modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
+        modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Row(modifier = Modifier.weight(0.25f)) {
-            Text(name, color = MaterialTheme.colors.onPrimary)
-            HoverableTooltip(description = description) { modifier ->
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = "description information",
-                    modifier = modifier
-                )
-            }
+        Column(modifier = Modifier.weight(0.25f)) {
+            Text(
+                name,
+                color = MaterialTheme.colors.onPrimary,
+                fontWeight = FontWeight.Bold,
+            )
+            if (!description.isNullOrBlank()) Text(
+                description,
+                style = TextStyle(color = Color(0xff808080), fontSize = 12.sp)
+            )
         }
         Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
+            var isFocused by remember { mutableStateOf(false) }
             TextField(
                 value,
                 onValueChange = onChange,
-                modifier = Modifier.weight(1f).border(
-                    1.dp,
-                    color = MaterialTheme.colors.secondary,
-                    shape = RoundedCornerShape(5.dp)
-                ),
+                modifier = Modifier.weight(1f)
+                    .border(1.dp, Color(if (isFocused) 0xff007AFF else 0xFFBABEBE), shape = RoundedCornerShape(10.dp))
+                    .onFocusChanged {
+                        isFocused = it.isFocused
+                    },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = MaterialTheme.colors.background,
+                    backgroundColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent,
                     disabledBorderColor = Color.Transparent,
                     focusedLabelColor = Color.Transparent,
@@ -86,6 +89,7 @@ fun SignInfoItem(
                 keyboardOptions =
                 if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
                 shape = RoundedCornerShape(size = 15.dp),
+                textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Normal, color = Color.Black)
             )
             if (null != onClick) ButtonWidget(
                 onClick = onClick,

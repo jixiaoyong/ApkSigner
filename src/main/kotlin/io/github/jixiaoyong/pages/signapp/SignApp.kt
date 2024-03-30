@@ -10,8 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,9 +77,9 @@ fun PageSignApp(
                 viewModel.changeSignInfo(CommandResult.NOT_EXECUT)
             }, alignment = Alignment.Center) {
                 Column(
-                    modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.2f))
+                    modifier = Modifier.fillMaxSize().background(color = Color.Black.copy(0.56f))
                         .padding(horizontal = 50.dp, vertical = 65.dp)
-                        .background(MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp))
+                        .background(Color.White, shape = RoundedCornerShape(10.dp))
                         .padding(horizontal = 20.dp, vertical = 15.dp)
                 ) {
                     Text(
@@ -103,7 +101,12 @@ fun PageSignApp(
                     }
                     TextButton(onClick = {
                         viewModel.changeSignInfo(CommandResult.NOT_EXECUT)
-                    }, modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) { Text("确认") }
+                    }, modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) {
+                        Text(
+                            "确认",
+                            color = Color(0xff007AFF)
+                        )
+                    }
                 }
             }
         }
@@ -148,10 +151,7 @@ fun PageSignApp(
                 DropBoxPanel(
                     window,
                     modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                        .background(
-                            color = MaterialTheme.colors.surface,
-                            shape = RoundedCornerShape(15.dp)
-                        )
+                        .background(color = Color(0xffF2F2F7), shape = RoundedCornerShape(10.dp))
                         .padding(15.dp)
                         .clickable {
                             scope.launch {
@@ -191,8 +191,9 @@ fun PageSignApp(
                     }
                 ) {
                     Text(
-                        text = "请拖拽apk文件到这里哦\n(支持多选，也可以点击这里选择apk文件)",
+                        text = "请拖拽apk文件到这里\n(支持多选，也可以点击这里选择apk文件)",
                         textAlign = TextAlign.Center,
+                        color = Color(0xFFBABEBE),
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
@@ -244,43 +245,32 @@ fun PageSignApp(
                     }
                 )
 
-                Text(
-                    "签名方案：",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colors.onPrimary
-                    ),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
-                        .padding(bottom = 15.dp)
+                InfoItemWidget(
+                    "签名方案",
+                    null,
+                    showChangeButton = false
                 ) {
-                    SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
-                        val isSelected = uiState.apkSignType.contains(item.type)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(checked = isSelected, onCheckedChange = {
-                                val newTypes = mutableSetOf<Int>()
-                                newTypes.addAll(uiState.apkSignType)
-                                if (isSelected) {
-                                    newTypes.remove(item.type)
-                                } else {
-                                    newTypes.add(item.type)
-                                }
+                    Row {
+                        SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
+                            val isSelected = uiState.apkSignType.contains(item.type)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(checked = isSelected,
+                                    colors = CheckboxDefaults.colors(checkedColor = Color(0xff007AFF)),
+                                    onCheckedChange = {
+                                        val newTypes = mutableSetOf<Int>()
+                                        newTypes.addAll(uiState.apkSignType)
+                                        if (isSelected) {
+                                            newTypes.remove(item.type)
+                                        } else {
+                                            newTypes.add(item.type)
+                                        }
 
-                                viewModel.changeApkSignType(newTypes)
-                            })
-                            Text(item.name, modifier = Modifier.padding(start = 5.dp))
-                            HoverableTooltip(description = item.description) {
-                                Icon(
-                                    Icons.Default.Info,
-                                    contentDescription = "description information",
-                                    modifier = it
-                                )
+                                        viewModel.changeApkSignType(newTypes)
+                                    })
+                                Text(item.name, color = Color.Black)
+                                HoverableTooltip(description = item.description)
                             }
                         }
-
                     }
                 }
 
@@ -290,18 +280,20 @@ fun PageSignApp(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "是否开启对齐：",
+                        "是否开启对齐",
                         style = TextStyle(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
                             color = MaterialTheme.colors.onPrimary
                         ),
-                        modifier = Modifier.weight(1f).padding(horizontal = 15.dp)
+                        modifier = Modifier.weight(1f).padding(start = 10.dp)
                     )
 
-                    Checkbox(checked = uiState.isZipAlign, onCheckedChange = {
-                        viewModel.changeZipAlign(it)
-                    })
+                    Switch(checked = uiState.isZipAlign,
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color(0xff007AFF)),
+                        onCheckedChange = {
+                            viewModel.changeZipAlign(it)
+                        })
                 }
             }
 
@@ -309,10 +301,12 @@ fun PageSignApp(
 
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .background(color = MaterialTheme.colors.surface.copy(alpha = 0.3f))
+                    .background(color = Color.White.copy(0.8f))
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
+                val signedButtonEnable = (CommandResult.NOT_EXECUT == uiState.apkSignedResult) &&
+                        currentApkFilePath.isNotEmpty()
                 ButtonWidget(
                     {
                         scope.launch(Dispatchers.IO) {
@@ -407,8 +401,9 @@ fun PageSignApp(
                         }
 
                     },
-                    enabled = CommandResult.NOT_EXECUT == uiState.apkSignedResult,
+                    enabled = signedButtonEnable,
                     title = "开始签名apk",
+                    isHighlight = true,
                     modifier = Modifier.size(250.dp, 50.dp),
                 )
             }

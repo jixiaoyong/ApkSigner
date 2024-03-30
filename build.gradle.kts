@@ -35,7 +35,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ApkSigner"
-            packageVersion = "1.1.3"
+            packageVersion = "1.2.0"
 
             buildTypes.release {
                 proguard {

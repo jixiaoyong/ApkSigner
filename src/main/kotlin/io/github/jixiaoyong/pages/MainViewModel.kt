@@ -1,6 +1,10 @@
 package io.github.jixiaoyong.pages
 
 import ApkSigner
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.mutableStateOf
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.utils.SettingsTool
@@ -19,9 +23,9 @@ import kotlinx.coroutines.launch
 class MainViewModel(private val settings: SettingsTool) : BaseViewModel() {
     val routes =
         listOf(
-            Pair("\uD83D\uDD10 签名信息", Routes.SignInfo),
-            Pair("\uD83D\uDD12 签名APP", Routes.SignApp),
-            Pair("\uD83D\uDEE0 设置信息", Routes.SettingInfo),
+            Triple(Icons.Default.List, "签名信息", Routes.SignInfo),
+            Triple(Icons.Default.Lock, "签名APP", Routes.SignApp),
+            Triple(Icons.Default.Settings, "设置信息", Routes.SettingInfo),
         )
 
     val currentIndex = MutableStateFlow(Routes.SignInfo)
