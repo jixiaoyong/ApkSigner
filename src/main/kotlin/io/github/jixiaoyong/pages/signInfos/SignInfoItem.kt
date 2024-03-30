@@ -92,7 +92,10 @@ fun SignInfoItem(
                 keyboardOptions =
                 if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
                 shape = RoundedCornerShape(size = 15.dp),
-                textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Normal, color = Color.Black)
+                textStyle = LocalTextStyle.current.copy(
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colors.onBackground
+                )
             )
             if (null != onClick) ButtonWidget(
                 onClick = onClick,

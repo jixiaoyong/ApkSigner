@@ -176,7 +176,7 @@ fun PageSettingInfo() {
             ) {
                 Column(modifier = Modifier.weight(1f, true)) {
                     Text(
-                        "是否自动匹配签名",
+                        "自动匹配签名",
                         style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                     )
                     Text(

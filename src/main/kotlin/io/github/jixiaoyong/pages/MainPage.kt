@@ -55,6 +55,10 @@ fun App() {
         scope.launch(Dispatchers.Default) {
             detector = OsThemeDetector.getDetector()
             detector?.registerListener(listener)
+            detector?.isDark?.let {
+                isDarkTheme = it
+
+            }
         }
 
         onDispose {
@@ -83,6 +87,7 @@ fun App() {
                         } else {
                             Color.Transparent
                         }
+
                     Row(
                         modifier =
                         Modifier
@@ -101,7 +106,7 @@ fun App() {
                             tint = MaterialTheme.colors.primary,
                             modifier = Modifier.padding(end = 5.dp).size(18.dp)
                         )
-                        Text(route.second)
+                        Text(route.second, color = MaterialTheme.colors.onBackground)
                     }
                 }
             }
