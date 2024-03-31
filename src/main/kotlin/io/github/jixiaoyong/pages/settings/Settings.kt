@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
+import LocalI18nStrings
 import LocalSettings
 import LocalWindow
 import androidx.compose.foundation.background
@@ -56,6 +57,8 @@ fun PageSettingInfo() {
     val scope = rememberCoroutineScope()
     val window = LocalWindow.current
     val settings = LocalSettings.current
+    val i18nStringTool = LocalI18nStrings.current
+    val i18nString = i18nStringTool.strings
 
     val viewModel = viewModel { SettingInfoViewModel(settings) }
     val uiState by viewModel.uiState.collectAsState()
@@ -72,32 +75,32 @@ fun PageSettingInfo() {
             }, confirmButton = {
                 ButtonWidget(onClick = {
                     viewModel.runRestConfig()
-                    showToast("重置成功")
-                }, title = "确定")
+                    showToast(i18nString.resetSuccess)
+                }, title = i18nString.confirm)
 
             }, title = {
-                Text("确定重置吗")
+                Text(i18nString.confirmReset)
             }, text = {
                 Column {
-                    Text("重置会清除以下内容，请谨慎操作")
+                    Text(i18nString.confirmResetTips)
                     CheckBox(
                         checked = resetConfig.resetSignInfo,
-                        title = "签名信息",
+                        title = i18nString.signConfig,
                         onCheckedChange = {
                             viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
                         })
                     CheckBox(
                         checked = resetConfig.resetApkTools,
-                        title = "签名工具配置(不会删除文件)",
+                        title = i18nString.signToolsConfigResetTips,
                         onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
 
                     CheckBox(
                         checked = resetConfig.resetSignTypes,
-                        title = "签名方案",
+                        title = i18nString.signType,
                         onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
                     CheckBox(
                         checked = resetConfig.resetSignedDirectory,
-                        title = "签名文件输出目录",
+                        title = i18nString.signedApkOutputDir,
                         onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
                 }
             })
@@ -119,11 +122,11 @@ fun PageSettingInfo() {
                             val chooseFileName =
                                 FileChooseUtil.chooseSignDirectory(
                                     window,
-                                    "请选择build-tools目录",
+                                    i18nString.chooseBuildTools,
                                     oldDirectory
                                 )
                             if (chooseFileName.isNullOrBlank()) {
-                                showToast("请选择build-tools目录", ToastConfig.DURATION.Long)
+                                showToast(i18nString.chooseBuildTools, ToastConfig.DURATION.Long)
                             } else {
                                 viewModel.setupBuildToolsConfig(chooseFileName)
                             }
@@ -132,40 +135,41 @@ fun PageSettingInfo() {
                 component = JPanel(),
                 onFileDrop = { scope.launch { viewModel.setupBuildToolsConfig(it.first()) } }) {
                 Text(
-                    text = "请拖拽Android SDK的build-tools的子文件夹到这里，以一次性修改apkSigner和zipAlign目录",
+                    text = i18nString.chooseBuildToolsTips,
                     color = MaterialTheme.colors.onSurface,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(alignment = Alignment.Center)
                 )
             }
 
-            InfoItemWidget("apk signer目录",
-                uiState.apkSign ?: "尚未初始化",
-                description = "请选择Android SDK中build-tools目录apksigner文件",
+            InfoItemWidget(i18nString.apksignerDirectory,
+                uiState.apkSign ?: i18nString.notInit,
+                description = i18nString.chooseApksignerTips,
                 onClick = {
                     scope.launch {
                         val chooseFileName =
-                            FileChooseUtil.chooseSignFile(window, "请选择apksigner文件")
+                            FileChooseUtil.chooseSignFile(window, i18nString.plzChooseApksigner)
                         if (chooseFileName.isNullOrBlank()) {
-                            showToast("请选择apksigner文件", ToastConfig.DURATION.Long)
+                            showToast(i18nString.plzChooseApksigner, ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupApkSigner(chooseFileName)
                             viewModel.saveApkSigner(ApkSigner.apkSignerPath)
-                            showToast(result ?: "修改成功")
+                            showToast(result ?: i18nString.changeSuccess)
                         }
                     }
 
                 })
-            InfoItemWidget("zipalign目录", uiState.zipAlign ?: "尚未初始化",
-                description = "请选择Android SDK中build-tools目录zipalign文件",
+            InfoItemWidget(i18nString.zipDirectory, uiState.zipAlign ?: i18nString.notInit,
+                description = i18nString.chooseZipTips,
                 onClick = {
                     scope.launch {
-                        val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择zipAlign文件")
+                        val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.plzChooseZip)
                         if (chooseFileName.isNullOrBlank()) {
-                            showToast("请选择zipAlign文件", ToastConfig.DURATION.Long)
+                            showToast(i18nString.plzChooseZip, ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupZipAlign(chooseFileName)
                             viewModel.saveZipAlign(ApkSigner.zipAlignPath)
-                            showToast(result ?: "修改成功")
+                            showToast(result ?: i18nString.changeSuccess)
                         }
                     }
                 })
@@ -176,11 +180,11 @@ fun PageSettingInfo() {
             ) {
                 Column(modifier = Modifier.weight(1f, true)) {
                     Text(
-                        "自动匹配签名",
+                        i18nString.autoMatchSignature,
                         style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                     )
                     Text(
-                        "当只有一个apk文件时，则自动尝试匹配上次使用的签名信息",
+                        i18nString.autoMatchSignatureTips,
                         style = TextStyle(
                             fontWeight = FontWeight.Medium,
                             fontSize = 12.sp,
@@ -195,17 +199,18 @@ fun PageSettingInfo() {
                 )
             }
 
-            if (uiState.isAutoMatchSignature) InfoItemWidget("aapt目录", uiState.aapt ?: "尚未初始化",
-                description = "若要自动匹配签名，请正确配置Android SDK中build-tools目录aapt文件",
+            if (uiState.isAutoMatchSignature) InfoItemWidget(i18nString.aaptDirectory,
+                uiState.aapt ?: i18nString.notInit,
+                description = i18nString.aaptDirectoryTips,
                 onClick = {
                     scope.launch {
-                        val chooseFileName = FileChooseUtil.chooseSignFile(window, "请选择aapt文件")
+                        val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.chooseAaptDirectory)
                         if (chooseFileName.isNullOrBlank()) {
-                            showToast("请选择aapt文件", ToastConfig.DURATION.Long)
+                            showToast(i18nString.chooseAaptDirectory, ToastConfig.DURATION.Long)
                         } else {
                             val result = ApkSigner.setupAapt(chooseFileName)
                             viewModel.saveAapt(ApkSigner.aaptPath)
-                            showToast(result ?: "修改成功")
+                            showToast(result ?: i18nString.changeSuccess)
                         }
                     }
                 })
@@ -214,7 +219,7 @@ fun PageSettingInfo() {
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
                     onClick = { viewModel.toggleResetDialog() },
-                    title = "重置",
+                    title = i18nString.reset,
                     modifier = Modifier.size(250.dp, 50.dp)
                 )
             }
@@ -224,8 +229,8 @@ fun PageSettingInfo() {
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val str = "这是一个本地可视化签名APK的小工具。为了避免泄漏密钥等信息，本工具不会联网。\n" +
-                        "当前版本：${uiState.version}，查看最新版本请点击访问：$PROJECT_WEBSITE"
+
+                val str = i18nString.appIntro(uiState.version, PROJECT_WEBSITE)
                 val startIndex = str.indexOf(PROJECT_WEBSITE)
                 val endIndex = startIndex + PROJECT_WEBSITE.length
 

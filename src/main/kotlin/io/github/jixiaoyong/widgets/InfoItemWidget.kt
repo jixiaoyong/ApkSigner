@@ -1,5 +1,6 @@
 package io.github.jixiaoyong.widgets
 
+import LocalI18nStrings
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -33,13 +35,14 @@ fun InfoItemWidget(
     content: @Composable (() -> Unit)? = null
 ) {
     val rounderRadius = 10.dp
+    val i18nString = LocalI18nStrings.current.strings
     Column(modifier = Modifier.padding(horizontal = 5.dp).padding(top = 5.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                 .background(MaterialTheme.colors.secondaryVariant, RoundedCornerShape(5.dp)).padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(8f)) {
                 Text(
                     title,
                     style = TextStyle(
@@ -49,17 +52,22 @@ fun InfoItemWidget(
 
                 if (!description.isNullOrBlank()) Text(
                     description,
-                    style = TextStyle(color = MaterialTheme.colors.onSecondary, fontSize = 12.sp)
+                    style = TextStyle(color = MaterialTheme.colors.onSecondary, fontSize = 12.sp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            if (showChangeButton) ButtonWidget(
-                { onClick?.invoke() },
-                title = buttonTitle ?: "修改",
-                modifier = Modifier.height(30.dp)
-            )
+            if (showChangeButton) Row(
+                modifier = Modifier.weight(2f,fill = true),
+                horizontalArrangement = Arrangement.End
+            ) {
+                ButtonWidget(
+                    { onClick?.invoke() },
+                    title = buttonTitle ?: i18nString.change,
+                    modifier = Modifier.height(30.dp)
+                )
+            }
         }
 
         if (null != content) {
@@ -74,7 +82,7 @@ fun InfoItemWidget(
                     .padding(vertical = 15.dp, horizontal = 10.dp)
             ) {
                 Text(
-                    value ?: "暂无内容",
+                    value ?: i18nString.noContent,
                     style = TextStyle(
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,

@@ -1,5 +1,6 @@
 package io.github.jixiaoyong.pages.signInfos
 
+import LocalI18nStrings
 import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PageSignInfo(viewModel: SignInfoViewModel) {
     val window = LocalWindow.current
+    val i18nString = LocalI18nStrings.current.strings
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
@@ -74,7 +76,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "当前签名: ",
+                    "",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.primary,
@@ -82,7 +84,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     )
                 )
                 Text(
-                    uiState.selectedSignInfo?.keyNickName ?: "暂无",
+                    uiState.selectedSignInfo?.keyNickName ?: i18nString.noContent,
                     style = TextStyle(
                         lineBreak = LineBreak.Paragraph,
                         color = MaterialTheme.colors.onBackground,
@@ -107,7 +109,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     onClick = {
                         dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset)
                     },
-                    title = "重新选择签名",
+                    title = i18nString.changeSignInfo,
                 )
             }
 
@@ -147,7 +149,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                     modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
                                 )
                                 HoverableTooltip(
-                                    description = "删除此工具存储的签名信息，不会删除apk签名文件",
+                                    description = i18nString.deleteSignInfoTips,
                                     alwaysShow = true
                                 ) { modifier ->
                                     IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
@@ -167,24 +169,24 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
 
             Column(modifier = Modifier.padding(vertical = 25.dp).fillMaxWidth()) {
                 SignInfoItem(
-                    "签名别名",
+                    i18nString.nickName,
                     newSignInfo.keyNickName,
                     false,
-                    description = "备注名称，用来区分不同签名"
+                    description = i18nString.nickNameDescription
                 ) { nickName ->
                     viewModel.updateNewSignInfo(keyNickName = nickName)
                 }
                 SignInfoItem(
-                    "文件路径", newSignInfo.keyStorePath, false, onClick = {
+                    i18nString.filePath, newSignInfo.keyStorePath, false, onClick = {
                         scope.launch {
-                            val result = FileChooseUtil.chooseSignFile(window, "请选择Android签名文件")
+                            val result = FileChooseUtil.chooseSignFile(window, i18nString.plzSelectSignFile)
                             if (result.isNullOrBlank()) {
-                                showToast("请选择Android签名文件")
+                                showToast(i18nString.plzSelectSignFile)
                             } else {
                                 viewModel.updateNewSignInfo(keyStorePath = result)
                             }
                         }
-                    }, buttonText = "选择文件", description = "签名文件的有效绝对路径"
+                    }, buttonText = i18nString.chooseFile, description = i18nString.absolutePathOfSignFile
                 ) { keyStorePath ->
                     viewModel.updateNewSignInfo(keyStorePath = keyStorePath)
                 }
@@ -208,15 +210,15 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 ) {
                     ButtonWidget(
                         enabled = newSignInfo.isValid(),
-                        title = "保存新签名信息",
+                        title = i18nString.saveNewSignInfo,
                         isHighlight = true,
                         modifier = Modifier.size(250.dp, 50.dp),
                         onClick = {
                             scope.launch {
                                 viewModel.saveNewSignInfo(newSignInfo)
                                 val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
-                                    "🎉保存成功！\n请点击【重新选择签名】按钮查看，是否清除已填写内容？",
-                                    actionLabel = "清空",
+                                    i18nString.saveNewSignInfoTips,
+                                    actionLabel = i18nString.cleanUp,
                                     duration = SnackbarDuration.Short
                                 )
                                 if (SnackbarResult.ActionPerformed == isNeedClean) {

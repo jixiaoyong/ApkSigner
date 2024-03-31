@@ -34,7 +34,7 @@ import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
-val LocalStrings = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
+val LocalI18nStrings = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
 
 fun main() =
     application {
@@ -56,7 +56,7 @@ fun main() =
             CompositionLocalProvider(
                 LocalWindow provides window,
                 LocalSettings provides SettingsTool(scope = rememberCoroutineScope()),
-                LocalStrings provides lyricist
+                LocalI18nStrings provides lyricist
             ) {
                 LaunchedEffect(checkDualRunning) {
                     appState = AppState.Loading
@@ -98,13 +98,13 @@ fun LoadingPage() {
         verticalArrangement = Arrangement.Center,
     ) {
         CircularProgressIndicator()
-        Text(LocalStrings.current.strings.loading, Modifier.padding(top = 10.dp))
+        Text(LocalI18nStrings.current.strings.loading, Modifier.padding(top = 10.dp))
     }
 }
 
 @Composable
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
-    val i18nString = LocalStrings.current.strings
+    val i18nString = LocalI18nStrings.current.strings
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 
 /**
  * @author : jixiaoyong
- * @description ：TODO
+ * @description ：识别拖拽文件的区域
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 29/3/2024

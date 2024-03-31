@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 
 /**
  * @author : jixiaoyong
- * @description ：TODO
+ * @description ：包装之后的checkbox
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 30/3/2024
