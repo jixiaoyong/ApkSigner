@@ -21,7 +21,7 @@ internal val ZhStrings = Strings(
     confirm = "确定",
     change = "修改",
     noContent = "暂无内容",
-    currentSignInfo = "当前签名: ",
+    currentSignInfo = "当前签名",
     changeSignInfo = "重新选择签名",
     deleteSignInfoTips = "删除此工具存储的签名信息，不会删除apk签名文件",
     nickName = "签名别名",
@@ -59,4 +59,24 @@ internal val ZhStrings = Strings(
         "这是一个本地可视化签名APK的小工具。为了避免泄漏密钥等信息，本工具不会联网。\n" +
                 "当前版本：$version，查看最新版本请点击访问：$webSite"
     },
+    signInfoTitle = "签名信息（鼠标上下滚动查看更多）",
+    checkSignFailed = { msg -> "查询签名失败:$msg" },
+    processing = "正在处理中……",
+    plzChooseApkFile = "请选择要签名的apk文件",
+    chooseApkFileTips = "请拖拽apk文件到这里\n(支持多选，也可以点击这里选择apk文件)",
+    currentSelectedFile = "当前选中文件",
+    plzSelectApkFileFirst = "请先选择apk文件",
+    checkSignInfo = "查看签名",
+    plzChooseSignedApkOutDir = "请先选择签名文件输出目录",
+    changeDir = "修改目录",
+    signType1Desc = "Android最低API为24+时无法使用V1签名",
+    isApkAlign = "是否开启对齐(zipAlign)",
+    chooseRightSignatureTips = "请先配置正确的签名文件",
+    setupApksignerAndZipAlignTips = "请先配置apksigner和zipalign路径",
+    chooseSignTypeFirst = "请至少选择一种签名方式",
+    chooseOpenSignedApkFile = "签名成功，是否打开签名后的文件？",
+    open = "打开",
+    signedFailed = "签名失败，：",
+    copyErrorMsg = "复制错误信息",
+    startSignApk = "开始签名apk"
 )

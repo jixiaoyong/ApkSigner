@@ -76,7 +76,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "",
+                    i18nString.currentSignInfo,
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.primary,

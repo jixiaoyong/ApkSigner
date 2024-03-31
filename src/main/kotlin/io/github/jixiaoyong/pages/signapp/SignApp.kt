@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
+import LocalI18nStrings
 import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,6 +63,7 @@ fun PageSignApp(
 ) {
     val window = LocalWindow.current
     val clipboard = LocalClipboardManager.current
+    val i18nStrings = LocalI18nStrings.current.strings
 
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -83,7 +85,7 @@ fun PageSignApp(
                         .padding(horizontal = 20.dp, vertical = 15.dp)
                 ) {
                     Text(
-                        "签名信息（鼠标上下滚动查看更多）",
+                        i18nStrings.signInfoTitle,
                         color = MaterialTheme.colors.onSurface,
                         fontWeight = FontWeight.W800,
                         modifier = Modifier.padding(20.dp).align(alignment = Alignment.CenterHorizontally)
@@ -103,7 +105,7 @@ fun PageSignApp(
                         viewModel.changeSignInfo(CommandResult.NOT_EXECUT)
                     }, modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) {
                         Text(
-                            "确认",
+                            i18nStrings.confirm,
                             color = MaterialTheme.colors.primary
                         )
                     }
@@ -113,7 +115,7 @@ fun PageSignApp(
 
         is CommandResult.Error<*> -> {
             scope.launch {
-                showToast("查询签名失败:${local.message}")
+                showToast(i18nStrings.checkSignFailed(local.message.toString()))
             }
         }
 
@@ -136,7 +138,7 @@ fun PageSignApp(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(80.dp).padding(10.dp))
-                    Text("处理中……", color = MaterialTheme.colors.onPrimary.copy(0.8f))
+                    Text(i18nStrings.processing, color = MaterialTheme.colors.onPrimary.copy(0.8f))
                 }
             }
         }
@@ -164,12 +166,12 @@ fun PageSignApp(
                                 val chooseFileName =
                                     FileChooseUtil.chooseMultiFile(
                                         window,
-                                        "请选择要签名的apk文件",
+                                        i18nStrings.plzChooseApkFile,
                                         filter = { _, name ->
                                             name.toLowerCase(Locale.getDefault()).endsWith(".apk")
                                         })
                                 if (chooseFileName.isNullOrEmpty()) {
-                                    showToast("请选择要签名的apk文件")
+                                    showToast(i18nStrings.plzChooseApkFile)
                                 } else {
                                     if (!uiState.signedOutputDirectory.isNullOrBlank()) {
                                         viewModel.saveSignedOutputDirectory(
@@ -177,7 +179,7 @@ fun PageSignApp(
                                         )
                                     }
                                     viewModel.changeApkFilePath(chooseFileName)
-                                    showToast("修改成功")
+                                    showToast(i18nStrings.changeSuccess)
                                 }
                             }
                         },
@@ -188,29 +190,31 @@ fun PageSignApp(
                                 it.lowercase(Locale.getDefault()).endsWith(".apk")
                             }
                             if (file.isEmpty()) {
-                                showToast("请先选择正确的apk文件")
+                                showToast(i18nStrings.plzChooseApkFile)
                             } else {
                                 viewModel.changeApkFilePath(file)
-                                showToast("修改成功")
+                                showToast(i18nStrings.changeSuccess)
                             }
                         }
                     }
                 ) {
                     Text(
-                        text = "请拖拽apk文件到这里\n(支持多选，也可以点击这里选择apk文件)",
+                        text = i18nStrings.chooseApkFileTips,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colors.onSurface,
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
                 InfoItemWidget(
-                    "当前选择的文件${if (currentApkFilePath.isEmpty()) "" else "(" + currentApkFilePath.size + ")"}",
-                    if (currentApkFilePath.isEmpty()) "请先选择apk文件" else currentApkFilePath.joinToString("\n"),
-                    buttonTitle = "查看签名",
+                    "${i18nStrings.currentSelectedFile}${if (currentApkFilePath.isEmpty()) "" else "(" + currentApkFilePath.size + ")"}",
+                    if (currentApkFilePath.isEmpty()) i18nStrings.plzSelectApkFileFirst else currentApkFilePath.joinToString(
+                        "\n"
+                    ),
+                    buttonTitle = i18nStrings.checkSignInfo,
                     onClick = {
                         scope.launch(Dispatchers.IO) {
                             if (currentApkFilePath.isEmpty()) {
-                                showToast("请先选择apk文件")
+                                showToast(i18nStrings.plzSelectApkFileFirst)
                             } else {
                                 viewModel.changeSignInfo(CommandResult.EXECUTING)
                                 val resultList = currentApkFilePath.map { ApkSigner.getApkSignInfo(it) }
@@ -221,18 +225,18 @@ fun PageSignApp(
                     }
                 )
                 InfoItemWidget(
-                    "当前的签名文件",
-                    uiState.currentSignInfo?.toString() ?: "暂无",
+                    i18nStrings.currentSignInfo,
+                    uiState.currentSignInfo?.toString() ?: i18nStrings.noContent,
                     onClick = {
                         onChangePage(Routes.SignInfo)
                         viewModel.removeApkSignature(uiState.apkPackageName)
                     })
 
-                val errorTips = "请先选择签名文件输出目录"
+                val errorTips = i18nStrings.plzChooseSignedApkOutDir
                 InfoItemWidget(
-                    "签名后的文件输出目录",
+                    i18nStrings.signedApkOutputDir,
                     uiState.signedOutputDirectory ?: errorTips,
-                    buttonTitle = "修改目录",
+                    buttonTitle = i18nStrings.changeDir,
                     onClick = {
                         scope.launch {
                             val outputDirectory =
@@ -245,14 +249,14 @@ fun PageSignApp(
                                 showToast(errorTips)
                             } else {
                                 viewModel.saveSignedOutputDirectory(outputDirectory)
-                                showToast("修改成功")
+                                showToast(i18nStrings.changeSuccess)
                             }
                         }
                     }
                 )
 
                 InfoItemWidget(
-                    "签名方案",
+                    i18nStrings.signType,
                     null,
                     showChangeButton = false
                 ) {
@@ -274,7 +278,7 @@ fun PageSignApp(
 
                                         viewModel.changeApkSignType(newTypes)
                                     })
-                                HoverableTooltip(description = item.description)
+                                HoverableTooltip(description = item.description(i18nStrings))
                             }
                         }
                     }
@@ -286,7 +290,7 @@ fun PageSignApp(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "是否开启对齐",
+                        i18nStrings.isApkAlign,
                         style = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
@@ -316,25 +320,25 @@ fun PageSignApp(
                             if (currentApkFilePath.filter { it.lowercase(Locale.getDefault()).endsWith(".apk") }
                                     .isEmpty()
                             ) {
-                                showToast("请先选择正确的apk文件")
+                                showToast(i18nStrings.plzSelectApkFileFirst)
                                 return@launch
                             }
 
                             val localSelectedSignInfo = uiState.currentSignInfo
                             if (null == localSelectedSignInfo || !localSelectedSignInfo.isValid()) {
                                 onChangePage(Routes.SignInfo)
-                                showToast("请先配置正确的签名文件")
+                                showToast(i18nStrings.chooseRightSignatureTips)
                                 return@launch
                             }
 
                             if (!ApkSigner.isInitialized()) {
                                 onChangePage(Routes.SettingInfo)
-                                showToast("请先配置apksigner和zipalign路径")
+                                showToast(i18nStrings.setupApksignerAndZipAlignTips)
                                 return@launch
                             }
 
                             if (uiState.apkSignType.isEmpty()) {
-                                showToast("请至少选择一种签名方式")
+                                showToast(i18nStrings.chooseSignTypeFirst)
                                 return@launch
                             }
 
@@ -382,8 +386,8 @@ fun PageSignApp(
                                 }
 
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
-                                    "签名成功，是否打开签名后的文件？",
-                                    "打开",
+                                    i18nStrings.chooseOpenSignedApkFile,
+                                    i18nStrings.open,
                                     SnackbarDuration.Long
                                 )
                                 val file = File(firstSuccessSignedApk?.result?.toString() ?: "")
@@ -392,8 +396,8 @@ fun PageSignApp(
                                 }
                             } else if (mergedResult is CommandResult.Error<*>) {
                                 val result = scaffoldState.snackbarHostState.showSnackbar(
-                                    "签名失败，：${mergedResult.message}",
-                                    "复制错误信息",
+                                    "${i18nStrings.signedFailed}${mergedResult.message}",
+                                    i18nStrings.copyErrorMsg,
                                     SnackbarDuration.Indefinite
                                 )
                                 if (SnackbarResult.ActionPerformed == result) {
@@ -405,7 +409,7 @@ fun PageSignApp(
 
                     },
                     enabled = signedButtonEnable,
-                    title = "开始签名apk",
+                    title = i18nStrings.startSignApk,
                     isHighlight = true,
                     modifier = Modifier.size(250.dp, 50.dp),
                 )

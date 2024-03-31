@@ -21,7 +21,7 @@ internal val EnStrings = Strings(
     confirm = "Confirm",
     change = "Change",
     noContent = "No content",
-    currentSignInfo = "Current signature: ",
+    currentSignInfo = "Current signature",
     changeSignInfo = "Re-select signature",
     deleteSignInfoTips = "Delete this tool stored signature information, it won't delete your APK signature files",
     nickName = "Signature nickname",
@@ -59,6 +59,26 @@ internal val EnStrings = Strings(
         "This is a small tool for local visualization of signed APKs. \nIn order to avoid leaking information such as keys, this tool will not be connected to the Internet.\n" +
                 "Current version:$version，To view the latest version, please click to visit:$webSite"
     },
+    signInfoTitle = "Signature information (scroll your mouse up and down to view more)",
+    checkSignFailed = { msg -> "Failed to query signature:$msg" },
+    processing = "Processing...",
+    plzChooseApkFile = "Please select the apk file to be signed",
+    chooseApkFileTips = "Please drag and drop the apk file here\n(supports multiple selections, you can also click here to select the apk file)",
+    currentSelectedFile = "Currently selected file",
+    plzSelectApkFileFirst = "Please select the apk file first",
+    checkSignInfo = "View signature",
+    plzChooseSignedApkOutDir = "Please select the signature file output directory first",
+    changeDir = "Modify",
+    signType1Desc = "V 1 signature cannot be used when Android minimum API is 24+",
+    isApkAlign = "Whether to enable alignment (zipAlign)",
+    chooseRightSignatureTips = "Please configure the correct signature file first",
+    setupApksignerAndZipAlignTips = "Please configure apksigner and zipalign paths first",
+    chooseSignTypeFirst = "Please select at least one signature method",
+    chooseOpenSignedApkFile = "The signature is successful. Do you want to open the signed file?",
+    open = "Open",
+    signedFailed = "Signing failed: ",
+    copyErrorMsg = "Copy error message",
+    startSignApk = "Start signing apk"
 )
 
 //internal val EnStrings = Strings(

@@ -36,10 +36,10 @@ fun InfoItemWidget(
 ) {
     val rounderRadius = 10.dp
     val i18nString = LocalI18nStrings.current.strings
-    Column(modifier = Modifier.padding(horizontal = 5.dp).padding(top = 5.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 10.dp).padding(top = 5.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
-                .background(MaterialTheme.colors.secondaryVariant, RoundedCornerShape(5.dp)).padding(5.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)
+                .padding(vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(8f)) {
@@ -54,12 +54,13 @@ fun InfoItemWidget(
                     description,
                     style = TextStyle(color = MaterialTheme.colors.onSecondary, fontSize = 12.sp),
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 5.dp)
                 )
             }
 
             if (showChangeButton) Row(
-                modifier = Modifier.weight(2f,fill = true),
+                modifier = Modifier.weight(3f, fill = true),
                 horizontalArrangement = Arrangement.End
             ) {
                 ButtonWidget(
@@ -75,10 +76,8 @@ fun InfoItemWidget(
         } else {
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .background(
-                        MaterialTheme.colors.background,
-                        RoundedCornerShape(bottomEnd = rounderRadius, bottomStart = rounderRadius)
-                    )
+                    .padding(top = 5.dp, bottom = 15.dp)
+                    .background(MaterialTheme.colors.surface, RoundedCornerShape(5.dp))
                     .padding(vertical = 15.dp, horizontal = 10.dp)
             ) {
                 Text(

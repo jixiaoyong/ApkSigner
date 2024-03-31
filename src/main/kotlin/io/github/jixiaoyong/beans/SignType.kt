@@ -1,5 +1,7 @@
 package io.github.jixiaoyong.beans
 
+import io.github.jixiaoyong.i18n.Strings
+
 /**
  * @author : jixiaoyong
  * @description ：签名类型
@@ -7,8 +9,8 @@ package io.github.jixiaoyong.beans
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/25
  */
-sealed class SignType(val type: Int, val name: String, val description: String? = null) {
-    object V1 : SignType(1, "V1", "Android最低API为24+时无法使用V1签名")
+sealed class SignType(val type: Int, val name: String) {
+    object V1 : SignType(1, "V1")
     object V2 : SignType(2, "V2")
     object V3 : SignType(3, "V3")
     object V4 : SignType(4, "V4")
@@ -16,6 +18,14 @@ sealed class SignType(val type: Int, val name: String, val description: String? 
 
     override fun toString(): String {
         return "$type"
+    }
+
+    fun description(i18nString: Strings):String? {
+        return if(V1.type ==type){
+            i18nString.signType1Desc
+        }else{
+            null
+        }
     }
 
     companion object {
