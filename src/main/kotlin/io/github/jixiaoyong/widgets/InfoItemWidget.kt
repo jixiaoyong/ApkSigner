@@ -1,6 +1,5 @@
 package io.github.jixiaoyong.widgets
 
-import LocalI18nStrings
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.lyricist.strings
 
 /**
  * @author : jixiaoyong
@@ -35,7 +35,7 @@ fun InfoItemWidget(
     content: @Composable (() -> Unit)? = null
 ) {
     val rounderRadius = 10.dp
-    val i18nString = LocalI18nStrings.current.strings
+    val i18nString = strings
     Column(modifier = Modifier.padding(horizontal = 10.dp).padding(top = 5.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)

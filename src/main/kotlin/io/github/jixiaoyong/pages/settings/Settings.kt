@@ -1,9 +1,10 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
-import LocalI18nStrings
+import LocalLyricist
 import LocalSettings
 import LocalWindow
+import Logger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,10 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -27,7 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.lyricist.strings
 import io.github.jixiaoyong.base.viewModel
+import io.github.jixiaoyong.i18n.Locale
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.ToastConfig
@@ -57,8 +57,8 @@ fun PageSettingInfo() {
     val scope = rememberCoroutineScope()
     val window = LocalWindow.current
     val settings = LocalSettings.current
-    val i18nStringTool = LocalI18nStrings.current
-    val i18nString = i18nStringTool.strings
+    val i18nString = strings
+    val lyricist = LocalLyricist.current
 
     val viewModel = viewModel { SettingInfoViewModel(settings) }
     val uiState by viewModel.uiState.collectAsState()
@@ -83,23 +83,17 @@ fun PageSettingInfo() {
             }, text = {
                 Column {
                     Text(i18nString.confirmResetTips)
-                    CheckBox(
-                        checked = resetConfig.resetSignInfo,
-                        title = i18nString.signConfig,
-                        onCheckedChange = {
-                            viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
-                        })
-                    CheckBox(
-                        checked = resetConfig.resetApkTools,
+                    CheckBox(checked = resetConfig.resetSignInfo, title = i18nString.signConfig, onCheckedChange = {
+                        viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
+                    })
+                    CheckBox(checked = resetConfig.resetApkTools,
                         title = i18nString.signToolsConfigResetTips,
                         onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
 
-                    CheckBox(
-                        checked = resetConfig.resetSignTypes,
+                    CheckBox(checked = resetConfig.resetSignTypes,
                         title = i18nString.signType,
                         onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
-                    CheckBox(
-                        checked = resetConfig.resetSignedDirectory,
+                    CheckBox(checked = resetConfig.resetSignedDirectory,
                         title = i18nString.signedApkOutputDir,
                         onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
                 }
@@ -107,24 +101,55 @@ fun PageSettingInfo() {
         }
     }
 
+    if (resetConfig.showChangeLanguageDialog) {
+        MaterialTheme(
+            typography = MaterialTheme.typography.copy(
+                body1 = TextStyle.Default.copy(color = MaterialTheme.colors.onBackground)
+            ),
+        ) {
+            var currentLanguage by remember { mutableStateOf(lyricist.languageTag) }
+            AlertDialog(onDismissRequest = {
+                viewModel.toggleLanguageDialog()
+            }, confirmButton = {
+                ButtonWidget(onClick = {
+                    Logger.log("change language form ${lyricist.languageTag} to $currentLanguage")
+
+                    lyricist.languageTag = currentLanguage
+                    viewModel.changeLanguage(currentLanguage)
+                    viewModel.toggleLanguageDialog()
+                }, title = i18nString.confirm)
+
+            }, title = {
+                Text(i18nString.changeLanguage)
+            }, text = {
+                Column {
+                    Locale.values().map { item ->
+                        CheckBox(checked = item.code == currentLanguage, title = item.languageName,
+                            onCheckedChange = {
+                                if (it) {
+                                    currentLanguage = item.code
+                                }
+                            })
+                    }
+                }
+            })
+        }
+    }
+
+
     Scaffold(scaffoldState = scaffoldState) {
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).verticalScroll(rememberScrollState())
         ) {
             DropBoxPanel(window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
-                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp))
-                    .padding(15.dp)
+                    .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp)).padding(15.dp)
                     .clickable {
                         scope.launch {
                             val oldDirectory = uiState.apkSign?.substringBeforeLast(File.separator)
-                            val chooseFileName =
-                                FileChooseUtil.chooseSignDirectory(
-                                    window,
-                                    i18nString.chooseBuildTools,
-                                    oldDirectory
-                                )
+                            val chooseFileName = FileChooseUtil.chooseSignDirectory(
+                                window, i18nString.chooseBuildTools, oldDirectory
+                            )
                             if (chooseFileName.isNullOrBlank()) {
                                 showToast(i18nString.chooseBuildTools, ToastConfig.DURATION.Long)
                             } else {
@@ -147,8 +172,7 @@ fun PageSettingInfo() {
                 description = i18nString.chooseApksignerTips,
                 onClick = {
                     scope.launch {
-                        val chooseFileName =
-                            FileChooseUtil.chooseSignFile(window, i18nString.plzChooseApksigner)
+                        val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.plzChooseApksigner)
                         if (chooseFileName.isNullOrBlank()) {
                             showToast(i18nString.plzChooseApksigner, ToastConfig.DURATION.Long)
                         } else {
@@ -159,7 +183,8 @@ fun PageSettingInfo() {
                     }
 
                 })
-            InfoItemWidget(i18nString.zipDirectory, uiState.zipAlign ?: i18nString.notInit,
+            InfoItemWidget(i18nString.zipDirectory,
+                uiState.zipAlign ?: i18nString.notInit,
                 description = i18nString.chooseZipTips,
                 onClick = {
                     scope.launch {
@@ -184,11 +209,8 @@ fun PageSettingInfo() {
                         style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
                     )
                     Text(
-                        i18nString.autoMatchSignatureTips,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colors.onSecondary
+                        i18nString.autoMatchSignatureTips, style = TextStyle(
+                            fontWeight = FontWeight.Medium, fontSize = 12.sp, color = MaterialTheme.colors.onSecondary
                         )
                     )
                 }
@@ -215,6 +237,13 @@ fun PageSettingInfo() {
                     }
                 })
 
+            InfoItemWidget(
+                i18nString.currentLanguageTitle,
+                Locale.getLocale(lyricist.languageTag).languageName,
+                onClick = {
+                    viewModel.toggleLanguageDialog()
+                })
+
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
@@ -238,28 +267,21 @@ fun PageSettingInfo() {
                     append(str)
                     addStyle(
                         style = SpanStyle(
-                            color = MaterialTheme.colors.primary,
-                            textDecoration = TextDecoration.Underline
+                            color = MaterialTheme.colors.primary, textDecoration = TextDecoration.Underline
                         ), start = startIndex, end = endIndex
                     )
                     addStringAnnotation("URL", PROJECT_WEBSITE, startIndex, endIndex)
                 }
                 val uriHandler = LocalUriHandler.current
-                ClickableText(
-                    text = annotatedString,
-                    style = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colors.onSecondary.copy(alpha = 0.5f)
-                    ),
-                    onClick = { offset ->
-                        annotatedString
-                            .getStringAnnotations("URL", offset, offset)
-                            .firstOrNull()?.let { stringAnnotation ->
-                                uriHandler.openUri(stringAnnotation.item)
-                            }
+                ClickableText(text = annotatedString, style = TextStyle(
+                    textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colors.onSecondary.copy(alpha = 0.5f)
+                ), onClick = { offset ->
+                    annotatedString.getStringAnnotations("URL", offset, offset).firstOrNull()?.let { stringAnnotation ->
+                        uriHandler.openUri(stringAnnotation.item)
                     }
-                )
+                })
             }
         }
     }

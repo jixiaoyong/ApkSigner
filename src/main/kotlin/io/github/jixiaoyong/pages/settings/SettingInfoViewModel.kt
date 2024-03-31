@@ -50,6 +50,12 @@ class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel()
         )
     }
 
+    fun toggleLanguageDialog() {
+        uiStateFlow.value = uiStateFlow.value.copy(
+            resetInfo = uiStateFlow.value.resetInfo.copy(showChangeLanguageDialog = !uiStateFlow.value.resetInfo.showChangeLanguageDialog)
+        )
+    }
+
     /**
      *  Updates the reset configuration values based on the provided parameters.
      *  null 表示不修改现有值
@@ -115,6 +121,10 @@ class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel()
     fun saveAutoMatchSignature(autoMatch: Boolean) {
         settings.save(StorageKeys.AUTO_MATCH_SIGNATURE, autoMatch)
     }
+
+    fun changeLanguage(currentLanguage: String) {
+        settings.save(StorageKeys.LANGUAGE, currentLanguage)
+    }
 }
 
 data class SettingInfoUiState(
@@ -131,5 +141,6 @@ data class SettingInfoResetState(
     val resetSignInfo: Boolean = false,
     val resetApkTools: Boolean = false,
     val resetSignTypes: Boolean = false,
-    val resetSignedDirectory: Boolean = false
+    val resetSignedDirectory: Boolean = false,
+    val showChangeLanguageDialog: Boolean = false
 )

@@ -1,6 +1,5 @@
 package io.github.jixiaoyong.pages.signInfos
 
-import LocalI18nStrings
 import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.lyricist.strings
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.showToast
@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PageSignInfo(viewModel: SignInfoViewModel) {
     val window = LocalWindow.current
-    val i18nString = LocalI18nStrings.current.strings
+    val i18nStrings = strings
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
@@ -76,7 +76,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    i18nString.currentSignInfo,
+                    i18nStrings.currentSignInfo,
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.primary,
@@ -84,7 +84,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     )
                 )
                 Text(
-                    uiState.selectedSignInfo?.keyNickName ?: i18nString.noContent,
+                    uiState.selectedSignInfo?.keyNickName ?: i18nStrings.noContent,
                     style = TextStyle(
                         lineBreak = LineBreak.Paragraph,
                         color = MaterialTheme.colors.onBackground,
@@ -109,7 +109,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     onClick = {
                         dropdownMenu.status = DropdownMenuState.Status.Open(selectedSignInfoLayoutOffset)
                     },
-                    title = i18nString.changeSignInfo,
+                    title = i18nStrings.changeSignInfo,
                 )
             }
 
@@ -149,7 +149,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                     modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
                                 )
                                 HoverableTooltip(
-                                    description = i18nString.deleteSignInfoTips,
+                                    description = i18nStrings.deleteSignInfoTips,
                                     alwaysShow = true
                                 ) { modifier ->
                                     IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
@@ -169,24 +169,24 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
 
             Column(modifier = Modifier.padding(vertical = 25.dp).fillMaxWidth()) {
                 SignInfoItem(
-                    i18nString.nickName,
+                    i18nStrings.nickName,
                     newSignInfo.keyNickName,
                     false,
-                    description = i18nString.nickNameDescription
+                    description = i18nStrings.nickNameDescription
                 ) { nickName ->
                     viewModel.updateNewSignInfo(keyNickName = nickName)
                 }
                 SignInfoItem(
-                    i18nString.filePath, newSignInfo.keyStorePath, false, onClick = {
+                    i18nStrings.filePath, newSignInfo.keyStorePath, false, onClick = {
                         scope.launch {
-                            val result = FileChooseUtil.chooseSignFile(window, i18nString.plzSelectSignFile)
+                            val result = FileChooseUtil.chooseSignFile(window, i18nStrings.plzSelectSignFile)
                             if (result.isNullOrBlank()) {
-                                showToast(i18nString.plzSelectSignFile)
+                                showToast(i18nStrings.plzSelectSignFile)
                             } else {
                                 viewModel.updateNewSignInfo(keyStorePath = result)
                             }
                         }
-                    }, buttonText = i18nString.chooseFile, description = i18nString.absolutePathOfSignFile
+                    }, buttonText = i18nStrings.chooseFile, description = i18nStrings.absolutePathOfSignFile
                 ) { keyStorePath ->
                     viewModel.updateNewSignInfo(keyStorePath = keyStorePath)
                 }
@@ -210,15 +210,15 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                 ) {
                     ButtonWidget(
                         enabled = newSignInfo.isValid(),
-                        title = i18nString.saveNewSignInfo,
+                        title = i18nStrings.saveNewSignInfo,
                         isHighlight = true,
                         modifier = Modifier.size(250.dp, 50.dp),
                         onClick = {
                             scope.launch {
                                 viewModel.saveNewSignInfo(newSignInfo)
                                 val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
-                                    i18nString.saveNewSignInfoTips,
-                                    actionLabel = i18nString.cleanUp,
+                                    i18nStrings.saveNewSignInfoTips,
+                                    actionLabel = i18nStrings.cleanUp,
                                     duration = SnackbarDuration.Short
                                 )
                                 if (SnackbarResult.ActionPerformed == isNeedClean) {

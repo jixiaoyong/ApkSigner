@@ -72,5 +72,7 @@ data class Strings(
     val open:String,
     val signedFailed:String,
     val copyErrorMsg:String,
-    val startSignApk:String
+    val startSignApk:String,
+    val changeLanguage:String,
+    val currentLanguageTitle:String,
     )

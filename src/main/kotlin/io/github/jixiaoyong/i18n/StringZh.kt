@@ -9,7 +9,7 @@ import cafe.adriel.lyricist.LyricistStrings
  * @email : jixiaoyong1995@gmail.com
  * @date : 30/3/2024
  */
-@LyricistStrings(languageTag = Locales.ZH, default = true)
+@LyricistStrings(languageTag = Locales.ZH)
 internal val ZhStrings = Strings(
     loading = "加载中……",
     alreadyRunning = "ApkSigner已经启动了，请不要重复启动",
@@ -78,5 +78,7 @@ internal val ZhStrings = Strings(
     open = "打开",
     signedFailed = "签名失败，：",
     copyErrorMsg = "复制错误信息",
-    startSignApk = "开始签名apk"
+    startSignApk = "开始签名apk",
+    changeLanguage = "修改语言",
+    currentLanguageTitle = "语言"
 )

@@ -30,6 +30,7 @@ interface KeyValueStorage {
     val apkSigner: Flow<String?>
     val zipAlign: Flow<String?>
     val aapt: Flow<String?>
+    val language: Flow<String?>
     val isZipAlign: Flow<Boolean>
     val isAutoMatchSignature: Flow<Boolean>
     val signedDirectory: Flow<String?>
@@ -41,7 +42,6 @@ interface KeyValueStorage {
     fun save(key: StorageKeys, value: Any?)
 }
 
-
 enum class StorageKeys {
     APK_SIGNER_PATH, // 签名工具路径
     ZIP_ALIGN_PATH, // 压缩工具路径
@@ -52,10 +52,12 @@ enum class StorageKeys {
     SIGN_TYPE_LIST, // 签名类型列表
     ALIGN_ENABLE, // 是否开启zipalign压缩
     APK_SIGNATURE_MAP, // apk包名和对应签名id的map
+    LANGUAGE, // 当前的语言
     AUTO_MATCH_SIGNATURE; // 是否自动匹配签名信息
 
     val key get() = this.name
 }
+
 
 @OptIn(ExperimentalSettingsApi::class)
 class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
@@ -66,6 +68,8 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
         get() = observableSettings.getStringOrNullFlow(StorageKeys.APK_SIGNER_PATH.key)
     override val aapt: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.AAPT_PATH.key)
+    override val language: Flow<String?>
+        get() = observableSettings.getStringOrNullFlow(StorageKeys.LANGUAGE.key)
     override val zipAlign: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.ZIP_ALIGN_PATH.key)
     override val isZipAlign: Flow<Boolean>

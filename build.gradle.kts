@@ -15,6 +15,12 @@ repositories {
     google()
     maven("https://jitpack.io")
 }
+
+ksp {
+    arg("lyricist.generateStringsProperty", "true")
+
+}
+
 val multiplatformSettings = "1.1.1"
 val lyricist = "1.6.2-1.8.20"
 dependencies {

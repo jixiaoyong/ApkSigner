@@ -1,7 +1,6 @@
 package io.github.jixiaoyong.pages.signapp
 
 import ApkSigner
-import LocalI18nStrings
 import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import cafe.adriel.lyricist.strings
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.pages.Routes
@@ -63,7 +63,7 @@ fun PageSignApp(
 ) {
     val window = LocalWindow.current
     val clipboard = LocalClipboardManager.current
-    val i18nStrings = LocalI18nStrings.current.strings
+    val i18nStrings = strings
 
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()

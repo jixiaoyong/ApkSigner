@@ -18,23 +18,23 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import cafe.adriel.lyricist.Lyricist
+import cafe.adriel.lyricist.ProvideStrings
 import cafe.adriel.lyricist.rememberStrings
+import cafe.adriel.lyricist.strings
 import io.github.jixiaoyong.beans.AppState
-import io.github.jixiaoyong.i18n.EnStrings
-import io.github.jixiaoyong.i18n.Locales
 import io.github.jixiaoyong.i18n.Strings
-import io.github.jixiaoyong.i18n.ZhStrings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.*
 import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
-val LocalI18nStrings = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
+val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
 
 fun main() =
     application {
@@ -47,43 +47,53 @@ fun main() =
         ) {
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
+            val settingsTool = SettingsTool(scope = rememberCoroutineScope())
+            val stringsLyricist = rememberStrings()
 
-            val lyricist = rememberStrings(mapOf(Locales.ZH to ZhStrings, Locales.EN to EnStrings))
+            // app语言：优先用户选择的，其次系统默认的，其次英文
+            val systemLanguage = Locale.getDefault().language
+            val language by settingsTool.language.collectAsState(systemLanguage)
+            if (null != language) {
+                stringsLyricist.languageTag = language.toString()
+            }
 
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
             }
-            CompositionLocalProvider(
-                LocalWindow provides window,
-                LocalSettings provides SettingsTool(scope = rememberCoroutineScope()),
-                LocalI18nStrings provides lyricist
-            ) {
-                LaunchedEffect(checkDualRunning) {
-                    appState = AppState.Loading
-                    val isAppRunning = withContext(Dispatchers.IO) {
-                        AppProcessUtil.isDualAppRunning("ApkSigner")
-                    }
-                    appState =
-                        if (isAppRunning) {
-                            AppState.AlreadyExists
-                        } else {
-                            AppState.Success
+            ProvideStrings(stringsLyricist) {
+                CompositionLocalProvider(
+                    LocalWindow provides window,
+                    LocalSettings provides settingsTool,
+                    LocalLyricist provides stringsLyricist
+                ) {
+
+                    LaunchedEffect(checkDualRunning) {
+                        appState = AppState.Loading
+                        val isAppRunning = withContext(Dispatchers.IO) {
+                            AppProcessUtil.isDualAppRunning("ApkSigner")
                         }
-                }
-
-                when (appState) {
-                    is AppState.Idle, AppState.Loading -> {
-                        LoadingPage()
+                        appState =
+                            if (isAppRunning) {
+                                AppState.AlreadyExists
+                            } else {
+                                AppState.Success
+                            }
                     }
 
-                    is AppState.AlreadyExists -> {
-                        AlreadyExistsPage {
-                            checkDualRunning = !checkDualRunning
+                    when (appState) {
+                        is AppState.Idle, AppState.Loading -> {
+                            LoadingPage()
                         }
-                    }
 
-                    AppState.Success -> {
-                        App()
+                        is AppState.AlreadyExists -> {
+                            AlreadyExistsPage {
+                                checkDualRunning = !checkDualRunning
+                            }
+                        }
+
+                        AppState.Success -> {
+                            App()
+                        }
                     }
                 }
             }
@@ -98,20 +108,18 @@ fun LoadingPage() {
         verticalArrangement = Arrangement.Center,
     ) {
         CircularProgressIndicator()
-        Text(LocalI18nStrings.current.strings.loading, Modifier.padding(top = 10.dp))
+        Text(strings.loading, Modifier.padding(top = 10.dp))
     }
 }
 
 @Composable
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
-    val i18nString = LocalI18nStrings.current.strings
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier =
-            Modifier.widthIn(300.dp).heightIn(200.dp).background(
+            modifier = Modifier.widthIn(300.dp).heightIn(200.dp).background(
                 MaterialTheme.colors.surface.copy(0.8f),
                 RoundedCornerShape(10.dp),
             ),
@@ -124,13 +132,13 @@ fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
                 contentDescription = "already exists",
                 modifier = Modifier.size(50.dp),
             )
-            Text(i18nString.alreadyRunning, Modifier.padding(vertical = 20.dp))
+            Text(strings.alreadyRunning, Modifier.padding(vertical = 20.dp))
             Row {
                 ButtonWidget(onClick = { exitProcess(0) }) {
-                    Text(i18nString.exit)
+                    Text(strings.exit)
                 }
                 ButtonWidget(onClick = tryAgainFunc) {
-                    Text(i18nString.retry)
+                    Text(strings.retry)
                 }
             }
         }

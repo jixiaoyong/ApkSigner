@@ -9,7 +9,7 @@ import cafe.adriel.lyricist.LyricistStrings
  * @email : jixiaoyong1995@gmail.com
  * @date : 30/3/2024
  */
-@LyricistStrings(languageTag = Locales.EN)
+@LyricistStrings(languageTag = Locales.EN, default = true)
 internal val EnStrings = Strings(
     loading = "Loading...",
     alreadyRunning = "Apk Signer has been started, please do not start it again.",
@@ -78,7 +78,9 @@ internal val EnStrings = Strings(
     open = "Open",
     signedFailed = "Signing failed: ",
     copyErrorMsg = "Copy error message",
-    startSignApk = "Start signing apk"
+    startSignApk = "Start signing apk",
+    changeLanguage = "Modify language",
+    currentLanguageTitle = "Languages"
 )
 
 //internal val EnStrings = Strings(
