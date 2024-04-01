@@ -85,13 +85,13 @@ fun HoverableTooltip(
             tooltip = {
                 Row(
                     modifier = Modifier.background(
-                        color = MaterialTheme.colors.onSurface,
+                        color = MaterialTheme.colors.secondary,
                         shape = RoundedCornerShape(5.dp)
                     ).padding(horizontal = 5.dp, vertical = 5.dp),
                 ) {
                     Text(
                         description,
-                        style = TextStyle(color = MaterialTheme.colors.secondaryVariant)
+                        style = TextStyle(color = MaterialTheme.colors.onSecondary)
                     )
                 }
             },

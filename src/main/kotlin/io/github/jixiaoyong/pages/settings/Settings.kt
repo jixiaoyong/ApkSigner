@@ -77,7 +77,8 @@ fun PageSettingInfo() {
                     viewModel.runRestConfig()
                     showToast(i18nString.resetSuccess)
                 }, title = i18nString.confirm)
-
+            }, dismissButton = {
+                ButtonWidget(onClick = { viewModel.toggleResetDialog() }, title = i18nString.cancel)
             }, title = {
                 Text(i18nString.confirmReset)
             }, text = {
@@ -221,21 +222,27 @@ fun PageSettingInfo() {
                 )
             }
 
-            if (uiState.isAutoMatchSignature) InfoItemWidget(i18nString.aaptDirectory,
-                uiState.aapt ?: i18nString.notInit,
-                description = i18nString.aaptDirectoryTips,
-                onClick = {
-                    scope.launch {
-                        val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.chooseAaptDirectory)
-                        if (chooseFileName.isNullOrBlank()) {
-                            showToast(i18nString.chooseAaptDirectory, ToastConfig.DURATION.Long)
-                        } else {
-                            val result = ApkSigner.setupAapt(chooseFileName)
-                            viewModel.saveAapt(ApkSigner.aaptPath)
-                            showToast(result ?: i18nString.changeSuccess)
+            if (uiState.isAutoMatchSignature) Column {
+                Divider(
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                        .background(color = MaterialTheme.colors.secondary.copy(0.65f))
+                )
+                InfoItemWidget(i18nString.aaptDirectory,
+                    uiState.aapt ?: i18nString.notInit,
+                    description = i18nString.aaptDirectoryTips,
+                    onClick = {
+                        scope.launch {
+                            val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.chooseAaptDirectory)
+                            if (chooseFileName.isNullOrBlank()) {
+                                showToast(i18nString.chooseAaptDirectory, ToastConfig.DURATION.Long)
+                            } else {
+                                val result = ApkSigner.setupAapt(chooseFileName)
+                                viewModel.saveAapt(ApkSigner.aaptPath)
+                                showToast(result ?: i18nString.changeSuccess)
+                            }
                         }
-                    }
-                })
+                    })
+            }
 
             InfoItemWidget(
                 i18nString.currentLanguageTitle,

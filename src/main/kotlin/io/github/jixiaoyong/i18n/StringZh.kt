@@ -68,7 +68,6 @@ internal val ZhStrings = Strings(
     plzSelectApkFileFirst = "请先选择apk文件",
     checkSignInfo = "查看签名",
     plzChooseSignedApkOutDir = "请先选择签名文件输出目录",
-    changeDir = "修改目录",
     signType1Desc = "Android最低API为24+时无法使用V1签名",
     isApkAlign = "是否开启对齐(zipAlign)",
     chooseRightSignatureTips = "请先配置正确的签名文件",
@@ -80,5 +79,6 @@ internal val ZhStrings = Strings(
     copyErrorMsg = "复制错误信息",
     startSignApk = "开始签名apk",
     changeLanguage = "修改语言",
-    currentLanguageTitle = "语言"
+    currentLanguageTitle = "语言",
+    cancel = "取消"
 )

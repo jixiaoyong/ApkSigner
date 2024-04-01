@@ -138,8 +138,8 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = it.keyNickName,
-                                    modifier = Modifier.weight(2f),
-                                    maxLines = 1,
+                                    modifier = Modifier.weight(3f),
+                                    maxLines = 2,
                                     color = textColor
                                 )
                                 Text(

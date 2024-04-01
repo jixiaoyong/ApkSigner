@@ -236,7 +236,6 @@ fun PageSignApp(
                 InfoItemWidget(
                     i18nStrings.signedApkOutputDir,
                     uiState.signedOutputDirectory ?: errorTips,
-                    buttonTitle = i18nStrings.changeDir,
                     onClick = {
                         scope.launch {
                             val outputDirectory =

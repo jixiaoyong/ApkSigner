@@ -23,7 +23,7 @@ internal val EnStrings = Strings(
     noContent = "No content",
     currentSignInfo = "Current signature",
     changeSignInfo = "Re-select signature",
-    deleteSignInfoTips = "Delete this tool stored signature information, it won't delete your APK signature files",
+    deleteSignInfoTips = "Delete stored signature information, \nit won't delete your signature files",
     nickName = "Signature nickname",
     nickNameDescription = "Nickname, used to distinguish different signatures",
     filePath = "File path",
@@ -68,7 +68,6 @@ internal val EnStrings = Strings(
     plzSelectApkFileFirst = "Please select the apk file first",
     checkSignInfo = "View signature",
     plzChooseSignedApkOutDir = "Please select the signature file output directory first",
-    changeDir = "Modify",
     signType1Desc = "V 1 signature cannot be used when Android minimum API is 24+",
     isApkAlign = "Whether to enable alignment (zipAlign)",
     chooseRightSignatureTips = "Please configure the correct signature file first",
@@ -80,7 +79,8 @@ internal val EnStrings = Strings(
     copyErrorMsg = "Copy error message",
     startSignApk = "Start signing apk",
     changeLanguage = "Modify language",
-    currentLanguageTitle = "Languages"
+    currentLanguageTitle = "Languages",
+    cancel = "Cancel"
 )
 
 //internal val EnStrings = Strings(
