@@ -22,10 +22,14 @@ data class SignInfoBean(
 
     override fun equals(other: Any?): Boolean {
         return other is SignInfoBean && keyNickName == other.keyNickName && keyStorePath == other.keyStorePath
-                && keyStorePassword == other.keyStorePassword && keyAlias == other.keyAlias && keyPassword == other.keyPassword
+                && keyStorePassword == other.keyStorePassword && keyAlias == other.keyAlias
+                && keyPassword == other.keyPassword && id == other.id
     }
 
     fun isSameOne(other: SignInfoBean?) = id == other?.id
+
+    fun copy() =
+        SignInfoBean(keyNickName, keyStorePath, keyStorePassword, keyAlias, keyPassword, System.currentTimeMillis())
 
     override fun hashCode(): Int {
         return super.hashCode()

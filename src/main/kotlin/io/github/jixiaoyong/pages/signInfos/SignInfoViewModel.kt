@@ -69,16 +69,22 @@ class SignInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
     }
 
     // save sign info to local storage
-    fun saveNewSignInfo(newSignInfo: SignInfoBean) {
+    fun saveNewSignInfo() {
+        val newSignInfo = uiStateFlow.value.newSignInfo
         val newSignInfos = mutableListOf<SignInfoBean>()
         newSignInfos.addAll(uiStateFlow.value.signInfoList)
         val indexOfSignInfo = newSignInfos.indexOfFirst { it.isSameOne(newSignInfo) }
         if (-1 != indexOfSignInfo) {
             newSignInfos[indexOfSignInfo] = newSignInfo
+            saveSelectedSignInfo(newSignInfo)
         } else {
             newSignInfos.add(newSignInfo)
         }
         settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
+
+        // 每次保存新签名之后，重置签名的id，避免在此点保存的时候还是覆盖已经保存的签名
+        // 对于需要编辑已有签名的，需要从列表中选择并编辑
+        updateNewSignInfo(newSignInfo.copy())
     }
 }
 

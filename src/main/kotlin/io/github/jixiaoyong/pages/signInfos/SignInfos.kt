@@ -215,7 +215,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                         modifier = Modifier.size(250.dp, 50.dp),
                         onClick = {
                             scope.launch {
-                                viewModel.saveNewSignInfo(newSignInfo)
+                                viewModel.saveNewSignInfo()
                                 val isNeedClean = scaffoldState.snackbarHostState.showSnackbar(
                                     i18nStrings.saveNewSignInfoTips,
                                     actionLabel = i18nStrings.cleanUp,
