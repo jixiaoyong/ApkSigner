@@ -29,9 +29,7 @@ APK 文件。
 
 本软件基于 JetBrains Compose Multiplatform 开发，支持 macOS、Windows、Linux。
 
-我日常开发主要基于 macOS，因此在 Windows 和 Linux
-上可能存在一些尚未发现的兼容性问题。如果你发现了这样的问题，敬请[告知](https://github.com/jixiaoyong/ApkSigner/issues)
-，我会尽可能适配。同时也非常欢迎你提交[PR](https://github.com/jixiaoyong/ApkSigner/pulls)。
+我日常开发主要基于 macOS，因此在 Windows 和 Linux 上可能存在一些尚未发现的兼容性问题。如果你发现了这样的问题，敬请[告知](https://github.com/jixiaoyong/ApkSigner/issues)，我会尽可能适配。同时也非常欢迎你提交[PR](https://github.com/jixiaoyong/ApkSigner/pulls)。
 
 ## 主要功能
 
@@ -56,7 +54,9 @@ APK 文件。
 - [ ] 优化签名配置
 - [x] 美化主题
 - [ ] 添加查看日志功能
-- [x] 支持国际化语言,可自动识别系统语言
+- [x] 支持国际化语言，可自动识别系统语言
+
+出于隐私考虑，本 APP 不会添加联网检测更新功能，如果你希望获取最新版本的信息，可以在 [GitHub](https://github.com/jixiaoyong/ApkSigner) 上面 star 或者 watch 本项目，这样当 APP 有更新时 GitHub 会在首页或者使用邮件通知你。
 
 ## 界面预览
 
@@ -114,9 +114,10 @@ GNU 通用公共许可证，了解详情。
 
 在不违反上述条款的基础之上，如果你想要基于此项目制作、分发你自己的软件版本，还需要遵守如下条款：
 
-* **保留作者信息**：使用、复制、修改或分发本项目的源代码时，必须保留原作者的姓名和联系信息。
-* **Logo使用限制**
-  ：未经原作者明确书面许可，不得使用、复制、修改或分发本项目的 Logo。
-* **源码链接**：在使用、复制、修改或分发本项目的源代码、软件作品时，必须在显著位置（例如本软件“设置信息”页面底部）提供指向原项目源码网址的链接。文本内容为“本项目基于
-  JI,XIAOYONG 的开源项目 ApkSigner 开发，你可以免费在 https://github.com/jixiaoyong/ApkSigner 获取项目源代码”。
+- **保留作者信息**：使用、复制、修改或分发本项目的源代码时，必须保留原作者的姓名和联系信息。
 
+- **Logo 使用限制**：未经原作者明确书面许可，不得使用、复制、修改或分发本项目的 Logo。
+
+- **源码链接**：在使用、复制、修改或分发本项目的源代码、软件作品时，必须在显著位置（例如本软件“设置信息”页面底部）提供指向原项目源码网址的链接。 
+
+  文本内容为“本项目基于 JI,XIAOYONG 的开源项目 ApkSigner 开发，你可以免费在 <https://github.com/jixiaoyong/ApkSigner> 获取项目源代码”。
