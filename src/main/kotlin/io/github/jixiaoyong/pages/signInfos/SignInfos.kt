@@ -132,9 +132,8 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                 viewModel.saveSelectedSignInfo(it)
                                 dropdownMenu.status = DropdownMenuState.Status.Closed
                             },
-                            modifier = Modifier.widthIn(450.dp, 600.dp),
-
-                            ) {
+                            modifier = Modifier.widthIn(500.dp, 650.dp),
+                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = it.keyNickName,
@@ -146,6 +145,7 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                     text = it.keyStorePath,
                                     fontSize = 10.sp,
                                     color = textColor,
+                                    lineHeight = 13.sp,
                                     modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
                                 )
                                 HoverableTooltip(
@@ -153,11 +153,11 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                     alwaysShow = true
                                 ) { modifier ->
                                     IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
-                                        Icon(Icons.Default.Delete, "")
+                                        Icon(Icons.Default.Delete, "delete", tint = MaterialTheme.colors.onBackground)
                                     }
                                 }
                                 IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
-                                    Icon(Icons.Default.Edit, "edit")
+                                    Icon(Icons.Default.Edit, "edit", tint = MaterialTheme.colors.onBackground)
                                 }
                             }
                         }
