@@ -4,7 +4,6 @@ import ApkSigner
 import LocalLyricist
 import LocalSettings
 import LocalWindow
-import Logger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,6 +34,7 @@ import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.ButtonWidget
 import io.github.jixiaoyong.widgets.CheckBox
 import io.github.jixiaoyong.widgets.InfoItemWidget
+import io.github.jixiaoyong.widgets.PopWidget
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.swing.JPanel
@@ -64,79 +64,46 @@ fun PageSettingInfo() {
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
 
-    if (resetConfig.showResetDialog) {
-        MaterialTheme(
-            typography = MaterialTheme.typography.copy(
-                body1 = TextStyle.Default.copy(color = MaterialTheme.colors.onBackground)
-            ),
-        ) {
-            AlertDialog(onDismissRequest = {
-                viewModel.toggleResetDialog()
-            }, confirmButton = {
-                ButtonWidget(onClick = {
-                    viewModel.runRestConfig()
-                    showToast(i18nString.resetSuccess)
-                }, title = i18nString.confirm)
-            }, dismissButton = {
-                ButtonWidget(onClick = { viewModel.toggleResetDialog() }, title = i18nString.cancel)
-            }, title = {
-                Text(i18nString.confirmReset)
-            }, text = {
-                Column {
-                    Text(i18nString.confirmResetTips)
-                    CheckBox(checked = resetConfig.resetSignInfo, title = i18nString.signConfig, onCheckedChange = {
-                        viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
+    PopWidget(title = i18nString.confirmReset,
+        show = resetConfig.showResetDialog,
+        onDismiss = { viewModel.toggleResetDialog() },
+        onConfirm = { viewModel.runRestConfig() }) {
+        Column(modifier = Modifier.widthIn(350.dp).padding(start = 30.dp)) {
+            Text(i18nString.confirmResetTips)
+            CheckBox(checked = resetConfig.resetSignInfo, title = i18nString.signConfig, onCheckedChange = {
+                viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
+            })
+            CheckBox(checked = resetConfig.resetApkTools,
+                title = i18nString.signToolsConfigResetTips,
+                onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
+            CheckBox(checked = resetConfig.resetSignTypes,
+                title = i18nString.signType,
+                onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
+            CheckBox(checked = resetConfig.resetSignedDirectory,
+                title = i18nString.signedApkOutputDir,
+                onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
+        }
+    }
+
+    var currentLanguage by remember { mutableStateOf(lyricist.languageTag) }
+    PopWidget(title = i18nString.changeLanguage,
+        show = resetConfig.showChangeLanguageDialog,
+        onDismiss = { viewModel.toggleLanguageDialog() },
+        onConfirm = {
+            lyricist.languageTag = currentLanguage
+            viewModel.changeLanguage(currentLanguage)
+        }) {
+        Column(modifier = Modifier.wrapContentWidth()) {
+            Locale.values().map { item ->
+                CheckBox(checked = item.code == currentLanguage, title = item.languageName,
+                    onCheckedChange = {
+                        if (it) {
+                            currentLanguage = item.code
+                        }
                     })
-                    CheckBox(checked = resetConfig.resetApkTools,
-                        title = i18nString.signToolsConfigResetTips,
-                        onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
-
-                    CheckBox(checked = resetConfig.resetSignTypes,
-                        title = i18nString.signType,
-                        onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
-                    CheckBox(checked = resetConfig.resetSignedDirectory,
-                        title = i18nString.signedApkOutputDir,
-                        onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
-                }
-            })
+            }
         }
     }
-
-    if (resetConfig.showChangeLanguageDialog) {
-        MaterialTheme(
-            typography = MaterialTheme.typography.copy(
-                body1 = TextStyle.Default.copy(color = MaterialTheme.colors.onBackground)
-            ),
-        ) {
-            var currentLanguage by remember { mutableStateOf(lyricist.languageTag) }
-            AlertDialog(onDismissRequest = {
-                viewModel.toggleLanguageDialog()
-            }, confirmButton = {
-                ButtonWidget(onClick = {
-                    Logger.log("change language form ${lyricist.languageTag} to $currentLanguage")
-
-                    lyricist.languageTag = currentLanguage
-                    viewModel.changeLanguage(currentLanguage)
-                    viewModel.toggleLanguageDialog()
-                }, title = i18nString.confirm)
-
-            }, title = {
-                Text(i18nString.changeLanguage)
-            }, text = {
-                Column {
-                    Locale.values().map { item ->
-                        CheckBox(checked = item.code == currentLanguage, title = item.languageName,
-                            onCheckedChange = {
-                                if (it) {
-                                    currentLanguage = item.code
-                                }
-                            })
-                    }
-                }
-            })
-        }
-    }
-
 
     Scaffold(scaffoldState = scaffoldState) {
         Column(

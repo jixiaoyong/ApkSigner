@@ -78,8 +78,6 @@ class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel()
     }
 
     fun runRestConfig() {
-        toggleResetDialog()
-
         val resetConfig = uiStateFlow.value.resetInfo
 
         if (resetConfig.resetSignInfo) {
