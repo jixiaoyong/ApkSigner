@@ -1,0 +1,28 @@
+[versions]
+kotlin-version = "1.8.20"
+compose-version = "1.6.1"
+
+multiplatformSettings = "1.1.1"
+lyricist = "1.6.2-1.8.20"
+gson = "2.10.1"
+ksp = "1.9.22-1.0.16"
+jsystemThemeDetector = "3.6"
+
+[libraries]
+
+lyricist-lib = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+lyricist-processor = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+
+multisettings-noarg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
+multisettings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettings" }
+multisettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
+
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+jsystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version.ref = "jsystemThemeDetector" }
+
+[plugins]
+
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose-version" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
