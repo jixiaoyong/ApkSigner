@@ -1,5 +1,7 @@
 package io.github.jixiaoyong.widgets
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -20,11 +22,8 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.round
-import androidx.compose.ui.window.Popup
 
 /**
  * @author : jixiaoyong
@@ -33,7 +32,7 @@ import androidx.compose.ui.window.Popup
  * @email : jixiaoyong1995@gmail.com
  * @date : 12/1/2024
  */
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable (modifier: Modifier) -> Unit) {
     var isHovered by remember { mutableStateOf(false) }
@@ -51,18 +50,11 @@ fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable (modi
                 isHovered = false
             }
     ) {
-        content(Modifier.onGloballyPositioned {
-            iconOffset = it.positionInParent()
-            iconSize = it.size
-        })
-
-        if (isHovered) Popup(
-            offset = iconOffset.round() + IntOffset(
-                iconSize.width,
-                0
-            )
-        ) {
-            tooltip()
+        TooltipArea(tooltip) {
+            content(Modifier.onGloballyPositioned {
+                iconOffset = it.positionInParent()
+                iconSize = it.size
+            })
         }
     }
 }
