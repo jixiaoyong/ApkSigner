@@ -10,6 +10,8 @@ import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.gson
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
+import kotlin.collections.set
 
 /**
  * @author : jixiaoyong
@@ -18,8 +20,9 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class SignAppViewModel : BaseViewModel() {
     private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+    private val settings: SettingsTool by inject(SettingsTool::class.java)
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
     val uiState = uiStateFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SignAppState())
@@ -118,7 +121,9 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
     }
 
     fun changeApkSignType(newTypes: MutableSet<Int>) {
-        settings.signTypeList = flowOf(newTypes)
+        viewModelScope.launch {
+            settings.save(StorageKeys.SIGN_TYPE_LIST, newTypes.joinToString(","))
+        }
     }
 
     fun changeSignApkResult(signApkResult: CommandResult) {

@@ -6,6 +6,7 @@ import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.showToast
 import kotlinx.coroutines.flow.*
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.*
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class SettingInfoViewModel() : BaseViewModel() {
+    private val settings: SettingsTool by inject(SettingsTool::class.java)
 
     private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
     val uiState = uiStateFlow.asStateFlow()

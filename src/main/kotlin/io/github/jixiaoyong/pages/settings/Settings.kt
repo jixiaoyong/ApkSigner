@@ -2,7 +2,6 @@ package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
 import LocalLyricist
-import LocalSettings
 import LocalWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,11 +55,10 @@ fun PageSettingInfo() {
     val scaffoldState: ScaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val window = LocalWindow.current
-    val settings = LocalSettings.current
     val i18nString = strings
     val lyricist = LocalLyricist.current
 
-    val viewModel = viewModel { SettingInfoViewModel(settings) }
+    val viewModel = viewModel { SettingInfoViewModel() }
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
 

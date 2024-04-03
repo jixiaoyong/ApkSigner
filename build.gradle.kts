@@ -35,6 +35,9 @@ dependencies {
     // If you want to use @LyricistStrings to generate code for you
     ksp(libs.lyricist.processor)
 
+    // di
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
 }
 
 compose.desktop {

@@ -1,6 +1,5 @@
 package io.github.jixiaoyong.pages
 
-import LocalSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,10 +38,8 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun App() {
-    val settings = LocalSettings.current
-
     val scope = rememberCoroutineScope()
-    val viewModel = viewModel { MainViewModel(settings) }
+    val viewModel = viewModel { MainViewModel() }
 
     val routes = listOf(
         Triple(Icons.Default.List, strings.signConfig, Routes.SignInfo),
@@ -52,10 +49,9 @@ fun App() {
 
     var isDarkTheme by viewModel.isDarkTheme
     val pageIndex by viewModel.currentIndex.collectAsState()
-
     // 将viewModel放在这里避免切换页面时丢失
-    val signInfoViewModel = viewModel { SignInfoViewModel(settings) }
-    val signAppViewModel = viewModel { SignAppViewModel(settings) }
+    val signInfoViewModel = viewModel { SignInfoViewModel() }
+    val signAppViewModel = viewModel { SignAppViewModel() }
 
     DisposableEffect(Unit) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->

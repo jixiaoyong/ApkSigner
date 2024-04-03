@@ -9,12 +9,9 @@ import com.russhwolf.settings.coroutines.getStringOrNullFlow
 import com.russhwolf.settings.set
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.beans.SignType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 
 /**
@@ -60,7 +57,7 @@ enum class StorageKeys {
 
 
 @OptIn(ExperimentalSettingsApi::class)
-class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
+class SettingsTool() : KeyValueStorage {
     private val settings: Settings by lazy { Settings() }
     private val observableSettings: ObservableSettings by lazy { settings as ObservableSettings }
 
@@ -78,15 +75,10 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
         get() = observableSettings.getBooleanFlow(StorageKeys.AUTO_MATCH_SIGNATURE.key, false)
     override val signedDirectory: Flow<String?>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGNED_DIRECTORY.key)
-    override var signTypeList: Flow<Set<Int>>
+    override val signTypeList: Flow<Set<Int>>
         get() = observableSettings.getStringOrNullFlow(StorageKeys.SIGN_TYPE_LIST.key).map {
             return@map if (it.isNullOrBlank()) SignType.DEF_SIGN_TYPES.map { it.type }.toSet()
             else it.split(",").map { it.toInt() }.toSet()
-        }
-        set(value) {
-            scope.launch {
-                settings[StorageKeys.SIGN_TYPE_LIST.key] = value.lastOrNull()?.joinToString(",")
-            }
         }
 
     override val selectedSignInfoBean: Flow<SignInfoBean?>

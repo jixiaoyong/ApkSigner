@@ -23,6 +23,7 @@ import cafe.adriel.lyricist.ProvideStrings
 import cafe.adriel.lyricist.rememberStrings
 import cafe.adriel.lyricist.strings
 import io.github.jixiaoyong.beans.AppState
+import io.github.jixiaoyong.di.appModule
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.utils.AppProcessUtil
@@ -30,16 +31,31 @@ import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.ButtonWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.core.logger.Level
+import org.koin.java.KoinJavaComponent.inject
+import org.koin.mp.KoinPlatformTools
 import java.util.*
 import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
-val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
-val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
+val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No Lyricist provided") }
 
 fun main() =
     application {
         val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
+        DisposableEffect(Unit) {
+            startKoin {
+                modules(appModule)
+                logger(KoinPlatformTools.defaultLogger(Level.WARNING))
+            }
+
+            onDispose {
+                stopKoin()
+            }
+        }
+
         Window(
             onCloseRequest = ::exitApplication,
             title = "APK Signer",
@@ -48,11 +64,11 @@ fun main() =
         ) {
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
-            val settingsTool = SettingsTool(scope = rememberCoroutineScope())
             val stringsLyricist = rememberStrings()
 
             // app语言：优先用户选择的，其次系统默认的，其次英文
             val systemLanguage = Locale.getDefault().language
+            val settingsTool: SettingsTool by inject(SettingsTool::class.java)
             val language by settingsTool.language.collectAsState(systemLanguage)
             if (null != language) {
                 stringsLyricist.languageTag = language.toString()
@@ -61,10 +77,10 @@ fun main() =
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
             }
+
             ProvideStrings(stringsLyricist) {
                 CompositionLocalProvider(
                     LocalWindow provides window,
-                    LocalSettings provides settingsTool,
                     LocalLyricist provides stringsLyricist
                 ) {
 

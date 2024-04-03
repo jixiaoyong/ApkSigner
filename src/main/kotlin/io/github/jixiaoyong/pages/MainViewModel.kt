@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -16,7 +17,9 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class MainViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class MainViewModel() : BaseViewModel() {
+
+    private val settings: SettingsTool by inject(SettingsTool::class.java)
 
     val currentIndex = MutableStateFlow(Routes.SignInfo)
     val isDarkTheme = mutableStateOf(false)
