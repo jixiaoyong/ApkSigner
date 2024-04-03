@@ -1,11 +1,12 @@
 [versions]
+
 kotlin-version = "1.8.20"
+ksp = "1.8.20-1.0.10"
 compose-version = "1.6.1"
 
 multiplatformSettings = "1.1.1"
 lyricist = "1.6.2-1.8.20"
 gson = "2.10.1"
-ksp = "1.8.20-1.0.10" # 注意同步修改gradle.properties处的ksp.version值
 jsystemThemeDetector = "3.9.1"
 composeIcons = "1.1.0"
 multiplatformPath = "0.2.2"
@@ -13,8 +14,12 @@ multiplatformPath = "0.2.2"
 dataStoreVersion = "1.1.0-beta02"
 jetbrainsNavigationCompose = "2.7.0-alpha04"
 jetbrainsLifecycle = "2.8.0-rc01"
+koin-bom = "3.6.0-wasm-alpha2"
 
 [libraries]
+
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
 
 lyricist-lib = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }

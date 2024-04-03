@@ -6,6 +6,7 @@ import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -14,7 +15,10 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class MainViewModel(private val settingsRepository: SettingPreferencesRepository) : BaseViewModel() {
+
+class MainViewModel() : BaseViewModel() {
+
+    private val settingsRepository: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
     val isDarkTheme = settingsRepository.isDarkMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
     val selectedSignatureInfo = settingsRepository.selectedSignInfoBean.take(1).map { null != it }.stateIn(

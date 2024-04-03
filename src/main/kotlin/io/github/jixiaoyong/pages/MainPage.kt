@@ -1,6 +1,5 @@
 package io.github.jixiaoyong.pages
 
-import LocalDatastore
 import Logger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,7 +44,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun App(viewModel: MainViewModel) {
-    val settingsRepository = LocalDatastore.current
     val scope = rememberCoroutineScope()
 
     val routes = listOf(
@@ -59,8 +57,8 @@ fun App(viewModel: MainViewModel) {
     var localThemeMode by remember { mutableStateOf(isDarkTheme ?: false) }
 
     // 将viewModel放在这里避免切换页面时丢失
-    val signInfoViewModel = viewModel { SignInfoViewModel(settingsRepository) }
-    val signAppViewModel = viewModel { SignAppViewModel(settingsRepository) }
+    val signInfoViewModel = viewModel { SignInfoViewModel() }
+    val signAppViewModel = viewModel { SignAppViewModel() }
 
     val navController: NavHostController = rememberNavController()
 
@@ -84,7 +82,7 @@ fun App(viewModel: MainViewModel) {
                     localThemeMode = isDarkTheme ?: it
                 }
             } catch (e: Exception) {
-                Logger.error("detect system theme error",e)
+                Logger.error("detect system theme error", e)
             }
         }
 

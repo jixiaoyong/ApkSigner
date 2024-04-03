@@ -9,6 +9,8 @@ import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
+import org.koin.java.KoinJavaComponent.inject
+import kotlin.collections.set
 
 /**
  * @author : jixiaoyong
@@ -17,8 +19,9 @@ import okio.Path.Companion.toPath
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignAppViewModel(private val settings: SettingPreferencesRepository) : BaseViewModel() {
+class SignAppViewModel : BaseViewModel() {
     private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+    private val settings: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
     val uiState = uiStateFlow.asStateFlow()

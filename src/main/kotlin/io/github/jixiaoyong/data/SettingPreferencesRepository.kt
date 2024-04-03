@@ -9,6 +9,7 @@ import io.github.jixiaoyong.utils.gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -17,7 +18,8 @@ import kotlinx.coroutines.flow.map
  * @email : jixiaoyong1995@gmail.com
  * @date : 2024/5/7
  */
-class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataStoreHelper) {
+class SettingPreferencesRepository() {
+    private val datastoreHelper: PreferenceDataStoreHelper by inject(PreferenceDataStoreHelper::class.java)
 
     suspend fun getIsInitialized(): Boolean =
         datastoreHelper.getFirstPreference(PreferenceDataStoreConstants.IS_INITIALED_PREFERENCE, false)

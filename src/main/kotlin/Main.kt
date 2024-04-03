@@ -26,7 +26,7 @@ import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.data.SettingPreferencesRepository
-import io.github.jixiaoyong.data.getDataStore
+import io.github.jixiaoyong.di.appModule
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.pages.MainViewModel
@@ -37,20 +37,35 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.core.logger.Level
+import org.koin.java.KoinJavaComponent.inject
+import org.koin.mp.KoinPlatformTools
 import java.util.*
 import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
-val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No LocalLyricist provided") }
-val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No LocalDatastore provided") }
+val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No Lyricist provided") }
 
 fun main() =
     application {
         val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
-        val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
-        val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
+        val preferenceDataStoreHelper: PreferenceDataStoreHelper by inject(PreferenceDataStoreHelper::class.java)
+        val settingPreferencesRepository: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
         // At the top level of your kotlin file:
+        DisposableEffect(Unit) {
+            startKoin {
+                modules(appModule)
+                logger(KoinPlatformTools.defaultLogger(Level.WARNING))
+            }
+
+            onDispose {
+                stopKoin()
+            }
+        }
+
         Window(
             onCloseRequest = ::exitApplication,
             title = "APK Signer",
@@ -61,7 +76,7 @@ fun main() =
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
             val stringsLyricist = rememberStrings()
-            val viewModel = viewModel { MainViewModel(settingPreferencesRepository) }
+            val viewModel = viewModel { MainViewModel() }
 
             DisposableEffect(Unit) {
                 Logger.init(scope.plus(Dispatchers.IO))
@@ -70,11 +85,10 @@ fun main() =
                     Logger.onDispose()
                 }
             }
-
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
                 scope.launch {
-                    val settingsTool = SettingsTool(scope = scope)
+                    val settingsTool by inject<SettingsTool>(SettingsTool::class.java)
                     if (!settingPreferencesRepository.getIsInitialized()) {
                         settingsTool.saveToDatastore(help = preferenceDataStoreHelper)
                         settingPreferencesRepository.setIsInitialized(true)
@@ -90,8 +104,7 @@ fun main() =
             ProvideStrings(stringsLyricist) {
                 CompositionLocalProvider(
                     LocalWindow provides window,
-                    LocalLyricist provides stringsLyricist,
-                    LocalDatastore provides settingPreferencesRepository,
+                    LocalLyricist provides stringsLyricist
                 ) {
 
                     LaunchedEffect(checkDualRunning) {
@@ -123,6 +136,7 @@ fun main() =
             }
         }
     }
+
 
 @Composable
 fun LoadingPage() {

@@ -42,6 +42,9 @@ dependencies {
     implementation(libs.jetbrains.navigation.compose)
     implementation(libs.jetbrains.lifecycle.viewmodel)
     implementation(libs.sujanpoudel.multiplatform.paths)
+    // di
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
 }
 
 compose.desktop {
@@ -56,9 +59,8 @@ compose.desktop {
             modules("jdk.unsupported") // for datastore compatibility
 
             buildTypes.release {
-                proguard() {
+                proguard {
                     configurationFiles.from("compose.desktop.pro")
-//                    isEnabled.set(false)
                 }
             }
 
@@ -77,5 +79,5 @@ compose.desktop {
 
 // 将这些属性作为额外的属性添加到项目中
 extra["packageName"] = compose.desktop.application.nativeDistributions.packageName
-extra["packageVersion"] =  compose.desktop.application.nativeDistributions.packageVersion
+extra["packageVersion"] = compose.desktop.application.nativeDistributions.packageVersion
 apply(from = "versionInfo.gradle.kts")

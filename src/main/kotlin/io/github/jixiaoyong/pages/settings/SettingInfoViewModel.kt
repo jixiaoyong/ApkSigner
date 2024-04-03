@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.skiko.OS.*
 import org.jetbrains.skiko.hostOs
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -17,8 +18,8 @@ import org.jetbrains.skiko.hostOs
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SettingInfoViewModel(private val repository: SettingPreferencesRepository) :
-    BaseViewModel() {
+class SettingInfoViewModel() : BaseViewModel() {
+    private val repository: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
     private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
     val uiState = uiStateFlow.asStateFlow()

@@ -5,6 +5,7 @@ import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * @author : jixiaoyong
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignInfoViewModel(private val settings: SettingPreferencesRepository) : BaseViewModel() {
+class SignInfoViewModel() : BaseViewModel() {
+    private val settings: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
     private val uiStateFlow: MutableStateFlow<SignInfoUiState> = MutableStateFlow(SignInfoUiState())
     val uiState = uiStateFlow.asStateFlow()

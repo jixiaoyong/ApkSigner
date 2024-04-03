@@ -1,7 +1,6 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
-import LocalDatastore
 import LocalLyricist
 import LocalWindow
 import androidx.compose.foundation.background
@@ -59,9 +58,8 @@ fun PageSettingInfo() {
     val window = LocalWindow.current
     val i18nString = strings
     val lyricist = LocalLyricist.current
-    val repository = LocalDatastore.current
 
-    val viewModel = viewModel { SettingInfoViewModel(repository) }
+    val viewModel = viewModel { SettingInfoViewModel() }
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
     var showThemeModeDialog by remember { mutableStateOf(false) }
