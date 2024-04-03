@@ -5,13 +5,13 @@ compose-version = "1.6.1"
 multiplatformSettings = "1.1.1"
 lyricist = "1.6.2-1.8.20"
 gson = "2.10.1"
-ksp = "1.9.22-1.0.16"
+ksp = "1.8.20-1.0.10"
 jsystemThemeDetector = "3.6"
 
 [libraries]
 
 lyricist-lib = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
-lyricist-processor = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
 
 multisettings-noarg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
 multisettings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettings" }

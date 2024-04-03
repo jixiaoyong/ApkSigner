@@ -3,8 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.compose)
+    alias(libs.plugins.ksp)
 }
 
 group = "io.github.jixiaoyong"
