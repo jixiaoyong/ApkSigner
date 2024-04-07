@@ -70,16 +70,19 @@ fun PageSettingInfo() {
         onConfirm = { viewModel.runRestConfig() }) {
         Column(modifier = Modifier.widthIn(350.dp).padding(start = 30.dp)) {
             Text(i18nString.confirmResetTips)
-            CheckBox(checked = resetConfig.resetSignInfo, title = i18nString.signConfig, onCheckedChange = {
-                viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
-            })
-            CheckBox(checked = resetConfig.resetApkTools,
+            CheckBox(checked = resetConfig.resetSignInfo,
+                title = i18nString.signConfig,
+                modifier = Modifier.fillMaxWidth(),
+                onCheckedChange = {
+                    viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
+                })
+            CheckBox(checked = resetConfig.resetApkTools, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signToolsConfigResetTips,
                 onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
-            CheckBox(checked = resetConfig.resetSignTypes,
+            CheckBox(checked = resetConfig.resetSignTypes, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signType,
                 onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
-            CheckBox(checked = resetConfig.resetSignedDirectory,
+            CheckBox(checked = resetConfig.resetSignedDirectory, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signedApkOutputDir,
                 onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
         }
@@ -95,7 +98,9 @@ fun PageSettingInfo() {
         }) {
         Column(modifier = Modifier.wrapContentWidth()) {
             Locale.values().map { item ->
-                CheckBox(checked = item.code == currentLanguage, title = item.languageName,
+                CheckBox(checked = item.code == currentLanguage,
+                    title = item.languageName,
+                    modifier = Modifier.padding(start = 50.dp).fillMaxWidth(),
                     onCheckedChange = {
                         if (it) {
                             currentLanguage = item.code
@@ -249,8 +254,8 @@ fun PageSettingInfo() {
                 val uriHandler = LocalUriHandler.current
                 ClickableText(text = annotatedString, style = TextStyle(
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colors.onSecondary.copy(alpha = 0.5f)
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colors.onSecondary
                 ), onClick = { offset ->
                     annotatedString.getStringAnnotations("URL", offset, offset).firstOrNull()?.let { stringAnnotation ->
                         uriHandler.openUri(stringAnnotation.item)

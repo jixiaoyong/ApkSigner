@@ -123,8 +123,9 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     )
                         .border(1.dp, MaterialTheme.colors.secondary, shape = RoundedCornerShape(10.dp))
                 ) {
-                    uiState.signInfoList.forEach {
+                    uiState.signInfoList.forEachIndexed { index, it ->
                         val isSelected = uiState.selectedSignInfo == it
+                        val isLastOne = index == uiState.signInfoList.size - 1
                         val textColor = if (isSelected) MaterialTheme.colors.primary
                         else MaterialTheme.colors.onBackground
                         DropdownMenuItem(
@@ -134,31 +135,42 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                             },
                             modifier = Modifier.widthIn(500.dp, 650.dp),
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = it.keyNickName,
-                                    modifier = Modifier.weight(3f),
-                                    maxLines = 2,
-                                    color = textColor
-                                )
-                                Text(
-                                    text = it.keyStorePath,
-                                    fontSize = 10.sp,
-                                    color = textColor,
-                                    lineHeight = 13.sp,
-                                    modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
-                                )
-                                HoverableTooltip(
-                                    description = i18nStrings.deleteSignInfoTips,
-                                    alwaysShow = true
-                                ) { modifier ->
-                                    IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
-                                        Icon(Icons.Default.Delete, "delete", tint = MaterialTheme.colors.onBackground)
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = it.keyNickName,
+                                        modifier = Modifier.weight(3f),
+                                        maxLines = 2,
+                                        color = textColor
+                                    )
+                                    Text(
+                                        text = it.keyStorePath,
+                                        fontSize = 10.sp,
+                                        color = textColor,
+                                        lineHeight = 13.sp,
+                                        modifier = Modifier.weight(6f).padding(horizontal = 5.dp)
+                                    )
+                                    HoverableTooltip(
+                                        description = i18nStrings.deleteSignInfoTips,
+                                        alwaysShow = true
+                                    ) { modifier ->
+                                        IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                "delete",
+                                                tint = MaterialTheme.colors.onBackground
+                                            )
+                                        }
+                                    }
+                                    IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
+                                        Icon(Icons.Default.Edit, "edit", tint = MaterialTheme.colors.onBackground)
                                     }
                                 }
-                                IconButton(onClick = { viewModel.updateNewSignInfo(it) }) {
-                                    Icon(Icons.Default.Edit, "edit", tint = MaterialTheme.colors.onBackground)
-                                }
+                                if (!isLastOne) Divider(
+                                    modifier = Modifier.background(
+                                        color = MaterialTheme.colors.secondary.copy(0.65f)
+                                    )
+                                )
                             }
                         }
                     }

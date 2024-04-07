@@ -1,13 +1,13 @@
 package io.github.jixiaoyong.widgets
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,19 +70,15 @@ fun PopWidget(
             Column(
                 modifier = Modifier.weight(1f, fill = false)
                     .wrapContentSize().heightIn(max = 450.dp).verticalScroll(scrollable)
-                    .padding(top = 20.dp, bottom = 30.dp)
+                    .padding(top = 20.dp, bottom = 25.dp)
             ) { content() }
             Row(
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(bottom = 30.dp)
+                modifier = Modifier.padding(bottom = 5.dp)
             ) {
-                cancelButton?.let {
-                    Row(modifier = Modifier.clickable {
-                        onDismiss()
-                    }) { it() }
-                }
+                cancelButton?.let { TextButton(onClick = onDismiss) { it() } }
                 confirmButton?.let {
-                    Row(modifier = Modifier.clickable {
+                    TextButton(onClick = {
                         onDismiss()
                         onConfirm()
                     }) { it() }
@@ -131,7 +127,7 @@ fun PopWidget(
             Text(
                 confirmButton,
                 textAlign = TextAlign.Center,
-                style = TextStyle(color = MaterialTheme.colors.primary, fontSize = 16.sp),
+                style = TextStyle(fontSize = 16.sp),
                 modifier = Modifier.widthIn(100.dp).padding(horizontal = 5.dp)
             )
         },

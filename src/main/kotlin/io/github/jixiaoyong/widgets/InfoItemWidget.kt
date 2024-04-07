@@ -34,7 +34,6 @@ fun InfoItemWidget(
     onClick: (() -> Unit)? = null,
     content: @Composable (() -> Unit)? = null
 ) {
-    val rounderRadius = 10.dp
     val i18nString = strings
     Column(modifier = Modifier.padding(horizontal = 10.dp).padding(top = 5.dp)) {
         Row(
