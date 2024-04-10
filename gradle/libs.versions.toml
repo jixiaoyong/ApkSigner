@@ -7,6 +7,7 @@ lyricist = "1.6.2-1.8.20"
 gson = "2.10.1"
 ksp = "1.8.20-1.0.10"
 jsystemThemeDetector = "3.6"
+composeIcons = "1.1.0"
 
 [libraries]
 
@@ -20,6 +21,8 @@ multisettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coro
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 jsystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version.ref = "jsystemThemeDetector" }
+
+composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
 
 [plugins]
 

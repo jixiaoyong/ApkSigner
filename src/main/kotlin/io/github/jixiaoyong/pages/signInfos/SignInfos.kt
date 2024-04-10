@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.lyricist.strings
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Key
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.showToast
@@ -75,6 +78,12 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Icon(
+                    FontAwesomeIcons.Solid.Key,
+                    contentDescription = i18nStrings.currentSignInfo, tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp).size(25.dp)
+                )
+
                 Text(
                     i18nStrings.currentSignInfo,
                     style = TextStyle(

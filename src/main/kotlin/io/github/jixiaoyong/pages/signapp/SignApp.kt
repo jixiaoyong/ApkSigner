@@ -25,6 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import cafe.adriel.lyricist.strings
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Android
+import compose.icons.fontawesomeicons.solid.AlignLeft
+import compose.icons.fontawesomeicons.solid.Key
+import compose.icons.fontawesomeicons.solid.ListOl
+import compose.icons.fontawesomeicons.solid.SignOutAlt
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.pages.Routes
@@ -211,6 +219,7 @@ fun PageSignApp(
                         "\n"
                     ),
                     buttonTitle = i18nStrings.checkSignInfo,
+                    icon = FontAwesomeIcons.Brands.Android,
                     onClick = {
                         scope.launch(Dispatchers.IO) {
                             if (currentApkFilePath.isEmpty()) {
@@ -227,6 +236,7 @@ fun PageSignApp(
                 InfoItemWidget(
                     i18nStrings.currentSignInfo,
                     uiState.currentSignInfo?.toString() ?: i18nStrings.noContent,
+                    icon = FontAwesomeIcons.Solid.Key,
                     onClick = {
                         onChangePage(Routes.SignInfo)
                         viewModel.removeApkSignature(uiState.apkPackageName)
@@ -236,6 +246,7 @@ fun PageSignApp(
                 InfoItemWidget(
                     i18nStrings.signedApkOutputDir,
                     uiState.signedOutputDirectory ?: errorTips,
+                    icon = FontAwesomeIcons.Solid.SignOutAlt,
                     onClick = {
                         scope.launch {
                             val outputDirectory =
@@ -257,6 +268,7 @@ fun PageSignApp(
                 InfoItemWidget(
                     i18nStrings.signType,
                     null,
+                    icon = FontAwesomeIcons.Solid.ListOl,
                     showChangeButton = false
                 ) {
                     Row {
@@ -288,13 +300,19 @@ fun PageSignApp(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    Icon(
+                        FontAwesomeIcons.Solid.AlignLeft,
+                        contentDescription = i18nStrings.isApkAlign, tint = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(start = 10.dp, end = 10.dp).size(25.dp)
+                    )
+
                     Text(
                         i18nStrings.isApkAlign,
                         style = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
                         ),
-                        modifier = Modifier.weight(1f).padding(start = 10.dp)
+                        modifier = Modifier.weight(1f)
                     )
 
                     Switch(checked = uiState.isZipAlign,

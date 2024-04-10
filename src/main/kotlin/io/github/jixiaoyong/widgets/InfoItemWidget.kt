@@ -4,11 +4,13 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,6 +30,7 @@ import cafe.adriel.lyricist.strings
 fun InfoItemWidget(
     title: String,
     value: String?,
+    icon: ImageVector? = null,
     description: String? = null,
     buttonTitle: String? = null,
     showChangeButton: Boolean = true,
@@ -41,6 +44,11 @@ fun InfoItemWidget(
                 .padding(vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (null != icon) Icon(
+                icon, contentDescription = title, tint = MaterialTheme.colors.primary,
+                modifier = Modifier.padding(end = 10.dp).size(25.dp)
+            )
+
             Column(modifier = Modifier.weight(8f)) {
                 Text(
                     title,

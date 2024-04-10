@@ -35,6 +35,7 @@ dependencies {
     // If you want to use @LyricistStrings to generate code for you
     ksp(libs.lyricist.processor)
 
+    implementation(libs.composeIcons.fontAwesome)
 }
 
 compose.desktop {

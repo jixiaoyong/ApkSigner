@@ -25,6 +25,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.lyricist.strings
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.AlignLeft
+import compose.icons.fontawesomeicons.solid.CheckSquare
+import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.UserShield
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.i18n.Locale
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
@@ -143,6 +149,7 @@ fun PageSettingInfo() {
             InfoItemWidget(i18nString.apksignerDirectory,
                 uiState.apkSign ?: i18nString.notInit,
                 description = i18nString.chooseApksignerTips,
+                icon = FontAwesomeIcons.Solid.UserShield,
                 onClick = {
                     scope.launch {
                         val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.plzChooseApksigner)
@@ -159,6 +166,7 @@ fun PageSettingInfo() {
             InfoItemWidget(i18nString.zipDirectory,
                 uiState.zipAlign ?: i18nString.notInit,
                 description = i18nString.chooseZipTips,
+                icon = FontAwesomeIcons.Solid.AlignLeft,
                 onClick = {
                     scope.launch {
                         val chooseFileName = FileChooseUtil.chooseSignFile(window, i18nString.plzChooseZip)
@@ -176,6 +184,12 @@ fun PageSettingInfo() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
             ) {
+                Icon(
+                    FontAwesomeIcons.Solid.CheckSquare,
+                    contentDescription = i18nString.autoMatchSignature, tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(end = 10.dp).size(25.dp)
+                )
+
                 Column(modifier = Modifier.weight(1f, true)) {
                     Text(
                         i18nString.autoMatchSignature,
@@ -219,6 +233,7 @@ fun PageSettingInfo() {
             InfoItemWidget(
                 i18nString.currentLanguageTitle,
                 Locale.getLocale(lyricist.languageTag).languageName,
+                icon = FontAwesomeIcons.Solid.Language,
                 onClick = {
                     viewModel.toggleLanguageDialog()
                 })
