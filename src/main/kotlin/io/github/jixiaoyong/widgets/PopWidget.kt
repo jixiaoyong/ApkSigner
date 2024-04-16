@@ -79,7 +79,6 @@ fun PopWidget(
                 cancelButton?.let { TextButton(onClick = onDismiss) { it() } }
                 confirmButton?.let {
                     TextButton(onClick = {
-                        onDismiss()
                         onConfirm()
                     }) { it() }
                 }

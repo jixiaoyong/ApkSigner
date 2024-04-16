@@ -73,7 +73,10 @@ fun PageSettingInfo() {
     PopWidget(title = i18nString.confirmReset,
         show = resetConfig.showResetDialog,
         onDismiss = { viewModel.toggleResetDialog() },
-        onConfirm = { viewModel.runRestConfig() }) {
+        onConfirm = {
+            viewModel.runRestConfig()
+            viewModel.toggleResetDialog()
+        }) {
         Column(modifier = Modifier.widthIn(350.dp).padding(start = 30.dp)) {
             Text(i18nString.confirmResetTips)
             CheckBox(checked = resetConfig.resetSignInfo,
@@ -101,6 +104,7 @@ fun PageSettingInfo() {
         onConfirm = {
             lyricist.languageTag = currentLanguage
             viewModel.changeLanguage(currentLanguage)
+            viewModel.toggleLanguageDialog()
         }) {
         Column(modifier = Modifier.wrapContentWidth()) {
             Locale.values().map { item ->

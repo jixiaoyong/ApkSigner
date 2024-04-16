@@ -162,8 +162,8 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
                                     HoverableTooltip(
                                         description = i18nStrings.deleteSignInfoTips,
                                         alwaysShow = true
-                                    ) { modifier ->
-                                        IconButton(modifier = modifier, onClick = { viewModel.removeSignInfo(it) }) {
+                                    ) {
+                                        IconButton(modifier = Modifier, onClick = { viewModel.removeSignInfo(it) }) {
                                             Icon(
                                                 Icons.Default.Delete,
                                                 "delete",

@@ -3,7 +3,6 @@ package io.github.jixiaoyong.widgets
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,17 +11,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.onPointerEvent
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
 /**
@@ -34,29 +27,8 @@ import androidx.compose.ui.unit.dp
  */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable (modifier: Modifier) -> Unit) {
-    var isHovered by remember { mutableStateOf(false) }
-    var iconOffset by remember { mutableStateOf(Offset.Zero) }
-    var iconSize by remember { mutableStateOf(IntSize.Zero) }
-    Box(
-        Modifier.onPointerEvent(
-            PointerEventType.Move
-        ) {
-        }
-            .onPointerEvent(PointerEventType.Enter) {
-                isHovered = true
-            }
-            .onPointerEvent(PointerEventType.Exit) {
-                isHovered = false
-            }
-    ) {
-        TooltipArea(tooltip) {
-            content(Modifier.onGloballyPositioned {
-                iconOffset = it.positionInParent()
-                iconSize = it.size
-            })
-        }
-    }
+fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable () -> Unit) {
+    TooltipArea(tooltip, delayMillis = 100) { content() }
 }
 
 
@@ -68,10 +40,10 @@ fun HoverableTooltip(tooltip: @Composable () -> Unit, content: @Composable (modi
 fun HoverableTooltip(
     description: String?,
     alwaysShow: Boolean = false,
-    content: @Composable (modifier: Modifier) -> Unit
+    content: @Composable () -> Unit
 ) {
     if (description.isNullOrBlank()) {
-        if (alwaysShow) content(Modifier)
+        if (alwaysShow) content()
     } else {
         HoverableTooltip(
             tooltip = {
@@ -92,13 +64,15 @@ fun HoverableTooltip(
     }
 }
 
+/**
+ * [imageVector]使用默认的❓图标，鼠标悬浮在其上时展示提示[description]
+ */
 @Composable
 fun HoverableTooltip(description: String?, imageVector: ImageVector = Icons.Default.Info, alwaysShow: Boolean = false) {
-    HoverableTooltip(description = description, alwaysShow = alwaysShow) { modifier ->
+    HoverableTooltip(description = description, alwaysShow = alwaysShow) {
         Icon(
             imageVector,
             contentDescription = description,
-            modifier = modifier,
             tint = MaterialTheme.colors.onSecondary
         )
     }

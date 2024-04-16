@@ -272,7 +272,7 @@ fun PageSignApp(
                     showChangeButton = false
                 ) {
                     Row {
-                        SignType.ALL_SIGN_TYPES.forEachIndexed { index, item ->
+                        SignType.ALL_SIGN_TYPES.forEach { item ->
                             val isSelected = uiState.apkSignType.contains(item.type)
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 CheckBox(

@@ -96,9 +96,9 @@ fun App() {
 
                     Row(
                         modifier = Modifier.weight(1f).padding(horizontal = 1.dp)
-                            .background(backgroundColor, RoundedCornerShape(5.dp)).clickable {
-                                viewModel.changePage(route.third)
-                            }.padding(vertical = 15.dp),
+                            .background(backgroundColor, RoundedCornerShape(5.dp))
+                            .clickable { viewModel.changePage(route.third) }
+                            .padding(vertical = 15.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {

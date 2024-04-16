@@ -1,13 +1,11 @@
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,12 +20,15 @@ import cafe.adriel.lyricist.Lyricist
 import cafe.adriel.lyricist.ProvideStrings
 import cafe.adriel.lyricist.rememberStrings
 import cafe.adriel.lyricist.strings
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.widgets.ButtonWidget
+import io.github.jixiaoyong.widgets.PopWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -73,12 +74,11 @@ fun main() =
                         val isAppRunning = withContext(Dispatchers.IO) {
                             AppProcessUtil.isDualAppRunning("ApkSigner")
                         }
-                        appState =
-                            if (isAppRunning) {
-                                AppState.AlreadyExists
-                            } else {
-                                AppState.Success
-                            }
+                        appState = if (isAppRunning) {
+                            AppState.AlreadyExists
+                        } else {
+                            AppState.Success
+                        }
                     }
 
                     when (appState) {
@@ -87,9 +87,7 @@ fun main() =
                         }
 
                         is AppState.AlreadyExists -> {
-                            AlreadyExistsPage {
-                                checkDualRunning = !checkDualRunning
-                            }
+                            AlreadyExistsPage { checkDualRunning = !checkDualRunning }
                         }
 
                         AppState.Success -> {
@@ -115,32 +113,26 @@ fun LoadingPage() {
 
 @Composable
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            modifier = Modifier.widthIn(300.dp).heightIn(200.dp).background(
-                MaterialTheme.colors.surface.copy(0.8f),
-                RoundedCornerShape(10.dp),
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Icon(
-                Icons.Default.Warning,
-                tint = MaterialTheme.colors.error,
-                contentDescription = "already exists",
-                modifier = Modifier.size(50.dp),
-            )
-            Text(strings.alreadyRunning, Modifier.padding(vertical = 20.dp))
-            Row {
-                ButtonWidget(onClick = { exitProcess(0) }) {
-                    Text(strings.exit)
-                }
-                ButtonWidget(onClick = tryAgainFunc) {
-                    Text(strings.retry)
-                }
+
+    Box(modifier = Modifier.background(color = MaterialTheme.colors.background).fillMaxSize()) {
+        PopWidget(title = "",
+            show = true,
+            confirmButton = strings.retry,
+            cancelButton = strings.exit,
+            onDismiss = { exitProcess(0) },
+            onConfirm = { tryAgainFunc() }) {
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    FontAwesomeIcons.Solid.ExclamationTriangle,
+                    tint = MaterialTheme.colors.error,
+                    contentDescription = "already exists",
+                    modifier = Modifier.size(50.dp),
+                )
+                Text(strings.alreadyRunning, Modifier.padding(top = 20.dp))
             }
         }
     }
