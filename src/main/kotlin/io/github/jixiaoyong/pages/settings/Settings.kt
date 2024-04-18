@@ -37,10 +37,7 @@ import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.ToastConfig
 import io.github.jixiaoyong.utils.showToast
-import io.github.jixiaoyong.widgets.ButtonWidget
-import io.github.jixiaoyong.widgets.CheckBox
-import io.github.jixiaoyong.widgets.InfoItemWidget
-import io.github.jixiaoyong.widgets.PopWidget
+import io.github.jixiaoyong.widgets.*
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.swing.JPanel
@@ -205,11 +202,9 @@ fun PageSettingInfo() {
                         )
                     )
                 }
-                Switch(
+                SwitchButton(
                     uiState.isAutoMatchSignature,
-                    { autoMatch -> viewModel.saveAutoMatchSignature(autoMatch) },
-                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary)
-                )
+                ) { autoMatch -> viewModel.saveAutoMatchSignature(autoMatch) }
             }
 
             if (uiState.isAutoMatchSignature) Column {

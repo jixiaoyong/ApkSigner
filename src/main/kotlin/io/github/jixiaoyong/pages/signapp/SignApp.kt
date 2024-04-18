@@ -38,10 +38,7 @@ import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.pages.Routes
 import io.github.jixiaoyong.utils.FileChooseUtil
 import io.github.jixiaoyong.utils.showToast
-import io.github.jixiaoyong.widgets.ButtonWidget
-import io.github.jixiaoyong.widgets.CheckBox
-import io.github.jixiaoyong.widgets.HoverableTooltip
-import io.github.jixiaoyong.widgets.InfoItemWidget
+import io.github.jixiaoyong.widgets.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.Desktop
@@ -298,12 +295,12 @@ fun PageSignApp(
                 Row(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().padding(10.dp)
                 ) {
                     Icon(
                         FontAwesomeIcons.Solid.AlignLeft,
                         contentDescription = i18nStrings.isApkAlign, tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.padding(start = 10.dp, end = 10.dp).size(25.dp)
+                        modifier = Modifier.padding(end = 10.dp).size(25.dp)
                     )
 
                     Text(
@@ -315,8 +312,7 @@ fun PageSignApp(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Switch(checked = uiState.isZipAlign,
-                        colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colors.primary),
+                    SwitchButton(checked = uiState.isZipAlign,
                         onCheckedChange = {
                             viewModel.changeZipAlign(it)
                         })
