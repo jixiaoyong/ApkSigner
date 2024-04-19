@@ -1,5 +1,6 @@
 package io.github.jixiaoyong.widgets
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,32 +25,33 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SwitchButton(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null) {
     val mainColor = if (checked) MaterialTheme.colors.primary else MaterialTheme.colors.secondary
-    MaterialTheme() {
+    val switchButtonWidth = 15
+    var offsetLeft = animateFloatAsState(if (checked) 0f else switchButtonWidth.toFloat())
+    Row(
+        modifier = Modifier
+            .border(
+                width = 0.5.dp,
+                color = mainColor,
+                shape = RoundedCornerShape(25.dp)
+            )
+            .background(mainColor, shape = RoundedCornerShape(25.dp))
+            .width(35.dp)
+            .height(20.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                enabled = null != onCheckedChange
+            ) {
+                onCheckedChange?.invoke(!checked)
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(
             modifier = Modifier
-                .border(
-                    width = 0.5.dp,
-                    color = mainColor,
-                    shape = RoundedCornerShape(25.dp)
-                )
-                .background(mainColor, shape = RoundedCornerShape(25.dp))
-                .width(35.dp)
-                .height(20.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    enabled = null != onCheckedChange
-                ) {
-                    onCheckedChange?.invoke(!checked)
-                },
-            contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart
-        ) {
-            Row(
-                modifier = Modifier
-                    .size(20.dp)
-                    .background(color = Color.White, shape = RoundedCornerShape(25.dp))
-            ) {}
-        }
+                .offset(offsetLeft.value.dp, 0.dp)
+                .size(20.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(25.dp))
+        )
     }
 }
 
