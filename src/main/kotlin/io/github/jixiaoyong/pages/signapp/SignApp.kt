@@ -127,7 +127,7 @@ fun PageSignApp(
         else -> {}
     }
 
-    if (local is CommandResult.EXECUTING) {
+    if (CommandResult.EXECUTING === local || CommandResult.EXECUTING == uiState.apkSignedResult) {
         Popup(alignment = Alignment.Center) {
             Box(
                 modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.onBackground.copy(0.2f)),

@@ -22,14 +22,13 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
     private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
-    val uiState = uiStateFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SignAppState())
+    val uiState = uiStateFlow.asStateFlow()
 
     override fun onInit() {
         combine(
             settings.signTypeList,
             settings.selectedSignInfoBean,
             settings.signInfoBeans,
-            settings.apkSignatureMap,
             settings.signedDirectory,
             settings.isZipAlign,
             settings.isAutoMatchSignature
@@ -38,13 +37,16 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
                 apkSignType = params[0] as Set<Int>,
                 globalSelectedSignInfo = params[1] as SignInfoBean?,
                 allSignInfoBeans = params[2] as List<SignInfoBean>?,
-                apkSignatureMap = params[3] as Map<String, Long>,
-                signedOutputDirectory = params[4] as String?,
-                isZipAlign = params[5] as Boolean,
-                isAutoMatchSignature = params[6] as Boolean
+                signedOutputDirectory = params[3] as String?,
+                isZipAlign = params[4] as Boolean,
+                isAutoMatchSignature = params[5] as Boolean
             )
         }.onEach {
             uiStateFlow.value = it
+        }.launchIn(viewModelScope)
+
+        settings.apkSignatureMap.onEach {
+            uiStateFlow.value = uiStateFlow.value.copy(apkSignatureMap = it)
         }.launchIn(viewModelScope)
 
         // 监听并更新当前apk对应的签名信息
@@ -149,9 +151,8 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
             val message = List(resultList.size) { index ->
                 val path = pathList.getOrNull(index)
                 val result = resultList.getOrNull(index)
-                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" +
-                        (if (result is CommandResult.Error<*>) result.message.toString()
-                        else (result as CommandResult.Success<*>).result.toString())
+                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + (if (result is CommandResult.Error<*>) result.message.toString()
+                else (result as CommandResult.Success<*>).result.toString())
             }.joinToString("\n\n")
 
             CommandResult.Success(resultList.joinToString { message })
@@ -159,8 +160,7 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
             val message = List(resultList.size) { index ->
                 val path = pathList.getOrNull(index)
                 val result = resultList.getOrNull(index)
-                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" +
-                        ((result as CommandResult.Error<*>).message.toString())
+                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + ((result as CommandResult.Error<*>).message.toString())
             }.joinToString("\n\n")
 
             CommandResult.Error(message)
