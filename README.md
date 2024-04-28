@@ -97,6 +97,12 @@ packageReleaseDistributionForCurrentOS
 
 - 下载源码后，使用 IDEA 打开并运行 Main.kt 文件即可启动图形化界面。
 
+> 对于 windwos 用户，如果遇到`进程已结束，退出代码为 -1073741819 (0xC0000005)`，可以执行` ./gradlew run`。
+> 
+> 可以在 gradle > ApkSigner > compose desktop > run找到这个命令；
+> 
+> 或者可以在 编辑配置 > Gradle > 添加新的运行配置... > 运行 一栏添加run即可。
+
 ### 3. 运行 jar 包
 
 1. 自行使用 jar 打包命令`./gradlew packageReleaseUberJarForCurrentOS`打包
