@@ -1,6 +1,6 @@
 <div align="center">
 
-![icon](../src/main/resources/imgs/icon.png)
+![icon](../../src/main/resources/imgs/icon.png)
 
 # ApkSigner
 
@@ -16,7 +16,7 @@ Based on [JetBrains Compose Multiplatform](https://github.com/JetBrains/compose-
 
 Support Languages: Chinese, English
 
-[![download button](screenshort/download.svg)](https://github.com/jixiaoyong/ApkSigner/releases)
+[![download button](./screenshort/download.svg)](https://github.com/jixiaoyong/ApkSigner/releases)
 
 </div>
 
@@ -24,26 +24,18 @@ Support Languages: Chinese, English
 <br/>
 <br/>
 
-**[CHINESE README](../README.md)**
+**[CHINESE README](../../README.md)**
 
-> This document is translated from [Chinese Readme](../README.md) and is updated as much as possible, but it may be
-> outdated or contain errors. Please refer to the [Chinese Readme](../README.md).
-
-During my daily work, some APKs packaged prompted “no signature” when fortified by 360, but the signing process
-provided by 360 fortification is too cumbersome, so this small tool was developed to sign APK files via GUI.
+> This document is translated from [Chinese Readme](../../README.md) and is updated as much as possible, but it may be
+> outdated or contain errors. Please refer to the [Chinese Readme](../../README.md).
 
 This software is based on JetBrains Compose Multiplatform and supports macOS, Windows, and Linux.
 
-My daily development is mainly based on macOS, so there may be some compatibility issues on Windows and Linux that have
-not yet been discovered. If you find such problems,
-please [let me know](https://github.com/jixiaoyong/ApkSigner/issues), I will try to adapt as much as possible. You are
-also very welcome to submit [PR](https://github.com/jixiaoyong/ApkSigner/pulls).
+My daily development is mainly based on macOS, so there may be some compatibility issues on Windows and Linux that have not yet been discovered. If you find such problems, please let me [know](https://github.com/jixiaoyong/ApkSigner/issues), and I will try to adapt as much as possible. You are also very welcome to submit [PR](https://github.com/jixiaoyong/ApkSigner/pulls).
 
 ## Main Features
 
-This APP is to facilitate you to operate the signing of APK through the graphical interface, support the management,
-switching of multiple signatures, and one-click signing of APK, etc. The tool does not provide the function of
-generating signature files. To use this tool, you need to prepare the following content in advance:
+This APP is to facilitate you to operate the signing of APK through the graphical interface, support the management, switching of multiple signatures, and one-click signing of APK, etc. The tool does not provide the function of generating signature files. To use this tool, you need to prepare the following content in advance:
 
 * **Signature file**, generally `.keystore` or `.jks` format file, used to sign APK
 * **apksigner and zipalign files**, used to sign and align APK, generally in the `build-tools` folder of a certain
@@ -68,17 +60,16 @@ generating signature files. To use this tool, you need to prepare the following 
 - [ ] Add view log function
 - [x] Support international languages, can automatically recognize system language
 
-For privacy considerations, this APP will not add online update detection function. If you want to get the latest
-version of the information, you can star or watch this project on [GitHub](https://github.com/jixiaoyong/ApkSigner),
-so that when the APP is updated, GitHub will notify you on the homepage or by email.
+For privacy considerations, this APP will not add online update detection function. If you want to get the latest version of this APP, you can star or watch this project on [GitHub](https://github.com/jixiaoyong/ApkSigner), so that when the APP is updated, GitHub will notify you on the homepage or by email.
 
 ## Screenshots
 
 <br/>
 
-![sign_info](../docs/screenshort/sign_info.png)
-![sign_app](../docs/screenshort/sign_app.png)
-![sign_settings](../docs/screenshort/sign_settings.png)
+![sign_info](./screenshort/sign_info.png)
+![sign_app](./screenshort/sign_app.png)
+![sign_settings](./screenshort/sign_settings.png)
+![sign_app_dark](./screenshort/sign_app_dark.png)
 
 ## Usage
 
@@ -109,8 +100,7 @@ packageReleaseDistributionForCurrentOS
 
 2. Run `java -jar xxx.jar` to start the software
 
-For macOS users, you can consider using [jar2app](https://github.com/dante-biase/jar2app) to package the jar as an app
-to avoid the cumbersome mac system signature process.
+For macOS users, you can consider using [jar2app](https://github.com/dante-biase/jar2app) to package the jar as an app to avoid the cumbersome macOS signature process.
 
 ## License
 
@@ -118,7 +108,7 @@ Copyright (C) JI,XIAOYONG
 
 This software ([ApkSigner](https://github.com/jixiaoyong/ApkSigner)) is free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License as published by the Free Software Foundation,
-either [version 3](../LICENSE) of the License, or (at your option)any later version.
+either [version 3](../../LICENSE) of the License, or (at your option)any later version.
 
 The release of [ApkSigner](https://github.com/jixiaoyong/ApkSigner) is hoped to be useful, but there is no guarantee;
 even the marketability and suitability for a particular purpose are not guaranteed. Please refer to the GNU General
@@ -132,14 +122,9 @@ see <https://www.gnu.org/licenses/>.
 On the basis of not violating the above terms, if you want to produce and distribute your own software version based on
 this project, you also need to comply with the following terms:
 
-- **Retain author information**: When using, copying, modifying or distributing the source code of this project, the
-  original author’s name and contact information must be retained.
+- **Retain author information**: When using, copying, modifying or distributing the source code of this project, the original author’s name and contact information must be retained.
 
-- **Logo usage restrictions**: Without the explicit written permission of the original author, the Logo of this project
-  may not be used, copied, modified or distributed.
+- **Logo usage restrictions**: Without the explicit written permission of the original author, the Logo of this project may not be used, copied, modified or distributed.
 
-- **Source code link**: When using, copying, modifying or distributing the source code and software works of this
-  project, a link to the original project source code website must be provided in a prominent position (for example,
-  at the bottom of the “Settings Information” page of this software).
-  The text content is "This project is based on the open source project ApkSigner developed by JI,XIAOYONG, and you can
-  get the project source code for free at <https://github.com/jixiaoyong/ApkSigner>".
+- **Source code link**: When using, copying, modifying or distributing the source code and software works of this project, a link to the original project source code website must be provided in a prominent position (for example, at the bottom of the “Settings Information” page of this software).
+  The text content is "This project is based on the open source project ApkSigner developed by JI,XIAOYONG, and you can get the project source code for free at <https://github.com/jixiaoyong/ApkSigner>".
