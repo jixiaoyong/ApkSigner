@@ -29,7 +29,7 @@ fun SwitchButton(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)? = null)
     val switchButtonSize = DpSize(35.dp, 20.dp)
     val indicatorDiameterDp = switchButtonSize.height
     val switchButtonIndicatorOffsetX = switchButtonSize.width - indicatorDiameterDp
-    val offsetX = animateDpAsState(if (checked) 0.dp else switchButtonIndicatorOffsetX)
+    val offsetX = animateDpAsState(if (!checked) 0.dp else switchButtonIndicatorOffsetX)
     val roundedCornerShape = RoundedCornerShape(switchButtonSize.height)
     Row(
         modifier = Modifier

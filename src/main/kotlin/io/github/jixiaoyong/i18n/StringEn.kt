@@ -57,7 +57,7 @@ internal val EnStrings = Strings(
     reset = "Reset",
     appIntro = { version, webSite ->
         "This is a tool for local visualization of signed APKs. \nIn order to avoid leaking information such as keys, this tool will not be connected to the Internet.\n" +
-                "Current version:$version，To get the latest version, please click here to visit:$webSite"
+                "Current version:$version, To get the latest version, please click here to visit:$webSite"
     },
     signInfoTitle = "Signature information (scroll your mouse up and down to view more)",
     checkSignFailed = { msg -> "Failed to query signature:$msg" },

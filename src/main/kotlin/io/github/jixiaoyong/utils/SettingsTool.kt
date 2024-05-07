@@ -1,12 +1,11 @@
 package io.github.jixiaoyong.utils
 
 import com.google.gson.reflect.TypeToken
-import com.russhwolf.settings.ExperimentalSettingsApi
-import com.russhwolf.settings.ObservableSettings
-import com.russhwolf.settings.Settings
+import com.russhwolf.settings.*
 import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringOrNullFlow
-import com.russhwolf.settings.set
+import io.github.jd1378.otphelper.data.local.PreferenceDataStoreConstants
+import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.beans.SignType
 import kotlinx.coroutines.CoroutineScope
@@ -123,5 +122,31 @@ class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
     // clean all the stored values
     override fun cleanStorage() {
         settings.clear()
+    }
+
+
+    suspend fun saveToDatastore(help: PreferenceDataStoreHelper) {
+        settings.get<String>(StorageKeys.APK_SIGNER_PATH.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.APK_SIGNER_PATH, it) }
+        settings.get<String>(StorageKeys.ZIP_ALIGN_PATH.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH, it) }
+        settings.get<String>(StorageKeys.AAPT_PATH.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.AAPT_PATH, it) }
+        settings.get<String>(StorageKeys.SIGN_INFO_SELECT.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.SIGN_INFO_SELECT, it) }
+        settings.get<String>(StorageKeys.SIGN_INFO_LIST.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.SIGN_INFO_LIST, it) }
+        settings.get<String>(StorageKeys.SIGNED_DIRECTORY.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.SIGNED_DIRECTORY, it) }
+        settings.get<String>(StorageKeys.SIGN_TYPE_LIST.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.SIGN_TYPE_LIST, it.split(",").toSet()) }
+        settings.get<Boolean>(StorageKeys.ALIGN_ENABLE.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.ALIGN_ENABLE, it) }
+        settings.get<String>(StorageKeys.APK_SIGNATURE_MAP.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.APK_SIGNATURE_MAP, it) }
+        settings.get<String>(StorageKeys.LANGUAGE.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.LANGUAGE, it) }
+        settings.get<Boolean>(StorageKeys.AUTO_MATCH_SIGNATURE.key)
+            ?.let { help.putPreference(PreferenceDataStoreConstants.AUTO_MATCH_SIGNATURE, it) }
     }
 }

@@ -1,4 +1,3 @@
-
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,13 +22,17 @@ import cafe.adriel.lyricist.strings
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ExclamationTriangle
+import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.beans.AppState
+import io.github.jixiaoyong.data.SettingPreferencesRepository
+import io.github.jixiaoyong.data.getDataStore
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.PopWidget
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.system.exitProcess
@@ -37,36 +40,47 @@ import kotlin.system.exitProcess
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
 val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
+val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No SettingsTool provided") }
 
 fun main() =
     application {
         val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
+        // At the top level of your kotlin file:
         Window(
             onCloseRequest = ::exitApplication,
             title = "APK Signer",
             icon = painterResource("/imgs/icon.png"),
             state = windowState,
         ) {
+            val scope = rememberCoroutineScope()
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
-            val settingsTool = SettingsTool(scope = rememberCoroutineScope())
+            val settingsTool = SettingsTool(scope = scope)
             val stringsLyricist = rememberStrings()
-
-            // app语言：优先用户选择的，其次系统默认的，其次英文
-            val systemLanguage = Locale.getDefault().language
-            val language by settingsTool.language.collectAsState(systemLanguage)
-            if (null != language) {
-                stringsLyricist.languageTag = language.toString()
-            }
+            val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
+            val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
 
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
+                scope.launch {
+                    if (!settingPreferencesRepository.getIsInitialized()) {
+                        settingsTool.saveToDatastore(help = preferenceDataStoreHelper)
+                        settingPreferencesRepository.setIsInitialized(true)
+                    }
+
+                    // app语言：优先用户选择的，其次系统默认的，其次英文
+                    val systemLanguage = Locale.getDefault().language
+                    val language = settingPreferencesRepository.getLanguage(systemLanguage)
+                    stringsLyricist.languageTag = language
+                }
             }
+
             ProvideStrings(stringsLyricist) {
                 CompositionLocalProvider(
                     LocalWindow provides window,
                     LocalSettings provides settingsTool,
-                    LocalLyricist provides stringsLyricist
+                    LocalLyricist provides stringsLyricist,
+                    LocalDatastore provides settingPreferencesRepository,
                 ) {
 
                     LaunchedEffect(checkDualRunning) {

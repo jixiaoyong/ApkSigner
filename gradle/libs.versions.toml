@@ -5,9 +5,12 @@ compose-version = "1.6.1"
 multiplatformSettings = "1.1.1"
 lyricist = "1.6.2-1.8.20"
 gson = "2.10.1"
-ksp = "1.8.20-1.0.10"
+ksp = "1.8.20-1.0.10" # 注意同步修改gradle.properties处的ksp.version值
 jsystemThemeDetector = "3.6"
 composeIcons = "1.1.0"
+multiplatformPath = "0.2.1"
+
+dataStoreVersion = "1.1.0-beta02"
 
 [libraries]
 
@@ -23,6 +26,11 @@ ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = 
 jsystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version.ref = "jsystemThemeDetector" }
 
 composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
+
+androidx-datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStoreVersion" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStoreVersion" }
+
+sujanpoudel-multiplatform-paths = { group = "me.sujanpoudel.multiplatform.utils", name = "multiplatform-paths", version.ref = "multiplatformPath" }
 
 [plugins]
 

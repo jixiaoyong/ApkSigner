@@ -2,10 +2,12 @@ package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
 import io.github.jixiaoyong.base.BaseViewModel
+import io.github.jixiaoyong.data.SettingPreferencesRepository
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.showToast
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 /**
  * @author : jixiaoyong
@@ -14,16 +16,13 @@ import kotlinx.coroutines.flow.*
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class SettingInfoViewModel(private val settings: SettingsTool, private val repository: SettingPreferencesRepository) :
+    BaseViewModel() {
 
     private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
     val uiState = uiStateFlow.asStateFlow()
 
     override fun onInit() {
-        // 用 gradle runDistributable 或者 packageReleaseDistributionForCurrentOS 等运行应用程序才会有值
-        System.getProperty("jpackage.app-version")?.let {
-            uiStateFlow.value = uiStateFlow.value.copy(version = it)
-        }
 
         combine(
             settings.apkSigner,
@@ -121,7 +120,7 @@ class SettingInfoViewModel(private val settings: SettingsTool) : BaseViewModel()
     }
 
     fun changeLanguage(currentLanguage: String) {
-        settings.save(StorageKeys.LANGUAGE, currentLanguage)
+        viewModelScope.launch { repository.setLanguage(currentLanguage) }
     }
 }
 
@@ -130,7 +129,6 @@ data class SettingInfoUiState(
     val zipAlign: String? = null,
     val aapt: String? = null,
     val isAutoMatchSignature: Boolean = false,
-    val version: String = "未知",
     val resetInfo: SettingInfoResetState = SettingInfoResetState()
 )
 

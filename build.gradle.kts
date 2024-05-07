@@ -36,6 +36,10 @@ dependencies {
     ksp(libs.lyricist.processor)
 
     implementation(libs.composeIcons.fontAwesome)
+
+    implementation(libs.androidx.datastore.preferences.core)
+    implementation(libs.androidx.datastore.core.okio)
+    implementation(libs.sujanpoudel.multiplatform.paths)
 }
 
 compose.desktop {
@@ -65,3 +69,8 @@ compose.desktop {
         }
     }
 }
+
+// 将这些属性作为额外的属性添加到项目中
+extra["packageName"] = compose.desktop.application.nativeDistributions.packageName
+extra["packageVersion"] =  compose.desktop.application.nativeDistributions.packageVersion
+apply(from = "versionInfo.gradle.kts")

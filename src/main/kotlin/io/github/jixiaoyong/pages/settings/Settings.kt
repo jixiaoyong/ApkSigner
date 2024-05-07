@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
+import LocalDatastore
 import LocalLyricist
 import LocalSettings
 import LocalWindow
@@ -31,6 +32,7 @@ import compose.icons.fontawesomeicons.solid.AlignLeft
 import compose.icons.fontawesomeicons.solid.CheckSquare
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.UserShield
+import io.github.jixiaoyong.BuildConfig
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.i18n.Locale
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
@@ -52,7 +54,7 @@ import javax.swing.JPanel
  * @date : 2023/8/18
  */
 
-private const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/ApkSigner"
+const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/ApkSigner"
 
 @Composable
 fun PageSettingInfo() {
@@ -62,8 +64,9 @@ fun PageSettingInfo() {
     val settings = LocalSettings.current
     val i18nString = strings
     val lyricist = LocalLyricist.current
+    val repository = LocalDatastore.current
 
-    val viewModel = viewModel { SettingInfoViewModel(settings) }
+    val viewModel = viewModel { SettingInfoViewModel(settings, repository) }
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
 
@@ -252,7 +255,7 @@ fun PageSettingInfo() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                val str = i18nString.appIntro(uiState.version, PROJECT_WEBSITE)
+                val str = i18nString.appIntro(BuildConfig.PACKAGE_VERSION, PROJECT_WEBSITE)
                 val startIndex = str.indexOf(PROJECT_WEBSITE)
                 val endIndex = startIndex + PROJECT_WEBSITE.length
 
