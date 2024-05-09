@@ -80,5 +80,9 @@ internal val ZhStrings = Strings(
     startSignApk = "开始签名apk",
     changeLanguage = "修改语言",
     currentLanguageTitle = "语言",
-    cancel = "取消"
+    cancel = "取消",
+    themeMode = "主题模式",
+    darkMode = "深色",
+    lightMode = "浅色",
+    themeModeAuto = "跟随系统",
 )

@@ -27,10 +27,7 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.lyricist.strings
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.AlignLeft
-import compose.icons.fontawesomeicons.solid.CheckSquare
-import compose.icons.fontawesomeicons.solid.Language
-import compose.icons.fontawesomeicons.solid.UserShield
+import compose.icons.fontawesomeicons.solid.*
 import io.github.jixiaoyong.BuildConfig
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.i18n.Locale
@@ -67,6 +64,19 @@ fun PageSettingInfo() {
     val viewModel = viewModel { SettingInfoViewModel(repository) }
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
+    var showThemeModeDialog by remember { mutableStateOf(false) }
+
+    val themeMode = uiState.isDarkMode
+    var localThemeMode by remember { mutableStateOf(themeMode) }
+    val themeModeDesc = when (themeMode) {
+        true -> i18nString.darkMode
+        false -> i18nString.lightMode
+        else -> i18nString.themeModeAuto
+    }
+
+    LaunchedEffect(themeMode) {
+        localThemeMode = themeMode ?: localThemeMode
+    }
 
     PopWidget(title = i18nString.confirmReset,
         show = resetConfig.showResetDialog,
@@ -112,6 +122,31 @@ fun PageSettingInfo() {
                     onCheckedChange = {
                         if (it) {
                             currentLanguage = item.code
+                        }
+                    })
+            }
+        }
+    }
+
+    PopWidget(
+        title = i18nString.themeMode,
+        show = showThemeModeDialog,
+        onDismiss = { showThemeModeDialog = false },
+        onConfirm = {
+            viewModel.changeThemeMode(localThemeMode)
+            showThemeModeDialog = false
+        }) {
+        Column {
+            val themeModeMap =
+                mapOf(true to i18nString.darkMode, false to i18nString.lightMode, null to i18nString.themeModeAuto)
+
+            themeModeMap.forEach { pair ->
+                CheckBox(checked = localThemeMode == pair.key,
+                    title = pair.value,
+                    modifier = Modifier.padding(start = 50.dp).fillMaxWidth(),
+                    onCheckedChange = {
+                        if (it) {
+                            localThemeMode = pair.key
                         }
                     })
             }
@@ -238,6 +273,14 @@ fun PageSettingInfo() {
                     viewModel.toggleLanguageDialog()
                 })
 
+            InfoItemWidget(
+                i18nString.themeMode,
+                icon = FontAwesomeIcons.Solid.Sun,
+                value = null,
+                description = themeModeDesc,
+                onClick = {
+                    showThemeModeDialog = true
+                }) {}
 
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(

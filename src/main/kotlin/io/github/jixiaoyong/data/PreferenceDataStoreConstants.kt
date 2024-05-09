@@ -13,6 +13,7 @@ object PreferenceDataStoreConstants {
     val SIGNED_DIRECTORY = stringPreferencesKey("SIGNED_DIRECTORY") // 签名后文件保存路径
     val SIGN_TYPE_LIST = stringSetPreferencesKey("SIGN_TYPE_LIST") // 签名类型列表
     val ALIGN_ENABLE = booleanPreferencesKey("ALIGN_ENABLE") // 是否开启zipalign压缩
+    val IS_DARK_MODE = booleanPreferencesKey("IS_DARK_MODE") // 是否开启夜间模式
     val APK_SIGNATURE_MAP = stringPreferencesKey("APK_SIGNATURE_MAP") // apk包名和对应签名id的map
     val LANGUAGE = stringPreferencesKey("LANGUAGE") // 当前的语言
     val AUTO_MATCH_SIGNATURE = booleanPreferencesKey("AUTO_MATCH_SIGNATURE") // 是否自动匹配签名信息

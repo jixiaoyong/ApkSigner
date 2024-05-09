@@ -75,4 +75,8 @@ data class Strings(
     val changeLanguage: String,
     val currentLanguageTitle: String,
     val cancel: String,
+    val themeMode: String,
+    val darkMode: String,
+    val lightMode: String,
+    val themeModeAuto: String,
 )

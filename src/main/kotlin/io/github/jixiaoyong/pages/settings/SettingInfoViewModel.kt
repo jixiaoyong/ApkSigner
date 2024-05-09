@@ -26,13 +26,15 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
             repository.apkSigner,
             repository.zipAlign,
             repository.aapt,
-            repository.isAutoMatchSignature
-        ) { apkSigner, zipAlign, aapt, isAutoMatchSignature ->
+            repository.isAutoMatchSignature,
+            repository.isDarkMode,
+        ) { apkSigner, zipAlign, aapt, isAutoMatchSignature,isDarkMode ->
             uiStateFlow.value.copy(
                 apkSign = apkSigner,
                 zipAlign = zipAlign,
                 aapt = aapt,
-                isAutoMatchSignature = isAutoMatchSignature
+                isAutoMatchSignature = isAutoMatchSignature,
+                isDarkMode = isDarkMode
             )
         }.onEach {
             uiStateFlow.emit(it)
@@ -123,6 +125,13 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
     fun changeLanguage(currentLanguage: String) {
         viewModelScope.launch { repository.setLanguage(currentLanguage) }
     }
+
+    /**
+     * @param isDarkMode null 表示跟随系统，true 表示深色模式，false 表示浅色模式
+     */
+    fun changeThemeMode(isDarkMode: Boolean?) {
+        viewModelScope.launch { repository.changeThemeMode(isDarkMode) }
+    }
 }
 
 data class SettingInfoUiState(
@@ -130,6 +139,7 @@ data class SettingInfoUiState(
     val zipAlign: String? = null,
     val aapt: String? = null,
     val isAutoMatchSignature: Boolean = false,
+    val isDarkMode: Boolean? = null,
     val resetInfo: SettingInfoResetState = SettingInfoResetState()
 )
 

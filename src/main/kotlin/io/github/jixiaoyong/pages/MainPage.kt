@@ -50,16 +50,17 @@ fun App() {
         Triple(Icons.Default.Settings, strings.settingsConfig, Routes.SettingInfo),
     )
 
-    var isDarkTheme by viewModel.isDarkTheme
+    val isDarkTheme by viewModel.isDarkTheme.collectAsState()
     val pageIndex by viewModel.currentIndex.collectAsState()
+    var localThemeMode by remember { mutableStateOf(isDarkTheme ?: false) }
 
     // 将viewModel放在这里避免切换页面时丢失
     val signInfoViewModel = viewModel { SignInfoViewModel(settingsRepository) }
     val signAppViewModel = viewModel { SignAppViewModel(settingsRepository) }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(isDarkTheme) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->
-            isDarkTheme = isDark
+            localThemeMode = isDarkTheme ?: isDark
         }
 
         var detector: OsThemeDetector? = null
@@ -67,7 +68,7 @@ fun App() {
             detector = OsThemeDetector.getDetector()
             detector?.registerListener(listener)
             detector?.isDark?.let {
-                isDarkTheme = it
+                localThemeMode = isDarkTheme ?: it
             }
         }
 
@@ -76,9 +77,9 @@ fun App() {
         }
     }
 
-    ToasterUtil.init(isDarkTheme)
+    ToasterUtil.init(localThemeMode)
 
-    AppTheme(darkTheme = isDarkTheme) {
+    AppTheme(darkTheme = localThemeMode) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)

@@ -80,7 +80,11 @@ internal val EnStrings = Strings(
     startSignApk = "Start signing apk",
     changeLanguage = "Modify language",
     currentLanguageTitle = "Languages",
-    cancel = "Cancel"
+    cancel = "Cancel",
+    themeMode = "Theme Mode",
+    darkMode = "Dark Mode",
+    lightMode = "Light Mode",
+    themeModeAuto = "Auto Mode",
 )
 
 //internal val EnStrings = Strings(

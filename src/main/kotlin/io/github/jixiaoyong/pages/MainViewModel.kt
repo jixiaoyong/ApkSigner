@@ -1,12 +1,13 @@
 package io.github.jixiaoyong.pages
 
 import ApkSigner
-import androidx.compose.runtime.mutableStateOf
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(private val settingsRepository: SettingPreferencesRepository) : BaseViewModel() {
 
     val currentIndex = MutableStateFlow(Routes.SignInfo)
-    val isDarkTheme = mutableStateOf(false)
+    val isDarkTheme = settingsRepository.isDarkMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     override fun onInit() {
         viewModelScope.launch {

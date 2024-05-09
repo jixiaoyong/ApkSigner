@@ -43,6 +43,8 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.ALIGN_ENABLE, false)
     val isAutoMatchSignature: Flow<Boolean>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.AUTO_MATCH_SIGNATURE, false)
+    val isDarkMode: Flow<Boolean?>
+        get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.IS_DARK_MODE)
     val signedDirectory: Flow<String?>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.SIGNED_DIRECTORY)
 
@@ -119,5 +121,9 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
 
     suspend fun saveSignTypeList(signTypeList: Set<Int>) {
         datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_TYPE_LIST, signTypeList.map { "$it" }.toSet())
+    }
+
+    suspend fun changeThemeMode(isDarkMode: Boolean?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.IS_DARK_MODE, isDarkMode)
     }
 }
