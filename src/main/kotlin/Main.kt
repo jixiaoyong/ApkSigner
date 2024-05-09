@@ -39,8 +39,8 @@ import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
-val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No SettingsTool provided") }
-val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No SettingsTool provided") }
+val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No LocalLyricist provided") }
+val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No LocalDatastore provided") }
 
 fun main() =
     application {

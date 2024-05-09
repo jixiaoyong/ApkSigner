@@ -1,5 +1,6 @@
 package io.github.jixiaoyong.pages
 
+import LocalDatastore
 import LocalSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,9 +41,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun App() {
     val settings = LocalSettings.current
+    val settingsRepository = LocalDatastore.current
 
     val scope = rememberCoroutineScope()
-    val viewModel = viewModel { MainViewModel(settings) }
+    val viewModel = viewModel { MainViewModel(settingsRepository) }
 
     val routes = listOf(
         Triple(Icons.Default.List, strings.signConfig, Routes.SignInfo),
@@ -54,7 +56,7 @@ fun App() {
     val pageIndex by viewModel.currentIndex.collectAsState()
 
     // 将viewModel放在这里避免切换页面时丢失
-    val signInfoViewModel = viewModel { SignInfoViewModel(settings) }
+    val signInfoViewModel = viewModel { SignInfoViewModel(settingsRepository) }
     val signAppViewModel = viewModel { SignAppViewModel(settings) }
 
     DisposableEffect(Unit) {

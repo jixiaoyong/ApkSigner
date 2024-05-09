@@ -79,4 +79,12 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
                     gson.fromJson(it, listType)
                 }
         }
+
+    suspend fun saveSelectedSignInfo(signInfoBean: SignInfoBean?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_INFO_SELECT, gson.toJson(signInfoBean))
+    }
+
+    suspend fun saveSignInfoList(signInfoBean: List<SignInfoBean>?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_INFO_LIST, gson.toJson(signInfoBean))
+    }
 }

@@ -2,10 +2,9 @@ package io.github.jixiaoyong.pages.signInfos
 
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.SignInfoBean
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
-import io.github.jixiaoyong.utils.gson
+import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 /**
  * @author : jixiaoyong
@@ -14,7 +13,7 @@ import kotlinx.coroutines.flow.*
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class SignInfoViewModel(private val settings: SettingPreferencesRepository) : BaseViewModel() {
 
     private val uiStateFlow: MutableStateFlow<SignInfoUiState> = MutableStateFlow(SignInfoUiState())
     val uiState = uiStateFlow.asStateFlow()
@@ -55,14 +54,13 @@ class SignInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
     }
 
     fun saveSelectedSignInfo(signInfoBean: SignInfoBean?) {
-        val json = if (null == signInfoBean) null else gson.toJson(signInfoBean)
-        settings.save(StorageKeys.SIGN_INFO_SELECT, json)
+        viewModelScope.launch { settings.saveSelectedSignInfo(signInfoBean) }
     }
 
     fun removeSignInfo(signInfo: SignInfoBean) {
         val tempList = uiStateFlow.value.signInfoList.toMutableList()
         tempList.remove(signInfo)
-        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(tempList))
+        viewModelScope.launch { settings.saveSignInfoList(tempList) }
         if (signInfo == uiStateFlow.value.selectedSignInfo) {
             saveSelectedSignInfo(null)
         }
@@ -80,7 +78,7 @@ class SignInfoViewModel(private val settings: SettingsTool) : BaseViewModel() {
         } else {
             newSignInfos.add(newSignInfo)
         }
-        settings.save(StorageKeys.SIGN_INFO_LIST, gson.toJson(newSignInfos))
+        viewModelScope.launch { settings.saveSignInfoList(newSignInfos) }
 
         // 每次保存新签名之后，重置签名的id，避免在此点保存的时候还是覆盖已经保存的签名
         // 对于需要编辑已有签名的，需要从列表中选择并编辑
