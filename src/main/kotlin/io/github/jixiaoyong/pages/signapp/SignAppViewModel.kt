@@ -5,11 +5,10 @@ import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignInfoBean
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
-import io.github.jixiaoyong.utils.gson
+import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import okio.Path.Companion.toPath
 
 /**
  * @author : jixiaoyong
@@ -18,7 +17,7 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
+class SignAppViewModel(private val settings: SettingPreferencesRepository) : BaseViewModel() {
     private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
@@ -77,11 +76,18 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
         } else {
             ApkSigner.getApkPackageName(apkFilePath.firstOrNull())
         }
+
+        val outputDir = uiStateFlow.value.signedOutputDirectory ?: apkFilePath.firstOrNull()?.run {
+            this.toPath().parent.toString()
+        }
+        saveSignedOutputDirectory(outputDir)
+
         uiStateFlow.emit(
             uiStateFlow.value.copy(
                 apkFilePaths = apkFilePath,
                 apkPackageName = apkPackageName,
                 apkSignedResult = CommandResult.NOT_EXECUT,
+                signedOutputDirectory = outputDir,
                 signedLogs = emptyList()
             )
         )
@@ -91,19 +97,23 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
         if (null == packageName) {
             return
         }
-        val newMap = uiState.value.apkSignatureMap.toMutableMap()
-        newMap.remove(packageName)
-        settings.save(StorageKeys.APK_SIGNATURE_MAP, gson.toJson(newMap))
+        viewModelScope.launch {
+            val newMap = uiState.value.apkSignatureMap.toMutableMap()
+            newMap.remove(packageName)
+            settings.saveApkSignatureMap(newMap)
+        }
     }
 
     fun updateApkSignatureMap(packageName: String?, localSelectedSignInfo: SignInfoBean) {
-        if (null == packageName || !localSelectedSignInfo.isValid()) {
-            return
-        }
+        viewModelScope.launch {
+            if (null == packageName || !localSelectedSignInfo.isValid()) {
+                return@launch
+            }
 
-        val newMap = uiState.value.apkSignatureMap.toMutableMap()
-        newMap[packageName] = localSelectedSignInfo.id
-        settings.save(StorageKeys.APK_SIGNATURE_MAP, gson.toJson(newMap))
+            val newMap = uiState.value.apkSignatureMap.toMutableMap()
+            newMap[packageName] = localSelectedSignInfo.id
+            settings.saveApkSignatureMap(newMap)
+        }
     }
 
 
@@ -111,16 +121,16 @@ class SignAppViewModel(private val settings: SettingsTool) : BaseViewModel() {
         viewModelScope.launch { uiStateFlow.emit(uiStateFlow.value.copy(signInfoResult = signInfoResult)) }
     }
 
-    fun saveSignedOutputDirectory(signedDirectory: String) {
-        viewModelScope.launch { settings.save(StorageKeys.SIGNED_DIRECTORY, signedDirectory) }
+    fun saveSignedOutputDirectory(signedDirectory: String?) {
+        viewModelScope.launch { settings.saveSignedDirectory(signedDirectory) }
     }
 
     fun changeZipAlign(isZipAlign: Boolean) {
-        viewModelScope.launch { settings.save(StorageKeys.ALIGN_ENABLE, isZipAlign) }
+        viewModelScope.launch { settings.saveIsZipAlign(isZipAlign) }
     }
 
     fun changeApkSignType(newTypes: MutableSet<Int>) {
-        settings.signTypeList = flowOf(newTypes)
+        viewModelScope.launch { settings.saveSignTypeList(newTypes) }
     }
 
     fun changeSignApkResult(signApkResult: CommandResult) {

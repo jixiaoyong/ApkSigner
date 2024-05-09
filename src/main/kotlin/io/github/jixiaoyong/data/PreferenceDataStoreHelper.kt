@@ -55,8 +55,12 @@ class PreferenceDataStoreHelper(private val dataSource: DataStore<Preferences>) 
         dataSource.data.first()[key] ?: defaultValue
 
     // This Sets the value based on the value passed in value parameter.
-    suspend fun <T> putPreference(key: Preferences.Key<T>, value: T) {
-        dataSource.edit { preferences -> preferences[key] = value }
+    suspend fun <T> putPreference(key: Preferences.Key<T>, value: T?) {
+        if (null == value) {
+            removePreference(key)
+        } else {
+            dataSource.edit { preferences -> preferences[key] = value }
+        }
     }
 
     // This Function removes the Key Value pair from the datastore, hereby removing it completely.

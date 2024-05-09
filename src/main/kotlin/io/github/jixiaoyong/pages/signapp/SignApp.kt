@@ -178,11 +178,6 @@ fun PageSignApp(
                                 if (chooseFileName.isNullOrEmpty()) {
                                     showToast(i18nStrings.plzChooseApkFile)
                                 } else {
-                                    if (!uiState.signedOutputDirectory.isNullOrBlank()) {
-                                        viewModel.saveSignedOutputDirectory(
-                                            chooseFileName.first().substringBeforeLast(File.separator)
-                                        )
-                                    }
                                     viewModel.changeApkFilePath(chooseFileName)
                                     showToast(i18nStrings.changeSuccess)
                                 }

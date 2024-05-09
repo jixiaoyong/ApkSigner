@@ -85,6 +85,39 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
     }
 
     suspend fun saveSignInfoList(signInfoBean: List<SignInfoBean>?) {
-        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_INFO_LIST, gson.toJson(signInfoBean))
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_INFO_LIST, gson.toJson(signInfoBean ?: return))
+    }
+
+    suspend fun saveApkSignPath(apkSignPath: String?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.APK_SIGNER_PATH, apkSignPath)
+    }
+
+
+    suspend fun saveZipAlignPath(zipAlignPath: String?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH, zipAlignPath)
+    }
+
+    suspend fun saveSignedDirectory(signedDirectory: String?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGNED_DIRECTORY, signedDirectory)
+    }
+
+    suspend fun saveAaptPath(aaptPath: String?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.AAPT_PATH, aaptPath)
+    }
+
+    suspend fun saveAutoMatchSignature(autoMatch: Boolean) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.AUTO_MATCH_SIGNATURE, autoMatch)
+    }
+
+    suspend fun saveIsZipAlign(zipAlign: Boolean) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.ALIGN_ENABLE, zipAlign)
+    }
+
+    suspend fun saveApkSignatureMap(signatureMap: Map<String, Long>) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.APK_SIGNATURE_MAP, gson.toJson(signatureMap))
+    }
+
+    suspend fun saveSignTypeList(signTypeList: Set<Int>) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.SIGN_TYPE_LIST, signTypeList.map { "$it" }.toSet())
     }
 }

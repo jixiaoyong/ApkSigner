@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 /**
  * @author : jixiaoyong
  * @description ：读写配置信息
+ * todo 计划在下个大版本中移除此库，使用[io.github.jixiaoyong.data.SettingPreferencesRepository]替代
  *
  * @email : jixiaoyong1995@gmail.com
  * @date : 2023/8/19
@@ -57,7 +58,7 @@ enum class StorageKeys {
     val key get() = this.name
 }
 
-
+@Deprecated("Please use the {@link io.github.jixiaoyong.data.SettingPreferencesRepository} instead")
 @OptIn(ExperimentalSettingsApi::class)
 class SettingsTool(private val scope: CoroutineScope) : KeyValueStorage {
     private val settings: Settings by lazy { Settings() }

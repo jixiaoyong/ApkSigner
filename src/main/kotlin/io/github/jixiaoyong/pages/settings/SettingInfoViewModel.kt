@@ -3,8 +3,6 @@ package io.github.jixiaoyong.pages.settings
 import ApkSigner
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
-import io.github.jixiaoyong.utils.SettingsTool
-import io.github.jixiaoyong.utils.StorageKeys
 import io.github.jixiaoyong.utils.showToast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,7 +14,7 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SettingInfoViewModel(private val settings: SettingsTool, private val repository: SettingPreferencesRepository) :
+class SettingInfoViewModel(private val repository: SettingPreferencesRepository) :
     BaseViewModel() {
 
     private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
@@ -25,10 +23,10 @@ class SettingInfoViewModel(private val settings: SettingsTool, private val repos
     override fun onInit() {
 
         combine(
-            settings.apkSigner,
-            settings.zipAlign,
-            settings.aapt,
-            settings.isAutoMatchSignature
+            repository.apkSigner,
+            repository.zipAlign,
+            repository.aapt,
+            repository.isAutoMatchSignature
         ) { apkSigner, zipAlign, aapt, isAutoMatchSignature ->
             uiStateFlow.value.copy(
                 apkSign = apkSigner,
@@ -77,21 +75,24 @@ class SettingInfoViewModel(private val settings: SettingsTool, private val repos
     }
 
     fun runRestConfig() {
-        val resetConfig = uiStateFlow.value.resetInfo
+        viewModelScope.launch {
+            val resetConfig = uiStateFlow.value.resetInfo
 
-        if (resetConfig.resetSignInfo) {
-            settings.save(StorageKeys.SIGN_INFO_LIST, null)
-            settings.save(StorageKeys.SIGN_INFO_SELECT, null)
-        }
-        if (resetConfig.resetApkTools) {
-            settings.save(StorageKeys.APK_SIGNER_PATH, null)
-            settings.save(StorageKeys.ZIP_ALIGN_PATH, null)
-        }
-        if (resetConfig.resetSignTypes) {
-            settings.save(StorageKeys.SIGN_TYPE_LIST, null)
-        }
-        if (resetConfig.resetSignedDirectory) {
-            settings.save(StorageKeys.SIGNED_DIRECTORY, null)
+            if (resetConfig.resetSignInfo) {
+                repository.saveSelectedSignInfo(null)
+                repository.saveSignInfoList(null)
+            }
+            if (resetConfig.resetApkTools) {
+                repository.saveApkSignPath(null)
+                repository.saveZipAlignPath(null)
+                repository.saveAaptPath(null)
+            }
+            if (resetConfig.resetSignTypes) {
+                repository.setSignTypeList(emptySet())
+            }
+            if (resetConfig.resetSignedDirectory) {
+                repository.saveSignedDirectory(null)
+            }
         }
     }
 
@@ -104,19 +105,19 @@ class SettingInfoViewModel(private val settings: SettingsTool, private val repos
     }
 
     fun saveApkSigner(apkSigner: String?) {
-        settings.save(StorageKeys.APK_SIGNER_PATH, apkSigner)
+        viewModelScope.launch { repository.saveApkSignPath(apkSigner) }
     }
 
     fun saveZipAlign(zipAlign: String?) {
-        settings.save(StorageKeys.ZIP_ALIGN_PATH, zipAlign)
+        viewModelScope.launch { repository.saveZipAlignPath(zipAlign) }
     }
 
     fun saveAapt(aapt: String?) {
-        settings.save(StorageKeys.AAPT_PATH, aapt)
+        viewModelScope.launch { repository.saveAaptPath(aapt) }
     }
 
     fun saveAutoMatchSignature(autoMatch: Boolean) {
-        settings.save(StorageKeys.AUTO_MATCH_SIGNATURE, autoMatch)
+        viewModelScope.launch { repository.saveAutoMatchSignature(autoMatch) }
     }
 
     fun changeLanguage(currentLanguage: String) {

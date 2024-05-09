@@ -38,13 +38,15 @@ import java.util.*
 import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
-val LocalSettings = compositionLocalOf<SettingsTool> { error("No SettingsTool provided") }
 val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No LocalLyricist provided") }
 val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No LocalDatastore provided") }
 
 fun main() =
     application {
         val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
+        val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
+        val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
+
         // At the top level of your kotlin file:
         Window(
             onCloseRequest = ::exitApplication,
@@ -55,14 +57,12 @@ fun main() =
             val scope = rememberCoroutineScope()
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
-            val settingsTool = SettingsTool(scope = scope)
             val stringsLyricist = rememberStrings()
-            val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
-            val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
 
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
                 scope.launch {
+                    val settingsTool = SettingsTool(scope = scope)
                     if (!settingPreferencesRepository.getIsInitialized()) {
                         settingsTool.saveToDatastore(help = preferenceDataStoreHelper)
                         settingPreferencesRepository.setIsInitialized(true)
@@ -78,7 +78,6 @@ fun main() =
             ProvideStrings(stringsLyricist) {
                 CompositionLocalProvider(
                     LocalWindow provides window,
-                    LocalSettings provides settingsTool,
                     LocalLyricist provides stringsLyricist,
                     LocalDatastore provides settingPreferencesRepository,
                 ) {

@@ -1,7 +1,6 @@
 package io.github.jixiaoyong.pages
 
 import LocalDatastore
-import LocalSettings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -40,7 +39,6 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun App() {
-    val settings = LocalSettings.current
     val settingsRepository = LocalDatastore.current
 
     val scope = rememberCoroutineScope()
@@ -57,7 +55,7 @@ fun App() {
 
     // 将viewModel放在这里避免切换页面时丢失
     val signInfoViewModel = viewModel { SignInfoViewModel(settingsRepository) }
-    val signAppViewModel = viewModel { SignAppViewModel(settings) }
+    val signAppViewModel = viewModel { SignAppViewModel(settingsRepository) }
 
     DisposableEffect(Unit) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->
