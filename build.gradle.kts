@@ -39,6 +39,8 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences.core)
     implementation(libs.androidx.datastore.core.okio)
+    implementation(libs.jetbrains.navigation.compose)
+    implementation(libs.jetbrains.lifecycle.viewmodel)
     implementation(libs.sujanpoudel.multiplatform.paths)
 }
 

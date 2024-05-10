@@ -11,6 +11,8 @@ composeIcons = "1.1.0"
 multiplatformPath = "0.2.1"
 
 dataStoreVersion = "1.1.0-beta02"
+jetbrainsNavigationCompose = "2.7.0-alpha03"
+jetbrainsLifecycle = "2.8.0-beta02"
 
 [libraries]
 
@@ -29,6 +31,8 @@ composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awes
 
 androidx-datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStoreVersion" }
 androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStoreVersion" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrainsNavigationCompose" }
+jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrainsLifecycle" }
 
 sujanpoudel-multiplatform-paths = { group = "me.sujanpoudel.multiplatform.utils", name = "multiplatform-paths", version.ref = "multiplatformPath" }
 
