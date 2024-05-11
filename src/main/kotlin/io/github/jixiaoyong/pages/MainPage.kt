@@ -17,6 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import cafe.adriel.lyricist.strings
 import com.jthemedetecor.OsThemeDetector
 import io.github.jixiaoyong.base.viewModel
@@ -37,12 +41,11 @@ import kotlinx.coroutines.launch
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-@Composable
-fun App() {
-    val settingsRepository = LocalDatastore.current
 
+@Composable
+fun App(viewModel: MainViewModel) {
+    val settingsRepository = LocalDatastore.current
     val scope = rememberCoroutineScope()
-    val viewModel = viewModel { MainViewModel(settingsRepository) }
 
     val routes = listOf(
         Triple(Icons.Default.List, strings.signConfig, Routes.SignInfo),
@@ -57,6 +60,12 @@ fun App() {
     // 将viewModel放在这里避免切换页面时丢失
     val signInfoViewModel = viewModel { SignInfoViewModel(settingsRepository) }
     val signAppViewModel = viewModel { SignAppViewModel(settingsRepository) }
+
+    val navController: NavHostController = rememberNavController()
+
+    LaunchedEffect(pageIndex) {
+        navController.navigate(pageIndex)
+    }
 
     DisposableEffect(isDarkTheme) {
         val listener: (Boolean) -> Unit = { isDark: Boolean ->
@@ -114,14 +123,18 @@ fun App() {
                 }
             }
 
-            when (pageIndex) {
-                Routes.SignInfo -> PageSignInfo(signInfoViewModel)
-
-                Routes.SignApp -> PageSignApp(signAppViewModel) { route ->
-                    viewModel.changePage(route)
+            NavHost(navController, startDestination = Routes.SignInfo) {
+                composable(Routes.SignInfo) {
+                    PageSignInfo(signInfoViewModel)
                 }
-
-                Routes.SettingInfo -> PageSettingInfo()
+                composable(Routes.SignApp) {
+                    PageSignApp(signAppViewModel) { route ->
+                        viewModel.changePage(route)
+                    }
+                }
+                composable(Routes.SettingInfo) {
+                    PageSettingInfo()
+                }
             }
         }
     }

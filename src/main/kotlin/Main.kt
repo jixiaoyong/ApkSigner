@@ -23,11 +23,13 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
+import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import io.github.jixiaoyong.data.getDataStore
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
+import io.github.jixiaoyong.pages.MainViewModel
 import io.github.jixiaoyong.utils.AppProcessUtil
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.PopWidget
@@ -58,6 +60,7 @@ fun main() =
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
             val stringsLyricist = rememberStrings()
+            val viewModel = viewModel { MainViewModel(settingPreferencesRepository) }
 
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
@@ -104,7 +107,7 @@ fun main() =
                         }
 
                         AppState.Success -> {
-                            App()
+                            App(viewModel)
                         }
                     }
                 }

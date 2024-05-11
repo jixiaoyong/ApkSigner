@@ -11,8 +11,8 @@ composeIcons = "1.1.0"
 multiplatformPath = "0.2.1"
 
 dataStoreVersion = "1.1.0-beta02"
-jetbrainsNavigationCompose = "2.7.0-alpha03"
-jetbrainsLifecycle = "2.8.0-beta02"
+jetbrainsNavigationCompose = "2.7.0-alpha04"
+jetbrainsLifecycle = "2.8.0-rc01"
 
 [libraries]
 
