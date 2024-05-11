@@ -85,6 +85,8 @@ internal val EnStrings = Strings(
     darkMode = "Dark Mode",
     lightMode = "Light Mode",
     themeModeAuto = "Auto Mode",
+    logFileDirectory = "Log file directory",
+    openLogDirectoryFailed = "Failed to open log file directory",
 )
 
 //internal val EnStrings = Strings(

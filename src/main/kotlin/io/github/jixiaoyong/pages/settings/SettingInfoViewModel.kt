@@ -1,11 +1,14 @@
 package io.github.jixiaoyong.pages.settings
 
 import ApkSigner
+import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import io.github.jixiaoyong.utils.showToast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.jetbrains.skiko.OS.*
+import org.jetbrains.skiko.hostOs
 
 /**
  * @author : jixiaoyong
@@ -28,7 +31,7 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
             repository.aapt,
             repository.isAutoMatchSignature,
             repository.isDarkMode,
-        ) { apkSigner, zipAlign, aapt, isAutoMatchSignature,isDarkMode ->
+        ) { apkSigner, zipAlign, aapt, isAutoMatchSignature, isDarkMode ->
             uiStateFlow.value.copy(
                 apkSign = apkSigner,
                 zipAlign = zipAlign,
@@ -41,6 +44,10 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         }
             .launchIn(viewModelScope)
 
+        uiStateFlow.update {
+            val logFile = Logger.getLogFileDirectory().toString()
+            it.copy(logFileDirectory = logFile)
+        }
     }
 
     fun toggleResetDialog() {
@@ -132,6 +139,20 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
     fun changeThemeMode(isDarkMode: Boolean?) {
         viewModelScope.launch { repository.changeThemeMode(isDarkMode) }
     }
+
+    fun openLogDirectory(): Boolean {
+        val path = uiStateFlow.value.logFileDirectory
+        val command = when (hostOs) {
+            MacOS -> "/usr/bin/open"
+            Windows -> "explorer"
+            Linux -> "/usr/bin/xdg-open"
+            else -> return false
+        }
+        val cmd = arrayOf(command, path)
+        val result = Runtime.getRuntime().exec(cmd).waitFor()
+        Logger.log("open log directory($hostOs: ${result}): ${cmd.joinToString(" ")}")
+        return result == 0
+    }
 }
 
 data class SettingInfoUiState(
@@ -140,7 +161,8 @@ data class SettingInfoUiState(
     val aapt: String? = null,
     val isAutoMatchSignature: Boolean = false,
     val isDarkMode: Boolean? = null,
-    val resetInfo: SettingInfoResetState = SettingInfoResetState()
+    val resetInfo: SettingInfoResetState = SettingInfoResetState(),
+    val logFileDirectory: String? = null
 )
 
 data class SettingInfoResetState(

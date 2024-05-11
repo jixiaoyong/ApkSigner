@@ -85,4 +85,6 @@ internal val ZhStrings = Strings(
     darkMode = "深色",
     lightMode = "浅色",
     themeModeAuto = "跟随系统",
+    logFileDirectory = "日志文件目录",
+    openLogDirectoryFailed = "打开日志文件目录失败",
 )

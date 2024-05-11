@@ -79,4 +79,6 @@ data class Strings(
     val darkMode: String,
     val lightMode: String,
     val themeModeAuto: String,
+    val logFileDirectory:String,
+    val openLogDirectoryFailed: String,
 )

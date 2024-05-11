@@ -55,9 +55,9 @@ This APP is to facilitate you to operate the signing of APK through the graphica
 - [x] Support multi-file signature, view signature
 - [ ] Import multiple signature files
 - [x] Automatically save/match the signature information corresponding to APK
-- [ ] Optimize signature configuration
+- [x] Optimize signature configuration
 - [x] Beautify the theme
-- [ ] Add view log function
+- [x] Add view log function
 - [x] Support international languages, can automatically recognize system language
 
 For privacy considerations, this APP will not add online update detection function. If you want to get the latest version of this APP, you can star or watch this project on [GitHub](https://github.com/jixiaoyong/ApkSigner), so that when the APP is updated, GitHub will notify you on the homepage or by email.

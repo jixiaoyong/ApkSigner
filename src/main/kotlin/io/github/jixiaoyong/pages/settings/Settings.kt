@@ -282,6 +282,19 @@ fun PageSettingInfo() {
                     showThemeModeDialog = true
                 }) {}
 
+            InfoItemWidget(
+                i18nString.logFileDirectory,
+                icon = FontAwesomeIcons.Solid.FileAlt,
+                value = null,
+                description = uiState.logFileDirectory,
+                buttonTitle = i18nString.open,
+                onClick = {
+                    val result = viewModel.openLogDirectory()
+                    if (!result) {
+                        showToast(i18nString.openLogDirectoryFailed)
+                    }
+                }) {}
+
             Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(top = 80.dp)) {
                 ButtonWidget(
                     onClick = { viewModel.toggleResetDialog() },

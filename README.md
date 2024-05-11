@@ -54,9 +54,9 @@ A tool for Android developers to sign their applications with GUI software.
 - [x] 支持多文件签名，查看签名
 - [ ] 导入多个签名文件
 - [x] 自动保存/匹配 APK 对应的签名信息
-- [ ] 优化签名配置
+- [x] 优化签名配置
 - [x] 美化主题
-- [ ] 添加查看日志功能
+- [x] 添加查看日志功能
 - [x] 支持国际化语言，可自动识别系统语言
 
 出于隐私考虑，本 APP 不会添加联网检测更新功能，如果你希望获取最新版本的信息，可以在 [GitHub](https://github.com/jixiaoyong/ApkSigner) 上面 star

@@ -35,6 +35,7 @@ import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.PopWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.system.exitProcess
@@ -61,6 +62,14 @@ fun main() =
             var checkDualRunning by remember { mutableStateOf(true) }
             val stringsLyricist = rememberStrings()
             val viewModel = viewModel { MainViewModel(settingPreferencesRepository) }
+
+            DisposableEffect(Unit) {
+                Logger.init(scope.plus(Dispatchers.IO))
+
+                onDispose {
+                    Logger.onDispose()
+                }
+            }
 
             LaunchedEffect(Unit) {
                 window.minimumSize = window.size
