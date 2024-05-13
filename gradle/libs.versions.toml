@@ -8,7 +8,7 @@ gson = "2.10.1"
 ksp = "1.8.20-1.0.10" # 注意同步修改gradle.properties处的ksp.version值
 jsystemThemeDetector = "3.6"
 composeIcons = "1.1.0"
-multiplatformPath = "0.2.1"
+multiplatformPath = "0.2.2-beta-1"
 
 dataStoreVersion = "1.1.0-beta02"
 jetbrainsNavigationCompose = "2.7.0-alpha04"
