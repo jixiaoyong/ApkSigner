@@ -4,10 +4,7 @@ import ApkSigner
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
@@ -19,26 +16,18 @@ import kotlinx.coroutines.launch
  */
 class MainViewModel(private val settingsRepository: SettingPreferencesRepository) : BaseViewModel() {
 
-    val currentIndex = MutableStateFlow(Routes.SignInfo)
     val isDarkTheme = settingsRepository.isDarkMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    val selectedSignatureInfo = settingsRepository.selectedSignInfoBean.take(1).map { null != it }.stateIn(
+        viewModelScope,
+        SharingStarted.Lazily, false
+    )
 
     override fun onInit() {
-        viewModelScope.launch {
-            val selectedSignInfo = settingsRepository.selectedSignInfoBean.first()
-            if (selectedSignInfo != null) {
-                changePage(Routes.SignApp)
-            }
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             settingsRepository.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
             settingsRepository.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
             settingsRepository.aapt.first()?.let { ApkSigner.setupAapt(it) }
         }
-    }
-
-    fun changePage(route: String) {
-        currentIndex.value = route
     }
 }
 
