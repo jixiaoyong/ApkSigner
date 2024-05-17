@@ -113,12 +113,12 @@ object ApkSigner {
             RunCommandUtil.runCommand("command -v $zipAlignPath", "zip align")
         }
 
-        return if (null != result) {
-            "zipAlign命令检查失败，请重试（${result.message}）"
-        } else {
+//        return if (null != result) {
+//            "zipAlign命令检查失败，请重试（${result.message}）"
+//        } else {
             zipAlignCmdPath = zipAlignPath
-            null
-        }
+            return null
+//        }
     }
 
     fun setupAapt(aaptPath: String): String? {
