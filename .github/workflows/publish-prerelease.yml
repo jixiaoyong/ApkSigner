@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos-artifact
-          path: build/compose/binaries/main/dmg/*.dmg
+          path: build/compose/binaries/main-release/dmg/*.dmg
 
   windows_build:
     runs-on: windows-latest
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-artifact
-          path: build/compose/binaries/main/msi/*.msi
+          path: build/compose/binaries/main-release/msi/*.msi
 
   ubuntu_build:
     runs-on: ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ubuntu-artifact
-          path: build/compose/binaries/main/deb/*.deb
+          path: build/compose/binaries/main-release/deb/*.deb
 
   publisher:
     name: Publish artifacts to github release
