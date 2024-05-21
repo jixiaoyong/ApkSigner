@@ -53,6 +53,8 @@ compose.desktop {
             packageName = "ApkSigner"
             packageVersion = "1.2.1"
 
+            modules("jdk.unsupported") // for datastore compatibility
+
             buildTypes.release {
                 proguard {
                     configurationFiles.from("compose.desktop.pro")
