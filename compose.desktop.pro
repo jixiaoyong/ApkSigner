@@ -5,3 +5,5 @@
 -keep class io.github.g00fy2.versioncompare.**{ *; }
 -keep class com.sun.jna.* { *; }
 -keep class * implements com.sun.jna.* { *; }
+-keep class androidx.datastore.*.** {*;}
+-dontwarn okio.**

@@ -28,7 +28,7 @@ jobs:
 
       - name: Execute Gradle build
         run: |
-          ./gradlew packageDistributionForCurrentOS
+          ./gradlew packageReleaseDistributionForCurrentOS
       - name: Upload mac os artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -53,7 +53,7 @@ jobs:
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run: ./gradlew packageDistributionForCurrentOS
+        run: ./gradlew packageReleaseDistributionForCurrentOS
       - name: Upload windows artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -78,7 +78,7 @@ jobs:
         uses: gradle/gradle-build-action@v2.7.1
 
       - name: Execute Gradle build
-        run: ./gradlew packageDistributionForCurrentOS
+        run: ./gradlew packageReleaseDistributionForCurrentOS
       - name: Upload ubuntu artifacts
         uses: actions/upload-artifact@v3
         with:
