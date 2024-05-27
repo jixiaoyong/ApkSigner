@@ -3,7 +3,12 @@
 -keep class org.slf4j.**{ *; }
 -keep class javax.annotation.**{ *; }
 -keep class io.github.g00fy2.versioncompare.**{ *; }
--keep class com.sun.jna.* { *; }
+-keep class com.sun.jna.** { *; }
 -keep class * implements com.sun.jna.* { *; }
--keep class androidx.datastore.*.** {*;}
+-keep class androidx.datastore.**.** {*;}
 -dontwarn okio.**
+
+-keep class com.jthemedetecor.**{*;}
+-keep class com.github.oshi.**{*;}
+-keep class net.java.dev.jna.**{*;}
+-keep class oshi.**{*;}

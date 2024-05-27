@@ -6,7 +6,7 @@ multiplatformSettings = "1.1.1"
 lyricist = "1.6.2-1.8.20"
 gson = "2.10.1"
 ksp = "1.8.20-1.0.10" # 注意同步修改gradle.properties处的ksp.version值
-jsystemThemeDetector = "3.6"
+jsystemThemeDetector = "3.9.1"
 composeIcons = "1.1.0"
 multiplatformPath = "0.2.2"
 

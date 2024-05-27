@@ -1,6 +1,7 @@
 package io.github.jixiaoyong.pages
 
 import LocalDatastore
+import Logger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -76,10 +77,14 @@ fun App(viewModel: MainViewModel) {
 
         var detector: OsThemeDetector? = null
         scope.launch(Dispatchers.Default) {
-            detector = OsThemeDetector.getDetector()
-            detector?.registerListener(listener)
-            detector?.isDark?.let {
-                localThemeMode = isDarkTheme ?: it
+            try {
+                detector = OsThemeDetector.getDetector()
+                detector?.registerListener(listener)
+                detector?.isDark?.let {
+                    localThemeMode = isDarkTheme ?: it
+                }
+            } catch (e: Exception) {
+                Logger.error("detect system theme error",e)
             }
         }
 

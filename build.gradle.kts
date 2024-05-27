@@ -56,8 +56,9 @@ compose.desktop {
             modules("jdk.unsupported") // for datastore compatibility
 
             buildTypes.release {
-                proguard {
+                proguard() {
                     configurationFiles.from("compose.desktop.pro")
+//                    isEnabled.set(false)
                 }
             }
 
