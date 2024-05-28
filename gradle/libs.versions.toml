@@ -14,12 +14,17 @@ multiplatformPath = "0.2.2"
 dataStoreVersion = "1.1.0-beta02"
 jetbrainsNavigationCompose = "2.7.0-alpha04"
 jetbrainsLifecycle = "2.8.0-rc01"
+
 koin-bom = "3.6.0-wasm-alpha2"
+koinCompose = "3.6.0-Beta4"
+koinComposeMultiplatform = "1.2.0-Beta4"
 
 [libraries]
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComposeMultiplatform" }
+koin-composeVM = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeMultiplatform" }
 
 lyricist-lib = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }

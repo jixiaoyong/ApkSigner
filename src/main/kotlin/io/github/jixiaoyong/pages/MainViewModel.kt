@@ -26,13 +26,14 @@ class MainViewModel() : BaseViewModel() {
         SharingStarted.Lazily, false
     )
 
-    override fun onInit() {
+    init {
         viewModelScope.launch(Dispatchers.IO) {
             settingsRepository.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
             settingsRepository.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
             settingsRepository.aapt.first()?.let { ApkSigner.setupAapt(it) }
         }
     }
+
 }
 
 object Routes {

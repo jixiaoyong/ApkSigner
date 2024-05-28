@@ -1,3 +1,4 @@
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,7 +24,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ExclamationTriangle
 import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
-import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import io.github.jixiaoyong.di.appModule
@@ -37,6 +37,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.logger.Level
@@ -48,6 +50,7 @@ import kotlin.system.exitProcess
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No Lyricist provided") }
 
+@OptIn(KoinExperimentalAPI::class)
 fun main() =
     application {
         val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
@@ -75,7 +78,6 @@ fun main() =
             var appState by remember { mutableStateOf<AppState>(AppState.Idle) }
             var checkDualRunning by remember { mutableStateOf(true) }
             val stringsLyricist = rememberStrings()
-            val viewModel = viewModel { MainViewModel() }
 
             DisposableEffect(Unit) {
                 Logger.init(scope.plus(Dispatchers.IO))
@@ -128,6 +130,7 @@ fun main() =
                         }
 
                         AppState.Success -> {
+                            val viewModel = koinViewModel<MainViewModel>()
                             App(viewModel)
                         }
                     }

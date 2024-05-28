@@ -3,7 +3,9 @@ package io.github.jixiaoyong.di
 import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.data.SettingPreferencesRepository
 import io.github.jixiaoyong.data.getDataStore
+import io.github.jixiaoyong.pages.MainViewModel
 import io.github.jixiaoyong.utils.SettingsTool
+import org.koin.compose.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 /**
@@ -22,4 +24,5 @@ val appModule = module {
         PreferenceDataStoreHelper(getDataStore())
     }
     single { SettingPreferencesRepository() }
+    viewModel { MainViewModel()}
 }
