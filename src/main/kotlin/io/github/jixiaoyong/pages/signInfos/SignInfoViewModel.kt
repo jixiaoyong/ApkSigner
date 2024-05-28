@@ -20,15 +20,13 @@ class SignInfoViewModel() : BaseViewModel() {
     private val uiStateFlow: MutableStateFlow<SignInfoUiState> = MutableStateFlow(SignInfoUiState())
     val uiState = uiStateFlow.asStateFlow()
 
-    override fun onInit() {
-
+    init {
         combine(settings.signInfoBeans, settings.selectedSignInfoBean) { signInfoBeans, selectedSignInfoBean ->
             uiStateFlow.value.copy(
                 signInfoList = signInfoBeans,
                 selectedSignInfo = selectedSignInfoBean
             )
         }.onEach { uiStateFlow.emit(it) }.launchIn(viewModelScope)
-
     }
 
 

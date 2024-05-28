@@ -28,7 +28,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.*
 import io.github.jixiaoyong.BuildConfig
-import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.i18n.Locale
 import io.github.jixiaoyong.pages.signapp.DropBoxPanel
 import io.github.jixiaoyong.utils.FileChooseUtil
@@ -36,6 +35,8 @@ import io.github.jixiaoyong.utils.ToastConfig
 import io.github.jixiaoyong.utils.showToast
 import io.github.jixiaoyong.widgets.*
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 import java.io.File
 import javax.swing.JPanel
 
@@ -51,6 +52,7 @@ import javax.swing.JPanel
 
 const val PROJECT_WEBSITE = "https://github.com/jixiaoyong/ApkSigner"
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 fun PageSettingInfo() {
     val scaffoldState: ScaffoldState = rememberScaffoldState()
@@ -59,7 +61,7 @@ fun PageSettingInfo() {
     val i18nString = strings
     val lyricist = LocalLyricist.current
 
-    val viewModel = viewModel { SettingInfoViewModel() }
+    val viewModel = koinViewModel<SettingInfoViewModel>()
     val uiState by viewModel.uiState.collectAsState()
     val resetConfig = uiState.resetInfo
     var showThemeModeDialog by remember { mutableStateOf(false) }

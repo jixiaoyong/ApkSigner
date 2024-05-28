@@ -23,7 +23,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import cafe.adriel.lyricist.strings
 import com.jthemedetecor.OsThemeDetector
-import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.pages.settings.PageSettingInfo
 import io.github.jixiaoyong.pages.signInfos.PageSignInfo
 import io.github.jixiaoyong.pages.signInfos.SignInfoViewModel
@@ -33,6 +32,8 @@ import io.github.jixiaoyong.theme.AppTheme
 import io.github.jixiaoyong.utils.ToasterUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 
 /**
  * @author : jixiaoyong
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
  * @date : 25/3/2024
  */
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 fun App(viewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
@@ -57,8 +59,8 @@ fun App(viewModel: MainViewModel) {
     var localThemeMode by remember { mutableStateOf(isDarkTheme ?: false) }
 
     // 将viewModel放在这里避免切换页面时丢失
-    val signInfoViewModel = viewModel { SignInfoViewModel() }
-    val signAppViewModel = viewModel { SignAppViewModel() }
+    val signInfoViewModel = koinViewModel<SignInfoViewModel>()
+    val signAppViewModel = koinViewModel<SignAppViewModel>()
 
     val navController: NavHostController = rememberNavController()
 

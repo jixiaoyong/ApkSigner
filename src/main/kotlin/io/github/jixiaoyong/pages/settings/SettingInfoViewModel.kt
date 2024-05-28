@@ -24,7 +24,7 @@ class SettingInfoViewModel() : BaseViewModel() {
     private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
     val uiState = uiStateFlow.asStateFlow()
 
-    override fun onInit() {
+    init{
 
         combine(
             repository.apkSigner,

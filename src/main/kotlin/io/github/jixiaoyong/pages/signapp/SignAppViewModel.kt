@@ -26,7 +26,7 @@ class SignAppViewModel : BaseViewModel() {
     private val uiStateFlow = MutableStateFlow(SignAppState())
     val uiState = uiStateFlow.asStateFlow()
 
-    override fun onInit() {
+    init {
         combine(
             settings.signTypeList,
             settings.selectedSignInfoBean,
