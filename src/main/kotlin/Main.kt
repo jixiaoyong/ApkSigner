@@ -54,7 +54,6 @@ fun main() =
         val preferenceDataStoreHelper: PreferenceDataStoreHelper by inject(PreferenceDataStoreHelper::class.java)
         val settingPreferencesRepository: SettingPreferencesRepository by inject(SettingPreferencesRepository::class.java)
 
-        // At the top level of your kotlin file:
         DisposableEffect(Unit) {
             startKoin {
                 modules(appModule)
