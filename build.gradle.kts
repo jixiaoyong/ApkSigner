@@ -58,7 +58,7 @@ compose.desktop {
             buildTypes.release {
                 proguard() {
                     configurationFiles.from("compose.desktop.pro")
-//                    isEnabled.set(false)
+                    isEnabled.set(false)
                 }
             }
 
@@ -77,5 +77,5 @@ compose.desktop {
 
 // 将这些属性作为额外的属性添加到项目中
 extra["packageName"] = compose.desktop.application.nativeDistributions.packageName
-extra["packageVersion"] =  compose.desktop.application.nativeDistributions.packageVersion
+extra["packageVersion"] = compose.desktop.application.nativeDistributions.packageVersion
 apply(from = "versionInfo.gradle.kts")
