@@ -292,6 +292,8 @@ fun PageSettingInfo() {
                     val result = viewModel.openLogDirectory()
                     if (!result) {
                         showToast(i18nString.openLogDirectoryFailed)
+                    }else{
+                        showToast(i18nString.openLogDirectorySucceed)
                     }
                 }) {}
 

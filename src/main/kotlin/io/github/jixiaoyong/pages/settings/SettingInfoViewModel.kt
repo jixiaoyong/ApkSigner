@@ -151,7 +151,9 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         val cmd = arrayOf(command, path)
         val result = Runtime.getRuntime().exec(cmd).waitFor()
         Logger.log("open log directory($hostOs: ${result}): ${cmd.joinToString(" ")}")
-        return result == 0
+        // Explorer always return 1 whether succeed or failed
+        // issue: https://github.com/microsoft/WSL/issues/6565
+        return result == 0 || Windows == hostOs
     }
 }
 

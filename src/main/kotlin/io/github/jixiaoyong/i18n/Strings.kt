@@ -81,4 +81,5 @@ data class Strings(
     val themeModeAuto: String,
     val logFileDirectory:String,
     val openLogDirectoryFailed: String,
+    val openLogDirectorySucceed:String
 )

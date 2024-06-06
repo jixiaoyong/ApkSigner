@@ -87,4 +87,5 @@ internal val ZhStrings = Strings(
     themeModeAuto = "跟随系统",
     logFileDirectory = "日志文件目录",
     openLogDirectoryFailed = "打开日志文件目录失败",
+    openLogDirectorySucceed="正在打开日志文件中……",
 )
