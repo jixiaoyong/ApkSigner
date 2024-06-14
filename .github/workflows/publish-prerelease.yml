@@ -33,7 +33,7 @@ jobs:
       - name: Rename mac os artifacts with cpu arch
         run: |
           echo "origin file:"
-          tree -L 3 build/compose/binaries
+          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
           
           suffix=$(uname -m)
           for file in build/compose/binaries/main-release/dmg/*.dmg; do
@@ -43,7 +43,7 @@ jobs:
           done
           
           echo "result file:"
-          tree -L 3 build/compose/binaries
+          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
 
       - name: Upload mac os artifacts
         uses: actions/upload-artifact@v3
@@ -75,7 +75,7 @@ jobs:
       - name: Rename mac os artifacts with cpu arch
         run: |
           echo "origin file:"
-          tree -L 3 build/compose/binaries
+          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
           
           suffix=$(uname -m)
           for file in build/compose/binaries/main-release/dmg/*.dmg; do
@@ -85,7 +85,7 @@ jobs:
           done
           
           echo "result file:"
-          tree -L 3 build/compose/binaries
+          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
 
       - name: Upload mac os artifacts
         uses: actions/upload-artifact@v3
