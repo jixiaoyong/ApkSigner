@@ -81,13 +81,20 @@ A tool for Android developers to sign their applications with GUI software.
 
 点击下载[📦 最新 Release 软件包 (.dmg/.msi/.deb)](https://github.com/jixiaoyong/ApkSigner/releases)
 
+macOS 用户请注意，根据你的电脑芯片不同请分别下载对应软件：
+
+* Apple 芯片：下载`*-arm64.dmg`
+* Intel 芯片：下载`*-x86_64.dmg`
+
+对于 Windows 或 Linux 系统用户，非常抱歉我并没有对应机器完全测试软件的可用性，如果在使用中有任何问题欢迎反馈，我会尽量修复。同时也推荐你参考下面的方式下载源码自助打包。
+
 - 或下载源码自助打包：
 
 ```groovy
 packageReleaseDeb // 适用于 ubuntu 等 Linux 系统
 packageReleaseDmg // 适用于 macOS 系统
 packageReleaseMsi // 适用于 Windows 系统
-packageReleaseDistributionForCurrentOS
+packageReleaseDistributionForCurrentOS //自动打包适合当前系统的软件包
 ```
 
 ### 2. 编译源码
