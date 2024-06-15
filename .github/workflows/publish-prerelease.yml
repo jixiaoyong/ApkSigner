@@ -52,7 +52,7 @@ jobs:
           path: build/compose/binaries/main-release/dmg/*.dmg
 
   mac_build_x86:
-    runs-on: macos-latest-large
+    runs-on: macos-13
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v2
