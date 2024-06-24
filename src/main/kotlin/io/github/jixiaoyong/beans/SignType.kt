@@ -22,6 +22,7 @@ sealed class SignType(val type: Int, val name: String) {
 
     fun description(i18nString: Strings):String? {
         return if(V1.type ==type){
+            // api 24+ can't sign v1: https://issuetracker.google.com/issues/133325048#comment9
             i18nString.signType1Desc
         }else{
             null

@@ -142,7 +142,7 @@ object ApkSigner {
     /**
      * 获取当前apk文件的包名
      */
-    suspend fun getApkPackageName(apkFilePath: String?): String?{
+    suspend fun getApkPackageName(apkFilePath: String?): String? {
         if (apkFilePath.isNullOrBlank()) {
             return null
         }
@@ -241,8 +241,8 @@ object ApkSigner {
         if (alignedApkFilePath != null) {
             try {
                 // 创建ProcessBuilder对象并设置相关属性
-                val signVersionParams = signVersions.flatMap {
-                    arrayListOf("--v${it.type}-signing-enabled", "true")
+                val signVersionParams = SignType.ALL_SIGN_TYPES.flatMap {
+                    arrayListOf("--v${it.type}-signing-enabled", if (signVersions.contains(it)) "true" else "false")
                 }.toTypedArray()
                 val processBuilder = ProcessBuilder()
                 processBuilder.command(
