@@ -27,6 +27,7 @@ object RunCommandUtil {
         return try {
             val process = Runtime.getRuntime().exec(command)
             val logBuffer = StringBuffer()
+            val errBuffer = StringBuffer()
 
             if (printLog) {
                 BufferedReader(InputStreamReader(process.inputStream)).useLines {
@@ -37,11 +38,20 @@ object RunCommandUtil {
                 }
             }
 
+            if (printError) {
+                BufferedReader(InputStreamReader(process.errorStream)).useLines {
+                    it.forEach { line ->
+                        Logger.error("${logTag}$line")
+                        errBuffer.append(line).append("\n")
+                    }
+                }
+            }
+
             val result = process.waitFor()
             if (result == 0) {
                 null
             } else {
-                Exception("${logTag}exit code: $result\n${logBuffer}")
+                Exception("${logTag}exit code: $result\n${logBuffer}\nerr:${errBuffer}")
             }
 
         } catch (e: Exception) {
@@ -63,6 +73,7 @@ object RunCommandUtil {
         return try {
             val process = Runtime.getRuntime().exec(command)
             val logBuffer = StringBuffer()
+            val errBuffer = StringBuffer()
 
             if (printLog) {
                 BufferedReader(InputStreamReader(process.inputStream)).useLines {
@@ -73,11 +84,20 @@ object RunCommandUtil {
                 }
             }
 
+            if (printError) {
+                BufferedReader(InputStreamReader(process.errorStream)).useLines {
+                    it.forEach { line ->
+                        Logger.error("${logTag}$line")
+                        errBuffer.append(line).append("\n")
+                    }
+                }
+            }
+
             val result = process.waitFor()
             if (result == 0) {
                 CommandResult.Success(logBuffer.toString())
             } else {
-                CommandResult.Error("${logTag}exit code: $result\n${logBuffer}")
+                CommandResult.Error("${logTag}exit code: $result\n${logBuffer}\nerr:${errBuffer}")
             }
 
         } catch (e: Exception) {
