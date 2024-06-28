@@ -120,7 +120,14 @@ fun PageSignApp(
 
         is CommandResult.Error<*> -> {
             scope.launch {
-                showToast(i18nStrings.checkSignFailed(local.message.toString()))
+                val result = scaffoldState.snackbarHostState.showSnackbar(
+                    i18nStrings.checkSignFailed(local.message.toString()),
+                    actionLabel = i18nStrings.copyErrorMsg, duration = SnackbarDuration.Long
+                )
+                if (SnackbarResult.ActionPerformed == result) {
+                    clipboard.setText(AnnotatedString(local.message.toString()))
+                }
+                viewModel.changeSignInfo(CommandResult.NOT_EXECUT)
             }
         }
 
