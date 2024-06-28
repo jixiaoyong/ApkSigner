@@ -44,7 +44,7 @@ object ApkSigner {
         val buildTools =
             if (androidBuildToolsDir.isNullOrBlank()) return "" else File(androidBuildToolsDir)
         if (!buildTools.exists() || !buildTools.isDirectory) {
-            return "指定的Android SDK中build-tools目录无效或不存在，请重新选择。\n该目录一般为${ANDROID_BUILD_TOOLS_DIR_EXAMPLE}"
+            return "指定的Android SDK中build-tools目录无效或不存在($androidBuildToolsDir)，请重新选择。\n该目录一般为${ANDROID_BUILD_TOOLS_DIR_EXAMPLE}"
         }
 
         val apkSignerPath = "$androidBuildToolsDir${File.separator}apksigner"
@@ -89,15 +89,15 @@ object ApkSigner {
         // 校验文件是否为AOSP提供的apk signer，而非本APP避免误操作导致无限循环启动
         val apkSignerFile = File(apkSignerPath)
         if (!apkSignerFile.exists()) {
-            return "apkSigner命令不存在，请重新选择。"
+            return "apkSigner命令(${apkSignerPath})不存在，请重新选择。"
         } else if (!apkSignerFile.readText().contains(AOSP_NAME)) {
-            return "apkSigner命令不是${AOSP_NAME}官方提供的，请重新选择。"
+            return "apkSigner命令(${apkSignerPath})不是${AOSP_NAME}官方提供的，请重新选择。"
         }
 
         val result = RunCommandUtil.runCommand("$apkSignerPath version", "apk signer")
 
         return if (result != null) {
-            "apkSigner命令检查失败，请重试（${result.message}）"
+            "apkSigner命令(${apkSignerPath})检查失败，请重试（${result.message}）"
         } else {
             apkSignerCmdPath = apkSignerPath
             null
@@ -114,7 +114,7 @@ object ApkSigner {
         }
 
         return if (null != result) {
-            "zipAlign命令检查失败，请重试（${result.message}）"
+            "zipAlign命令(${zipAlignPath})检查失败，请重试（${result.message}）"
         } else {
             zipAlignCmdPath = zipAlignPath
             null
@@ -131,7 +131,7 @@ object ApkSigner {
         }
 
         return if (null != result) {
-            "aapt命令检查失败，请重试（${result.message}）"
+            "aapt命令(${aaptPath})检查失败，请重试（${result.message}）"
         } else {
             aaptCmdPath = aaptPath
             null

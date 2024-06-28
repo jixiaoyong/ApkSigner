@@ -4,7 +4,6 @@ import ApkSigner
 import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
-import io.github.jixiaoyong.utils.showToast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.skiko.OS.*
@@ -105,12 +104,12 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         }
     }
 
-    fun setupBuildToolsConfig(buildToolDir: String) {
+    fun setupBuildToolsConfig(buildToolDir: String): String? {
         val result = ApkSigner.init(buildToolDir)
         saveApkSigner(ApkSigner.apkSignerPath)
         saveZipAlign(ApkSigner.zipAlignPath)
         saveAapt(ApkSigner.aaptPath)
-        showToast(result ?: "修改成功")
+        return result
     }
 
     fun saveApkSigner(apkSigner: String?) {

@@ -15,7 +15,10 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -60,6 +63,7 @@ fun PageSettingInfo() {
     val i18nString = strings
     val lyricist = LocalLyricist.current
     val repository = LocalDatastore.current
+    val clipboard = LocalClipboardManager.current
 
     val viewModel = viewModel { SettingInfoViewModel(repository) }
     val uiState by viewModel.uiState.collectAsState()
@@ -169,12 +173,30 @@ fun PageSettingInfo() {
                             if (chooseFileName.isNullOrBlank()) {
                                 showToast(i18nString.chooseBuildTools, ToastConfig.DURATION.Long)
                             } else {
-                                viewModel.setupBuildToolsConfig(chooseFileName)
+                                val result = viewModel.setupBuildToolsConfig(chooseFileName)
+                                showErrorMsg(
+                                    scaffoldState,
+                                    result,
+                                    i18nString.changeSuccess,
+                                    i18nString.copyErrorMsg,
+                                    clipboard
+                                )
                             }
                         }
                     },
                 component = JPanel(),
-                onFileDrop = { scope.launch { viewModel.setupBuildToolsConfig(it.first()) } }) {
+                onFileDrop = {
+                    scope.launch {
+                        val result = viewModel.setupBuildToolsConfig(it.first())
+                        showErrorMsg(
+                            scaffoldState,
+                            result,
+                            i18nString.changeSuccess,
+                            i18nString.copyErrorMsg,
+                            clipboard
+                        )
+                    }
+                }) {
                 Text(
                     text = i18nString.chooseBuildToolsTips,
                     color = MaterialTheme.colors.onSurface,
@@ -195,7 +217,13 @@ fun PageSettingInfo() {
                         } else {
                             val result = ApkSigner.setupApkSigner(chooseFileName)
                             viewModel.saveApkSigner(ApkSigner.apkSignerPath)
-                            showToast(result ?: i18nString.changeSuccess)
+                            showErrorMsg(
+                                scaffoldState,
+                                result,
+                                i18nString.changeSuccess,
+                                i18nString.copyErrorMsg,
+                                clipboard
+                            )
                         }
                     }
 
@@ -212,7 +240,13 @@ fun PageSettingInfo() {
                         } else {
                             val result = ApkSigner.setupZipAlign(chooseFileName)
                             viewModel.saveZipAlign(ApkSigner.zipAlignPath)
-                            showToast(result ?: i18nString.changeSuccess)
+                            showErrorMsg(
+                                scaffoldState,
+                                result,
+                                i18nString.changeSuccess,
+                                i18nString.copyErrorMsg,
+                                clipboard
+                            )
                         }
                     }
                 })
@@ -259,7 +293,13 @@ fun PageSettingInfo() {
                             } else {
                                 val result = ApkSigner.setupAapt(chooseFileName)
                                 viewModel.saveAapt(ApkSigner.aaptPath)
-                                showToast(result ?: i18nString.changeSuccess)
+                                showErrorMsg(
+                                    scaffoldState,
+                                    result,
+                                    i18nString.changeSuccess,
+                                    i18nString.copyErrorMsg,
+                                    clipboard
+                                )
                             }
                         }
                     })
@@ -292,7 +332,7 @@ fun PageSettingInfo() {
                     val result = viewModel.openLogDirectory()
                     if (!result) {
                         showToast(i18nString.openLogDirectoryFailed)
-                    }else{
+                    } else {
                         showToast(i18nString.openLogDirectorySucceed)
                     }
                 }) {}
@@ -338,4 +378,27 @@ fun PageSettingInfo() {
         }
     }
 
+}
+
+private suspend inline fun showErrorMsg(
+    scaffoldState: ScaffoldState,
+    msg: String?,
+    successMsg: String,
+    actionLabel: String,
+    clipboard: ClipboardManager
+) {
+    if (msg.isNullOrBlank()) {
+        showToast(successMsg, ToastConfig.DURATION.Long)
+        return
+    }
+
+    val result = scaffoldState.snackbarHostState.showSnackbar(
+        msg,
+        actionLabel = actionLabel,
+        duration = SnackbarDuration.Long
+    )
+
+    if (SnackbarResult.ActionPerformed == result) {
+        clipboard.setText(AnnotatedString(msg))
+    }
 }
