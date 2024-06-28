@@ -61,7 +61,7 @@ object RunCommandUtil {
     }
 
     fun runCommandWithResult(
-        command: String,
+        vararg command: String,
         tag: String = "",
         printLog: Boolean = true,
         printError: Boolean = true
@@ -97,7 +97,7 @@ object RunCommandUtil {
             if (result == 0) {
                 CommandResult.Success(logBuffer.toString())
             } else {
-                CommandResult.Error("${logTag}exit code: $result\n${logBuffer}\nerr:${errBuffer}")
+                CommandResult.Error("${logTag}exit code: $result\nerr:${errBuffer}\n${logBuffer}")
             }
 
         } catch (e: Exception) {

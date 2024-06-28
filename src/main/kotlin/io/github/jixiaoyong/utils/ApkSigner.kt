@@ -363,40 +363,16 @@ object ApkSigner {
             return CommandResult.Error("请先初始化相关配置")
         }
 
-        if (apkFilePath.isNotEmpty()) {
-            try {
-                // 创建ProcessBuilder对象并设置相关属性
-                val processBuilder = ProcessBuilder()
-                processBuilder.command(
-                    apkSignerCmdPath,
-                    "verify",
-                    "-v",
-                    "--print-certs",
-                    apkFilePath,
-                )
-                processBuilder.redirectErrorStream(true)
-
-                // 启动子进程并获取输出流
-                val process = processBuilder.start()
-                val reader = BufferedReader(InputStreamReader(process.inputStream))
-
-                // 读取输出流并打印到控制台
-                val result = reader.readLines().joinToString("\n")
-
-                // 等待子进程结束并获取退出值
-                val exitCode = process.waitFor()
-                Logger.log("Exited with code: $exitCode")
-                return if (0 == exitCode) {
-                    CommandResult.Success(result)
-                } else {
-                    CommandResult.Error(result)
-                }
-            } catch (e: Exception) {
-                Logger.error("查询签名失败", e)
-                return CommandResult.Error("${e.message}", e)
-            }
+        return if (apkFilePath.isNotEmpty()) {
+            RunCommandUtil.runCommandWithResult(
+                apkSignerCmdPath,
+                "verify",
+                "-v",
+                "--print-certs",
+                apkFilePath,
+            )
         } else {
-            return CommandResult.Error("apk文件路径不能为空")
+            CommandResult.Error("apk文件路径不能为空")
         }
     }
 }
