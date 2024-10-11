@@ -6,9 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
@@ -49,7 +52,7 @@ fun App(viewModel: MainViewModel) {
     val scope = rememberCoroutineScope()
 
     val routes = listOf(
-        Triple(Icons.Default.List, strings.signConfig, Routes.SignInfo),
+        Triple(Icons.AutoMirrored.Filled.List, strings.signConfig, Routes.SignInfo),
         Triple(Icons.Default.Lock, strings.signApp, Routes.SignApp),
         Triple(Icons.Default.Settings, strings.settingsConfig, Routes.SettingInfo),
     )
@@ -84,7 +87,7 @@ fun App(viewModel: MainViewModel) {
                     localThemeMode = isDarkTheme ?: it
                 }
             } catch (e: Exception) {
-                Logger.error("detect system theme error",e)
+                Logger.error("detect system theme error", e)
             }
         }
 
@@ -98,47 +101,43 @@ fun App(viewModel: MainViewModel) {
     AppTheme(darkTheme = localThemeMode) {
         Scaffold(
             topBar = {
-                BottomNavigation {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination?.route ?: Routes.SignInfo
-                    Row(
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
-                            .background(MaterialTheme.colors.secondaryVariant).padding(horizontal = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        for (route in routes) {
-                            val isActive = route.third == currentDestination
-                            val backgroundColor = if (isActive) {
-                                MaterialTheme.colors.secondary
-                            } else {
-                                Color.Transparent
-                            }
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination?.route ?: Routes.SignInfo
+                Row(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
+                        .background(MaterialTheme.colors.secondaryVariant).padding(horizontal = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    for (route in routes) {
+                        val isActive = route.third == currentDestination
+                        val backgroundColor = if (isActive) {
+                            MaterialTheme.colors.secondary
+                        } else {
+                            Color.Transparent
+                        }
 
-                            Row(
-                                modifier = Modifier.weight(1f).padding(horizontal = 1.dp)
-                                    .background(backgroundColor, RoundedCornerShape(5.dp))
-                                    .clickable {
-                                        navigationToPage(navController, route.third)
-                                    }
-                                    .padding(vertical = 15.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    route.first,
-                                    contentDescription = route.second,
-                                    tint = MaterialTheme.colors.primary,
-                                    modifier = Modifier.padding(end = 5.dp).size(18.dp)
-                                )
-                                Text(route.second, color = MaterialTheme.colors.onBackground)
-                            }
+                        Row(
+                            modifier = Modifier.weight(1f).padding(horizontal = 1.dp)
+                                .background(backgroundColor, RoundedCornerShape(5.dp))
+                                .clickable {
+                                    navigationToPage(navController, route.third)
+                                }
+                                .padding(vertical = 15.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                route.first,
+                                contentDescription = route.second,
+                                tint = MaterialTheme.colors.primary,
+                                modifier = Modifier.padding(end = 5.dp).size(18.dp)
+                            )
+                            Text(route.second, color = MaterialTheme.colors.onBackground)
                         }
                     }
                 }
             }) {
-            Column(modifier = Modifier.fillMaxSize()) {
-
                 NavHost(navController, startDestination = Routes.SignInfo) {
                     composable(Routes.SignInfo) {
                         PageSignInfo(signInfoViewModel)
@@ -151,7 +150,6 @@ fun App(viewModel: MainViewModel) {
                     composable(Routes.SettingInfo) {
                         PageSettingInfo()
                     }
-                }
             }
         }
 

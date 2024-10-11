@@ -1,6 +1,6 @@
 [versions]
 kotlin-version = "1.8.20"
-compose-version = "1.6.1"
+compose-version = "1.7.0-alpha03"
 
 multiplatformSettings = "1.1.1"
 lyricist = "1.6.2-1.8.20"
@@ -11,7 +11,7 @@ composeIcons = "1.1.0"
 multiplatformPath = "0.2.2"
 
 dataStoreVersion = "1.1.0-beta02"
-jetbrainsNavigationCompose = "2.7.0-alpha04"
+jetbrainsNavigationCompose = "2.8.0-alpha10"
 jetbrainsLifecycle = "2.8.0-rc01"
 
 [libraries]
