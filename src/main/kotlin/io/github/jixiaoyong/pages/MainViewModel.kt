@@ -27,6 +27,7 @@ class MainViewModel(private val settingsRepository: SettingPreferencesRepository
             settingsRepository.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
             settingsRepository.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
             settingsRepository.aapt.first()?.let { ApkSigner.setupAapt(it) }
+            settingsRepository.javaHome.first()?.let { ApkSigner.setupJavaHome(it) }
         }
     }
 }

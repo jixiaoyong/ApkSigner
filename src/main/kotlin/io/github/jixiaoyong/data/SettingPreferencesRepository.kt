@@ -39,6 +39,8 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.LANGUAGE)
     val zipAlign: Flow<String?>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH)
+    val javaHome: Flow<String?>
+        get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.JAVA_HOME)
     val isZipAlign: Flow<Boolean>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.ALIGN_ENABLE, false)
     val isAutoMatchSignature: Flow<Boolean>
@@ -97,6 +99,11 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
 
     suspend fun saveZipAlignPath(zipAlignPath: String?) {
         datastoreHelper.putPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH, zipAlignPath)
+    }
+
+
+    suspend fun saveJavaHome(javaHome: String?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.JAVA_HOME, javaHome)
     }
 
     suspend fun saveSignedDirectory(signedDirectory: String?) {

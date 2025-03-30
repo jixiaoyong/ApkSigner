@@ -45,6 +45,8 @@ data class Strings(
     val changeSuccess: String,
     val zipDirectory: String,
     val chooseZipTips: String,
+    val javaHomeDirectory: String,
+    val chooseJavaTips: String,
     val plzChooseZip: String,
     val autoMatchSignature: String,
     val autoMatchSignatureTips: String,

@@ -8,6 +8,7 @@ object PreferenceDataStoreConstants {
     val APK_SIGNER_PATH = stringPreferencesKey("APK_SIGNER_PATH") // 签名工具路径
     val ZIP_ALIGN_PATH = stringPreferencesKey("ZIP_ALIGN_PATH") // 压缩工具路径
     val AAPT_PATH = stringPreferencesKey("AAPT_PATH") // aapt工具路径
+    val JAVA_HOME = stringPreferencesKey("JAVA_HOME") // java home路径
     val SIGN_INFO_SELECT = stringPreferencesKey("SIGN_INFO_SELECT") // 选中的签名信息
     val SIGN_INFO_LIST = stringPreferencesKey("SIGN_INFO_LIST") // 签名信息（密钥/密码等）列表
     val SIGNED_DIRECTORY = stringPreferencesKey("SIGNED_DIRECTORY") // 签名后文件保存路径

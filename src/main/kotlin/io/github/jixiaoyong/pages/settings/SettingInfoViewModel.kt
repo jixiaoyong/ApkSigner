@@ -120,6 +120,10 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         viewModelScope.launch { repository.saveZipAlignPath(zipAlign) }
     }
 
+    fun saveJavaHome(javaHome: String?) {
+        viewModelScope.launch { repository.saveJavaHome(javaHome) }
+    }
+
     fun saveAapt(aapt: String?) {
         viewModelScope.launch { repository.saveAaptPath(aapt) }
     }
@@ -159,6 +163,7 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
 data class SettingInfoUiState(
     val apkSign: String? = null,
     val zipAlign: String? = null,
+    val javaHome: String? = null,
     val aapt: String? = null,
     val isAutoMatchSignature: Boolean = false,
     val isDarkMode: Boolean? = null,
