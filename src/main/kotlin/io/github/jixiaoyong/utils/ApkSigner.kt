@@ -137,10 +137,13 @@ object ApkSigner {
             return "JAVA_HOME 路径无效，未找到 java 可执行文件"
         }
 
-        // 检查是否包含 include 目录和 lib/tools.jar，以确定是否为 JDK 目录
+        // 检查是否包含 include 目录或 bin/javac，以确定是否为 JDK 目录（JDK8及以下可用tools.jar补充判断）
         val includeDir = File(javaHome, "include")
-        val toolsJar = File(javaHome, "lib/tools.jar")
-        if (!includeDir.exists() || !toolsJar.exists()) {
+        val javacFile = File(javaHome, "bin${File.separator}javac")
+        val javacExeFile = File(javaHome, "bin${File.separator}javac.exe")
+        val toolsJar = File(javaHome, "lib${File.separator}tools.jar")
+        val isJdk = includeDir.exists() || javacFile.exists() || javacExeFile.exists() || toolsJar.exists()
+        if (!isJdk) {
             return "JAVA_HOME 路径无效，它似乎指向 JRE 目录而不是 JDK 目录"
         }
 

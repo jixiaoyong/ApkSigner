@@ -263,13 +263,18 @@ fun PageSettingInfo() {
                 })
 
             InfoItemWidget(
-                i18nString.javaHomeDirectory,
-                uiState.javaHome ?: i18nString.notInit,
+                i18nString.javaHomeDirectory + (uiState.javaHome?.jdkVersion ?: ""),
+                uiState.javaHome?.javaHome ?: i18nString.notInit,
                 description = i18nString.chooseJavaTips,
                 icon = FontAwesomeIcons.Solid.Coffee,
                 onClick = {
                     scope.launch {
-                        val chooseFileName = FileChooseUtil.chooseSignDirectory(window, i18nString.chooseJavaTips)
+                        val chooseFileName =
+                            FileChooseUtil.chooseSignDirectory(
+                                window,
+                                i18nString.chooseJavaTips,
+                                oldDirectory = uiState.javaHome?.javaHome
+                            )
                         if (chooseFileName.isNullOrBlank()) {
                             showToast(i18nString.chooseJavaTips, ToastConfig.DURATION.Long)
                         } else {
@@ -318,7 +323,8 @@ fun PageSettingInfo() {
                     modifier = Modifier.padding(horizontal = 15.dp)
                         .background(color = MaterialTheme.colors.secondary.copy(0.65f))
                 )
-                InfoItemWidget(i18nString.aaptDirectory,
+                InfoItemWidget(
+                    i18nString.aaptDirectory,
                     uiState.aapt ?: i18nString.notInit,
                     description = i18nString.aaptDirectoryTips,
                     onClick = {

@@ -79,3 +79,7 @@ compose.desktop {
 extra["packageName"] = compose.desktop.application.nativeDistributions.packageName
 extra["packageVersion"] = compose.desktop.application.nativeDistributions.packageVersion
 apply(from = "versionInfo.gradle.kts")
+
+kotlin {
+    jvmToolchain(17)
+}
