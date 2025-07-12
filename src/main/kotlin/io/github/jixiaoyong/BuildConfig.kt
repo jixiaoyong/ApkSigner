@@ -8,5 +8,5 @@ package io.github.jixiaoyong
  */
 object BuildConfig {
     const val PACKAGE_NAME = "io.github.jixiaoyong.ApkSigner"
-    const val PACKAGE_VERSION = "1.2.1"
+    const val PACKAGE_VERSION = "1.2.2"
 }

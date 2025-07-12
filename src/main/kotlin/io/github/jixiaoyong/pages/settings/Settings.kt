@@ -82,7 +82,8 @@ fun PageSettingInfo() {
         localThemeMode = themeMode ?: localThemeMode
     }
 
-    PopWidget(title = i18nString.confirmReset,
+    PopWidget(
+        title = i18nString.confirmReset,
         show = resetConfig.showResetDialog,
         onDismiss = { viewModel.toggleResetDialog() },
         onConfirm = {
@@ -91,26 +92,31 @@ fun PageSettingInfo() {
         }) {
         Column(modifier = Modifier.widthIn(350.dp).padding(start = 30.dp)) {
             Text(i18nString.confirmResetTips)
-            CheckBox(checked = resetConfig.resetSignInfo,
+            CheckBox(
+                checked = resetConfig.resetSignInfo,
                 title = i18nString.signConfig,
                 modifier = Modifier.fillMaxWidth(),
                 onCheckedChange = {
                     viewModel.updateResetConfig(resetSignInfo = !resetConfig.resetSignInfo)
                 })
-            CheckBox(checked = resetConfig.resetApkTools, modifier = Modifier.fillMaxWidth(),
+            CheckBox(
+                checked = resetConfig.resetApkTools, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signToolsConfigResetTips,
                 onCheckedChange = { viewModel.updateResetConfig(resetApkTools = !resetConfig.resetApkTools) })
-            CheckBox(checked = resetConfig.resetSignTypes, modifier = Modifier.fillMaxWidth(),
+            CheckBox(
+                checked = resetConfig.resetSignTypes, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signType,
                 onCheckedChange = { viewModel.updateResetConfig(resetSignTypes = !resetConfig.resetSignTypes) })
-            CheckBox(checked = resetConfig.resetSignedDirectory, modifier = Modifier.fillMaxWidth(),
+            CheckBox(
+                checked = resetConfig.resetSignedDirectory, modifier = Modifier.fillMaxWidth(),
                 title = i18nString.signedApkOutputDir,
                 onCheckedChange = { viewModel.updateResetConfig(resetSignedDirectory = !resetConfig.resetSignedDirectory) })
         }
     }
 
     var currentLanguage by remember { mutableStateOf(lyricist.languageTag) }
-    PopWidget(title = i18nString.changeLanguage,
+    PopWidget(
+        title = i18nString.changeLanguage,
         show = resetConfig.showChangeLanguageDialog,
         onDismiss = { viewModel.toggleLanguageDialog() },
         onConfirm = {
@@ -120,7 +126,8 @@ fun PageSettingInfo() {
         }) {
         Column(modifier = Modifier.wrapContentWidth()) {
             Locale.values().map { item ->
-                CheckBox(checked = item.code == currentLanguage,
+                CheckBox(
+                    checked = item.code == currentLanguage,
                     title = item.languageName,
                     modifier = Modifier.padding(start = 50.dp).fillMaxWidth(),
                     onCheckedChange = {
@@ -145,7 +152,8 @@ fun PageSettingInfo() {
                 mapOf(true to i18nString.darkMode, false to i18nString.lightMode, null to i18nString.themeModeAuto)
 
             themeModeMap.forEach { pair ->
-                CheckBox(checked = localThemeMode == pair.key,
+                CheckBox(
+                    checked = localThemeMode == pair.key,
                     title = pair.value,
                     modifier = Modifier.padding(start = 50.dp).fillMaxWidth(),
                     onCheckedChange = {
@@ -161,7 +169,8 @@ fun PageSettingInfo() {
         Column(
             modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).verticalScroll(rememberScrollState())
         ) {
-            DropBoxPanel(window,
+            DropBoxPanel(
+                window,
                 modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp)
                     .background(color = MaterialTheme.colors.surface, shape = RoundedCornerShape(10.dp)).padding(15.dp)
                     .clickable {
@@ -205,7 +214,8 @@ fun PageSettingInfo() {
                 )
             }
 
-            InfoItemWidget(i18nString.apksignerDirectory,
+            InfoItemWidget(
+                i18nString.apksignerDirectory,
                 uiState.apkSign ?: i18nString.notInit,
                 description = i18nString.chooseApksignerTips,
                 icon = FontAwesomeIcons.Solid.UserShield,
@@ -228,7 +238,8 @@ fun PageSettingInfo() {
                     }
 
                 })
-            InfoItemWidget(i18nString.zipDirectory,
+            InfoItemWidget(
+                i18nString.zipDirectory,
                 uiState.zipAlign ?: i18nString.notInit,
                 description = i18nString.chooseZipTips,
                 icon = FontAwesomeIcons.Solid.AlignLeft,
@@ -250,6 +261,36 @@ fun PageSettingInfo() {
                         }
                     }
                 })
+
+            InfoItemWidget(
+                i18nString.javaHomeDirectory + (uiState.javaHome?.jdkVersion ?: ""),
+                uiState.javaHome?.javaHome ?: i18nString.notInit,
+                description = i18nString.chooseJavaTips,
+                icon = FontAwesomeIcons.Solid.Coffee,
+                onClick = {
+                    scope.launch {
+                        val chooseFileName =
+                            FileChooseUtil.chooseSignDirectory(
+                                window,
+                                i18nString.chooseJavaTips,
+                                oldDirectory = uiState.javaHome?.javaHome
+                            )
+                        if (chooseFileName.isNullOrBlank()) {
+                            showToast(i18nString.chooseJavaTips, ToastConfig.DURATION.Long)
+                        } else {
+                            val result = ApkSigner.setupJavaHome(chooseFileName)
+                            viewModel.saveJavaHome(ApkSigner.javaHomePath)
+                            showErrorMsg(
+                                scaffoldState,
+                                result,
+                                i18nString.changeSuccess,
+                                i18nString.copyErrorMsg,
+                                clipboard
+                            )
+                        }
+                    }
+                })
+
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -282,7 +323,8 @@ fun PageSettingInfo() {
                     modifier = Modifier.padding(horizontal = 15.dp)
                         .background(color = MaterialTheme.colors.secondary.copy(0.65f))
                 )
-                InfoItemWidget(i18nString.aaptDirectory,
+                InfoItemWidget(
+                    i18nString.aaptDirectory,
                     uiState.aapt ?: i18nString.notInit,
                     description = i18nString.aaptDirectoryTips,
                     onClick = {
@@ -365,15 +407,17 @@ fun PageSettingInfo() {
                     addStringAnnotation("URL", PROJECT_WEBSITE, startIndex, endIndex)
                 }
                 val uriHandler = LocalUriHandler.current
-                ClickableText(text = annotatedString, style = TextStyle(
-                    textAlign = TextAlign.Center,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colors.onSecondary
-                ), onClick = { offset ->
-                    annotatedString.getStringAnnotations("URL", offset, offset).firstOrNull()?.let { stringAnnotation ->
-                        uriHandler.openUri(stringAnnotation.item)
-                    }
-                })
+                ClickableText(
+                    text = annotatedString, style = TextStyle(
+                        textAlign = TextAlign.Center,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colors.onSecondary
+                    ), onClick = { offset ->
+                        annotatedString.getStringAnnotations("URL", offset, offset).firstOrNull()
+                            ?.let { stringAnnotation ->
+                                uriHandler.openUri(stringAnnotation.item)
+                            }
+                    })
             }
         }
     }

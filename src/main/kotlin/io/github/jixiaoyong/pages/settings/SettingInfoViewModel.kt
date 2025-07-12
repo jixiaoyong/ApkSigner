@@ -16,10 +16,10 @@ import org.jetbrains.skiko.hostOs
  * @email : jixiaoyong1995@gmail.com
  * @date : 25/3/2024
  */
-class SettingInfoViewModel(private val repository: SettingPreferencesRepository) :
-    BaseViewModel() {
+class SettingInfoViewModel(private val repository: SettingPreferencesRepository) : BaseViewModel() {
 
-    private val uiStateFlow: MutableStateFlow<SettingInfoUiState> = MutableStateFlow(SettingInfoUiState())
+    private val uiStateFlow: MutableStateFlow<SettingInfoUiState> =
+        MutableStateFlow(SettingInfoUiState())
     val uiState = uiStateFlow.asStateFlow()
 
     override fun onInit() {
@@ -38,33 +38,56 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
                 isAutoMatchSignature = isAutoMatchSignature,
                 isDarkMode = isDarkMode
             )
-        }.onEach {
-            uiStateFlow.emit(it)
         }
+            .onEach { uiStateFlow.emit(it) }
             .launchIn(viewModelScope)
 
         uiStateFlow.update {
             val logFile = Logger.getLogFileDirectory().toString()
             it.copy(logFileDirectory = logFile)
         }
+
+        viewModelScope.launch {
+            repository.javaHome.collect { jdkInfo ->
+                val jdkInfoData =
+                    if (jdkInfo != null) {
+                        jdkInfo
+                    } else {
+                        val javaHomeEnv = System.getenv("JAVA_HOME")
+                        val javaVersion = getJdkVersion(javaHomeEnv)
+                        JdkInfo(javaHome = javaHomeEnv, jdkVersion = javaVersion)
+                    }
+                uiStateFlow.update { it.copy(javaHome = jdkInfoData) }
+            }
+        }
     }
 
     fun toggleResetDialog() {
-        uiStateFlow.value = uiStateFlow.value.copy(
-            resetInfo = uiStateFlow.value.resetInfo.copy(showResetDialog = !uiStateFlow.value.resetInfo.showResetDialog)
-        )
+        uiStateFlow.value =
+            uiStateFlow.value.copy(
+                resetInfo =
+                    uiStateFlow.value.resetInfo.copy(
+                        showResetDialog =
+                            !uiStateFlow.value.resetInfo.showResetDialog
+                    )
+            )
     }
 
     fun toggleLanguageDialog() {
-        uiStateFlow.value = uiStateFlow.value.copy(
-            resetInfo = uiStateFlow.value.resetInfo.copy(showChangeLanguageDialog = !uiStateFlow.value.resetInfo.showChangeLanguageDialog)
-        )
+        uiStateFlow.value =
+            uiStateFlow.value.copy(
+                resetInfo =
+                    uiStateFlow.value.resetInfo.copy(
+                        showChangeLanguageDialog =
+                            !uiStateFlow
+                                .value
+                                .resetInfo
+                                .showChangeLanguageDialog
+                    )
+            )
     }
 
-    /**
-     *  Updates the reset configuration values based on the provided parameters.
-     *  null 表示不修改现有值
-     */
+    /** Updates the reset configuration values based on the provided parameters. null 表示不修改现有值 */
     fun updateResetConfig(
         resetSignInfo: Boolean? = null,
         resetApkTools: Boolean? = null,
@@ -72,14 +95,18 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         resetSignedDirectory: Boolean? = null,
     ) {
         val oldResetInfo = uiStateFlow.value.resetInfo
-        uiStateFlow.value = uiStateFlow.value.copy(
-            resetInfo = oldResetInfo.copy(
-                resetSignInfo = resetSignInfo ?: oldResetInfo.resetSignInfo,
-                resetApkTools = resetApkTools ?: oldResetInfo.resetApkTools,
-                resetSignTypes = resetSignTypes ?: oldResetInfo.resetSignTypes,
-                resetSignedDirectory = resetSignedDirectory ?: oldResetInfo.resetSignedDirectory
+        uiStateFlow.value =
+            uiStateFlow.value.copy(
+                resetInfo =
+                    oldResetInfo.copy(
+                        resetSignInfo = resetSignInfo ?: oldResetInfo.resetSignInfo,
+                        resetApkTools = resetApkTools ?: oldResetInfo.resetApkTools,
+                        resetSignTypes = resetSignTypes
+                            ?: oldResetInfo.resetSignTypes,
+                        resetSignedDirectory = resetSignedDirectory
+                            ?: oldResetInfo.resetSignedDirectory
+                    )
             )
-        )
     }
 
     fun runRestConfig() {
@@ -120,6 +147,29 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         viewModelScope.launch { repository.saveZipAlignPath(zipAlign) }
     }
 
+    fun saveJavaHome(javaHomePath: String?) {
+        if (javaHomePath.isNullOrBlank()) {
+            viewModelScope.launch { repository.saveJavaHome(null) }
+            return
+        }
+
+        val javaBin = when (hostOs) {
+            MacOS, Linux -> "$javaHomePath/bin/java"
+            Windows -> "$javaHomePath\\bin\\java.exe"
+            else -> null
+        }
+        val javaFile = javaBin?.let { java.io.File(it) }
+        val jdkVersion = getJdkVersion(javaHomePath)
+
+        val jdkInfo = if (javaFile != null && javaFile.exists() && javaFile.canExecute()) {
+            JdkInfo(javaHome = javaHomePath, jdkVersion = jdkVersion)
+        } else {
+            null
+        }
+
+        viewModelScope.launch { repository.saveJavaHome(jdkInfo) }
+    }
+
     fun saveAapt(aapt: String?) {
         viewModelScope.launch { repository.saveAaptPath(aapt) }
     }
@@ -132,21 +182,20 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         viewModelScope.launch { repository.setLanguage(currentLanguage) }
     }
 
-    /**
-     * @param isDarkMode null 表示跟随系统，true 表示深色模式，false 表示浅色模式
-     */
+    /** @param isDarkMode null 表示跟随系统，true 表示深色模式，false 表示浅色模式 */
     fun changeThemeMode(isDarkMode: Boolean?) {
         viewModelScope.launch { repository.changeThemeMode(isDarkMode) }
     }
 
     fun openLogDirectory(): Boolean {
         val path = uiStateFlow.value.logFileDirectory
-        val command = when (hostOs) {
-            MacOS -> "/usr/bin/open"
-            Windows -> "explorer"
-            Linux -> "/usr/bin/xdg-open"
-            else -> return false
-        }
+        val command =
+            when (hostOs) {
+                MacOS -> "/usr/bin/open"
+                Windows -> "explorer"
+                Linux -> "/usr/bin/xdg-open"
+                else -> return false
+            }
         val cmd = arrayOf(command, path)
         val result = Runtime.getRuntime().exec(cmd).waitFor()
         Logger.log("open log directory($hostOs: ${result}): ${cmd.joinToString(" ")}")
@@ -154,16 +203,40 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         // issue: https://github.com/microsoft/WSL/issues/6565
         return result == 0 || Windows == hostOs
     }
+
+    private fun getJdkVersion(javaHomePath: String?): String? {
+        if (javaHomePath.isNullOrBlank()) return null
+        val javaBin = when (hostOs) {
+            MacOS, Linux -> "$javaHomePath/bin/java"
+            Windows -> "$javaHomePath\\bin\\java.exe"
+            else -> null
+        }
+        val javaFile = javaBin?.let { java.io.File(it) }
+        if (javaFile != null && javaFile.exists() && javaFile.canExecute()) {
+            try {
+                val process = ProcessBuilder(javaFile.absolutePath, "-version")
+                    .redirectErrorStream(true)
+                    .start()
+                val output = process.inputStream.bufferedReader().readText()
+                val versionRegex = Regex("\"([^\"]+)\"")
+                return versionRegex.find(output)?.groups?.get(1)?.value
+            } catch (e: Exception) {
+                return null
+            }
+        }
+        return null
+    }
 }
 
 data class SettingInfoUiState(
     val apkSign: String? = null,
     val zipAlign: String? = null,
+    val javaHome: JdkInfo? = null,
     val aapt: String? = null,
     val isAutoMatchSignature: Boolean = false,
     val isDarkMode: Boolean? = null,
     val resetInfo: SettingInfoResetState = SettingInfoResetState(),
-    val logFileDirectory: String? = null
+    val logFileDirectory: String? = null,
 )
 
 data class SettingInfoResetState(
@@ -174,3 +247,5 @@ data class SettingInfoResetState(
     val resetSignedDirectory: Boolean = false,
     val showChangeLanguageDialog: Boolean = false
 )
+
+data class JdkInfo(val javaHome: String, val jdkVersion: String? = null)

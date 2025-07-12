@@ -6,6 +6,7 @@ import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.utils.gson
+import io.github.jixiaoyong.pages.settings.JdkInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -39,6 +40,10 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.LANGUAGE)
     val zipAlign: Flow<String?>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH)
+    val javaHome: Flow<JdkInfo?>
+        get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.JAVA_HOME).map {
+            return@map if (it.isNullOrBlank()) null else gson.fromJson(it, JdkInfo::class.java)
+        }
     val isZipAlign: Flow<Boolean>
         get() = datastoreHelper.getPreference(PreferenceDataStoreConstants.ALIGN_ENABLE, false)
     val isAutoMatchSignature: Flow<Boolean>
@@ -97,6 +102,11 @@ class SettingPreferencesRepository(private val datastoreHelper: PreferenceDataSt
 
     suspend fun saveZipAlignPath(zipAlignPath: String?) {
         datastoreHelper.putPreference(PreferenceDataStoreConstants.ZIP_ALIGN_PATH, zipAlignPath)
+    }
+
+
+    suspend fun saveJavaHome(javaHome: JdkInfo?) {
+        datastoreHelper.putPreference(PreferenceDataStoreConstants.JAVA_HOME, gson.toJson(javaHome))
     }
 
     suspend fun saveSignedDirectory(signedDirectory: String?) {
