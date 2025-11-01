@@ -88,6 +88,6 @@ internal val EnStrings = Strings(
     logFileDirectory = "Log file directory",
     openLogDirectoryFailed = "Failed to open log file directory",
     openLogDirectorySucceed = "Opening log file...",
-    javaHomeDirectory = "JAVA_HOME Path(Optional)",
+    javaHomeDirectory = "JAVA_HOME Path(Optional): ",
     chooseJavaTips = "Please select the JAVA_HOME path, usually the JDK installation directory.",
 )

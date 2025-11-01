@@ -88,6 +88,6 @@ internal val ZhStrings = Strings(
     logFileDirectory = "日志文件目录",
     openLogDirectoryFailed = "打开日志文件目录失败",
     openLogDirectorySucceed = "正在打开日志文件中……",
-    javaHomeDirectory = "JAVA_HOME路径（可选）",
+    javaHomeDirectory = "JAVA_HOME路径（可选）:",
     chooseJavaTips = "请选择JAVA_HOME路径，一般是JDK安装目录",
 )

@@ -26,7 +26,7 @@ import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.data.SettingPreferencesRepository
-import io.github.jixiaoyong.data.getDataStore
+import io.github.jixiaoyong.data.dataStore
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.pages.MainViewModel
@@ -49,7 +49,7 @@ fun main() =
     application {
         val windowState =
             rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
-        val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
+        val preferenceDataStoreHelper = PreferenceDataStoreHelper(dataStore)
         val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
 
         // At the top level of your kotlin file:
