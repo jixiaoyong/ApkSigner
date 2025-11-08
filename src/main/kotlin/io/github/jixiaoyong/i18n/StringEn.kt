@@ -87,30 +87,7 @@ internal val EnStrings = Strings(
     themeModeAuto = "Auto Mode",
     logFileDirectory = "Log file directory",
     openLogDirectoryFailed = "Failed to open log file directory",
-    openLogDirectorySucceed="Opening log file...",
+    openLogDirectorySucceed = "Opening log file...",
+    javaHomeDirectory = "JAVA_HOME Path(Optional): ",
+    chooseJavaTips = "Please select the JAVA_HOME path, usually the JDK installation directory.",
 )
-
-//internal val EnStrings = Strings(
-//    simple = "Hello Compose!",
-//
-//    annotated = buildAnnotatedString {
-//        withStyle(SpanStyle(color = Color.Red)) { append("Hello ") }
-//        withStyle(SpanStyle(fontWeight = FontWeight.Light)) { append("Compose!") }
-//    },
-//
-//    parameter = { locale ->
-//        "Current locale: $locale"
-//    },
-//
-//    plural = { count ->
-//        val value = when (count) {
-//            0 -> "no"
-//            1, 2 -> "a few"
-//            in 3..10 -> "a bunch of"
-//            else -> "a lot of"
-//        }
-//        "I have $value apples"
-//    },
-//
-//    list = listOf("Avocado", "Pineapple", "Plum")
-//)

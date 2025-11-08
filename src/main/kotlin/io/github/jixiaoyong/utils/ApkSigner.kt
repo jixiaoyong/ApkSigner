@@ -1,6 +1,7 @@
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
 import kotlinx.coroutines.*
+import kotlinx.io.IOException
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -26,6 +27,8 @@ object ApkSigner {
     private lateinit var apkSignerCmdPath: String
     private lateinit var zipAlignCmdPath: String
     private lateinit var aaptCmdPath: String
+    var javaHomePath: String? = null
+        private set
 
     val apkSignerPath get() = if (::apkSignerCmdPath.isInitialized) apkSignerCmdPath else null
     val zipAlignPath get() = if (::zipAlignCmdPath.isInitialized) zipAlignCmdPath else null
@@ -121,6 +124,46 @@ object ApkSigner {
         }
     }
 
+    /**
+     * 检测 JAVA_HOME 路径是否有效，并确保它指向 JDK 目录
+     */
+    fun setupJavaHome(javaHome: String): String? {
+        if (javaHome.isBlank()) {
+            return "JAVA_HOME 路径不能为空"
+        }
+
+        val javaExecutable = File(javaHome, "bin/java")
+        if (!javaExecutable.exists()) {
+            return "JAVA_HOME 路径无效，未找到 java 可执行文件"
+        }
+
+        // 检查是否包含 include 目录或 bin/javac，以确定是否为 JDK 目录（JDK8及以下可用tools.jar补充判断）
+        val includeDir = File(javaHome, "include")
+        val javacFile = File(javaHome, "bin${File.separator}javac")
+        val javacExeFile = File(javaHome, "bin${File.separator}javac.exe")
+        val toolsJar = File(javaHome, "lib${File.separator}tools.jar")
+        val isJdk = includeDir.exists() || javacFile.exists() || javacExeFile.exists() || toolsJar.exists()
+        if (!isJdk) {
+            return "JAVA_HOME 路径无效，它似乎指向 JRE 目录而不是 JDK 目录"
+        }
+
+        // 尝试运行 java -version 命令，检查 JDK 是否可以正常运行
+        try {
+            val process = ProcessBuilder(javaExecutable.absolutePath, "-version")
+                .redirectErrorStream(true)
+                .start()
+            process.waitFor()
+            if (process.exitValue() != 0) {
+                return "JAVA_HOME 路径无效，java 命令运行失败"
+            }
+        } catch (e: IOException) {
+            return "JAVA_HOME 路径无效，无法运行 java 命令: ${e.message}"
+        }
+
+        javaHomePath = javaHome
+        return null
+    }
+
     fun setupAapt(aaptPath: String): String? {
         // check os is mac/linux or windows
         val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
@@ -149,7 +192,8 @@ object ApkSigner {
         val result = withContext(Dispatchers.IO) {
             RunCommandUtil.runCommandWithResult(
                 "$aaptPath dump badging $apkFilePath | grep 'package: name'",
-                "apk signer"
+                "apk signer",
+                javaHome = javaHomePath
             )
         }
         return if (result is CommandResult.Success<*>) {
@@ -244,7 +288,7 @@ object ApkSigner {
                 val signVersionParams = SignType.ALL_SIGN_TYPES.flatMap {
                     arrayListOf("--v${it.type}-signing-enabled", if (signVersions.contains(it)) "true" else "false")
                 }.toTypedArray()
-                val processBuilder = ProcessBuilder()
+                val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
                 processBuilder.command(
                     apkSignerCmdPath,
                     "sign",
@@ -310,7 +354,7 @@ object ApkSigner {
     }
 
 
-    fun zipAlignApk(
+    private fun zipAlignApk(
         apkFilePath: String,
         alignedApkPath: String? = null,
         onProgress: (String) -> Unit
@@ -318,7 +362,7 @@ object ApkSigner {
         val outPutFilePath = alignedApkPath ?: apkFilePath.replace(".apk", "_aligned.apk")
         try {
 // 创建ProcessBuilder对象并设置相关属性
-            val processBuilder = ProcessBuilder()
+            val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
             processBuilder.command(
                 zipAlignCmdPath,
                 "-v",
@@ -370,6 +414,7 @@ object ApkSigner {
                 "-v",
                 "--print-certs",
                 apkFilePath,
+                javaHome = javaHomePath
             )
         } else {
             CommandResult.Error("apk文件路径不能为空")

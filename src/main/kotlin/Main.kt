@@ -26,11 +26,11 @@ import io.github.jd1378.otphelper.data.local.PreferenceDataStoreHelper
 import io.github.jixiaoyong.base.viewModel
 import io.github.jixiaoyong.beans.AppState
 import io.github.jixiaoyong.data.SettingPreferencesRepository
-import io.github.jixiaoyong.data.getDataStore
+import io.github.jixiaoyong.data.dataStore
 import io.github.jixiaoyong.i18n.Strings
 import io.github.jixiaoyong.pages.App
 import io.github.jixiaoyong.pages.MainViewModel
-import io.github.jixiaoyong.utils.AppProcessUtil
+import io.github.jixiaoyong.utils.AppInstanceChecker
 import io.github.jixiaoyong.utils.SettingsTool
 import io.github.jixiaoyong.widgets.PopWidget
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +42,14 @@ import kotlin.system.exitProcess
 
 val LocalWindow = compositionLocalOf<ComposeWindow> { error("No Window provided") }
 val LocalLyricist = compositionLocalOf<Lyricist<Strings>> { error("No LocalLyricist provided") }
-val LocalDatastore = compositionLocalOf<SettingPreferencesRepository> { error("No LocalDatastore provided") }
+val LocalDatastore =
+    compositionLocalOf<SettingPreferencesRepository> { error("No LocalDatastore provided") }
 
 fun main() =
     application {
-        val windowState = rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
-        val preferenceDataStoreHelper = PreferenceDataStoreHelper(getDataStore())
+        val windowState =
+            rememberWindowState(height = 650.dp, position = WindowPosition(Alignment.Center))
+        val preferenceDataStoreHelper = PreferenceDataStoreHelper(dataStore)
         val settingPreferencesRepository = SettingPreferencesRepository(preferenceDataStoreHelper)
 
         // At the top level of your kotlin file:
@@ -97,7 +99,7 @@ fun main() =
                     LaunchedEffect(checkDualRunning) {
                         appState = AppState.Loading
                         val isAppRunning = withContext(Dispatchers.IO) {
-                            AppProcessUtil.isDualAppRunning("ApkSigner")
+                            AppInstanceChecker.isAppRunning()
                         }
                         appState = if (isAppRunning) {
                             AppState.AlreadyExists
@@ -140,7 +142,8 @@ fun LoadingPage() {
 fun AlreadyExistsPage(tryAgainFunc: () -> Unit) {
 
     Box(modifier = Modifier.background(color = MaterialTheme.colors.background).fillMaxSize()) {
-        PopWidget(title = "",
+        PopWidget(
+            title = "",
             show = true,
             confirmButton = strings.retry,
             cancelButton = strings.exit,
