@@ -69,6 +69,24 @@ fun SignInfoItem(
         }
         Row(modifier = Modifier.weight(0.75f), verticalAlignment = Alignment.CenterVertically) {
             var isFocused by remember { mutableStateOf(false) }
+            // performance improvement: remember Shape, TextStyle, and KeyboardOptions
+            val borderShape = remember { RoundedCornerShape(10.dp) }
+            val textFieldShape = remember { RoundedCornerShape(15.dp) }
+
+            // Using derivedStateOf or just simple logic inside remember for static dependencies
+            val keyboardOptions = remember(isPwd) {
+                if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default
+            }
+
+            val currentTextStyle = LocalTextStyle.current
+            val onBackgroundColor = MaterialTheme.colors.onBackground
+            val textStyle = remember(currentTextStyle, onBackgroundColor) {
+                currentTextStyle.copy(
+                    fontWeight = FontWeight.Normal,
+                    color = onBackgroundColor
+                )
+            }
+
             TextField(
                 value,
                 onValueChange = onChange,
@@ -76,7 +94,7 @@ fun SignInfoItem(
                     .border(
                         1.dp,
                         if (isFocused) MaterialTheme.colors.primary else MaterialTheme.colors.secondary,
-                        shape = RoundedCornerShape(10.dp)
+                        shape = borderShape
                     )
                     .onFocusChanged {
                         isFocused = it.isFocused
@@ -89,13 +107,9 @@ fun SignInfoItem(
                     unfocusedBorderColor = Color.Transparent,
                     unfocusedLabelColor = Color.Transparent,
                 ),
-                keyboardOptions =
-                if (isPwd) KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
-                shape = RoundedCornerShape(size = 15.dp),
-                textStyle = LocalTextStyle.current.copy(
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colors.onBackground
-                )
+                keyboardOptions = keyboardOptions,
+                shape = textFieldShape,
+                textStyle = textStyle
             )
             if (null != onClick) ButtonWidget(
                 onClick = onClick,
