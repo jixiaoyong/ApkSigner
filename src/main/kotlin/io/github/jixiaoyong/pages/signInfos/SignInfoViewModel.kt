@@ -3,6 +3,8 @@ package io.github.jixiaoyong.pages.signInfos
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.SignInfoBean
 import io.github.jixiaoyong.data.SettingPreferencesRepository
+import io.github.jixiaoyong.utils.KeyStoreValidationResult
+import io.github.jixiaoyong.utils.KeyStoreValidator
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -67,8 +69,18 @@ class SignInfoViewModel(private val settings: SettingPreferencesRepository) : Ba
     }
 
     // save sign info to local storage
-    suspend fun saveNewSignInfo() {
+    suspend fun saveNewSignInfo(): String? {
         val newSignInfo = uiStateFlow.value.newSignInfo
+        val validationResult = KeyStoreValidator.validate(
+            keyStorePath = newSignInfo.keyStorePath,
+            keyAlias = newSignInfo.keyAlias,
+            keyStorePassword = newSignInfo.keyStorePassword,
+            keyPassword = newSignInfo.keyPassword
+        )
+        if (validationResult !is KeyStoreValidationResult.Success) {
+            return validationResult.toString()
+        }
+
         val newSignInfos = mutableListOf<SignInfoBean>()
         newSignInfos.addAll(uiStateFlow.value.signInfoList)
         val indexOfSignInfo = newSignInfos.indexOfFirst { it.isSameOne(newSignInfo) }
@@ -84,6 +96,7 @@ class SignInfoViewModel(private val settings: SettingPreferencesRepository) : Ba
         // 每次保存新签名之后，重置签名的id，避免在此点保存的时候还是覆盖已经保存的签名
         // 对于需要编辑已有签名的，需要从列表中选择并编辑
         updateNewSignInfo(newSignInfo.copy())
+        return null
     }
 }
 
