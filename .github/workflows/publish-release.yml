@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: 17
@@ -49,46 +49,6 @@ jobs:
           name: macos-artifact
           path: build/compose/binaries/main-release/dmg/*.dmg
 
-  mac_build_x86:
-    runs-on: macos-13
-    steps:
-      - name: Checkout latest code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: "zulu"
-          java-version: 17
-
-      - name: Gradle Build Action
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Execute Gradle build
-        run: |
-          ./gradlew packageReleaseDistributionForCurrentOS
-
-      - name: Rename macOS artifacts with cpu arch
-        run: |
-          echo "origin file:"
-          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
-          
-          suffix=$(uname -m)
-          for file in build/compose/binaries/main-release/dmg/*.dmg; do
-            if [ -f "$file" ]; then
-              mv "$file" "${file%.dmg}-$suffix.dmg"
-            fi
-          done
-          
-          echo "result file:"
-          find build/compose/binaries -maxdepth 3 -print | sed -e 's|[^/]*/|   |g'
-
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-artifact-x86
-          path: build/compose/binaries/main-release/dmg/*.dmg
-
   windows_build:
     runs-on: windows-latest
     steps:
@@ -96,7 +56,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: 17
@@ -119,7 +79,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "zulu"
           java-version: 17
@@ -137,7 +97,7 @@ jobs:
 
   publisher:
     name: Publish artifacts to GitHub release
-    needs: [ mac_build, mac_build_x86, windows_build, ubuntu_build ]
+    needs: [ mac_build, windows_build, ubuntu_build ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
