@@ -61,9 +61,14 @@ fun PageSignInfo(viewModel: SignInfoViewModel) {
         }
     }
 
-    Scaffold(scaffoldState = scaffoldState) {
+    Scaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(horizontal = 30.dp, vertical = 10.dp)
+            modifier = Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 30.dp, vertical = 10.dp)
                 .verticalScroll(rememberScrollState())
         ) {
 

@@ -95,30 +95,31 @@ fun main() =
                     LocalLyricist provides stringsLyricist,
                     LocalDatastore provides settingPreferencesRepository,
                 ) {
-
-                    LaunchedEffect(checkDualRunning) {
-                        appState = AppState.Loading
-                        val isAppRunning = withContext(Dispatchers.IO) {
-                            AppInstanceChecker.isAppRunning()
-                        }
-                        appState = if (isAppRunning) {
-                            AppState.AlreadyExists
-                        } else {
-                            AppState.Success
-                        }
-                    }
-
-                    when (appState) {
-                        is AppState.Idle, AppState.Loading -> {
-                            LoadingPage()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        LaunchedEffect(checkDualRunning) {
+                            appState = AppState.Loading
+                            val isAppRunning = withContext(Dispatchers.IO) {
+                                AppInstanceChecker.isAppRunning()
+                            }
+                            appState = if (isAppRunning) {
+                                AppState.AlreadyExists
+                            } else {
+                                AppState.Success
+                            }
                         }
 
-                        is AppState.AlreadyExists -> {
-                            AlreadyExistsPage { checkDualRunning = !checkDualRunning }
-                        }
+                        when (appState) {
+                            is AppState.Idle, AppState.Loading -> {
+                                LoadingPage()
+                            }
 
-                        AppState.Success -> {
-                            App(viewModel)
+                            is AppState.AlreadyExists -> {
+                                AlreadyExistsPage { checkDualRunning = !checkDualRunning }
+                            }
+
+                            AppState.Success -> {
+                                App(viewModel)
+                            }
                         }
                     }
                 }
