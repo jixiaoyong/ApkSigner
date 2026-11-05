@@ -53,7 +53,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "ApkSigner"
-            packageVersion = "1.2.2"
+            packageVersion = "1.2.3"
 
             modules("jdk.unsupported") // for datastore compatibility
 
