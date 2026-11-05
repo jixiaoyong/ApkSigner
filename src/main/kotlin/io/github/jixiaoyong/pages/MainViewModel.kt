@@ -24,10 +24,12 @@ class MainViewModel(private val settingsRepository: SettingPreferencesRepository
 
     override fun onInit() {
         viewModelScope.launch(Dispatchers.IO) {
+            val detectedJavaHome = settingsRepository.javaHome.first()?.javaHome
+                ?: io.github.jixiaoyong.utils.JdkDetector.detectJdk()?.javaHome
+            detectedJavaHome?.let { ApkSigner.setupJavaHome(it) }
             settingsRepository.apkSigner.first()?.let { ApkSigner.setupApkSigner(it) }
             settingsRepository.zipAlign.first()?.let { ApkSigner.setupZipAlign(it) }
             settingsRepository.aapt.first()?.let { ApkSigner.setupAapt(it) }
-            settingsRepository.javaHome.first()?.let { ApkSigner.setupJavaHome(it.javaHome) }
         }
     }
 }

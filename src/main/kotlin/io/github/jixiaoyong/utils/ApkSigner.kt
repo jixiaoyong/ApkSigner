@@ -1,5 +1,6 @@
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
+import io.github.jixiaoyong.utils.JdkDetector
 import io.github.jixiaoyong.utils.SignVersionResolver
 import kotlinx.coroutines.*
 import kotlinx.io.IOException
@@ -90,20 +91,32 @@ object ApkSigner {
     }
 
     fun setupApkSigner(apkSignerPath: String): String? {
-        // 校验文件是否为AOSP提供的apk signer，而非本APP避免误操作导致无限循环启动
-        val apkSignerFile = File(apkSignerPath)
-        if (!apkSignerFile.exists()) {
-            return "apkSigner命令(${apkSignerPath})不存在，请重新选择。"
-        } else if (!apkSignerFile.readText().contains(AOSP_NAME)) {
-            return "apkSigner命令(${apkSignerPath})不是${AOSP_NAME}官方提供的，请重新选择。"
+        val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+        val normalizedPath = if (isWindows && !apkSignerPath.endsWith(".bat", ignoreCase = true) && !File(apkSignerPath).exists()) {
+            "$apkSignerPath.bat"
+        } else {
+            apkSignerPath
         }
 
-        val result = RunCommandUtil.runCommand("$apkSignerPath version", "apk signer")
+        // 校验文件是否为AOSP提供的apk signer，而非本APP避免误操作导致无限循环启动
+        val apkSignerFile = File(normalizedPath)
+        if (!apkSignerFile.exists()) {
+            return "apkSigner命令($normalizedPath)不存在，请重新选择。"
+        } else if (!apkSignerFile.readText().contains(AOSP_NAME)) {
+            return "apkSigner命令($normalizedPath)不是${AOSP_NAME}官方提供的，请重新选择。"
+        }
+
+        val effectiveJavaHome = javaHomePath ?: JdkDetector.detectJdk()?.javaHome
+        val result = RunCommandUtil.runCommand(
+            listOf(apkSignerFile.absolutePath, "version"),
+            "apk signer",
+            javaHome = effectiveJavaHome
+        )
 
         return if (result != null) {
-            "apkSigner命令(${apkSignerPath})检查失败，请重试（${result.message}）"
+            "apkSigner命令($normalizedPath)检查失败，请重试（${result.message}）"
         } else {
-            apkSignerCmdPath = apkSignerPath
+            apkSignerCmdPath = apkSignerFile.absolutePath
             null
         }
     }
@@ -111,10 +124,9 @@ object ApkSigner {
     fun setupZipAlign(zipAlignPath: String): String? {
         // check os is mac/linux or windows
         val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
-            File(zipAlignPath).exists()
-            null
+            if (File(zipAlignPath).exists()) null else Exception("文件不存在: $zipAlignPath")
         } else {
-            RunCommandUtil.runCommand("command -v $zipAlignPath", "zip align")
+            RunCommandUtil.runCommand(listOf("command", "-v", zipAlignPath), "zip align")
         }
 
         return if (null != result) {
@@ -126,43 +138,20 @@ object ApkSigner {
     }
 
     /**
-     * 检测 JAVA_HOME 路径是否有效，并确保它指向 JDK 目录
+     * 检测 JAVA_HOME 路径是否有效，并确保它指向 JDK/JBR 目录
      */
     fun setupJavaHome(javaHome: String): String? {
         if (javaHome.isBlank()) {
             return "JAVA_HOME 路径不能为空"
         }
 
-        val javaExecutable = File(javaHome, "bin/java")
-        if (!javaExecutable.exists()) {
-            return "JAVA_HOME 路径无效，未找到 java 可执行文件"
+        val info = JdkDetector.validateAndGetInfo(javaHome)
+        return if (info != null) {
+            javaHomePath = info.javaHome
+            null
+        } else {
+            "JAVA_HOME 路径无效，未找到可正常执行的 java 运行环境"
         }
-
-        // 检查是否包含 include 目录或 bin/javac，以确定是否为 JDK 目录（JDK8及以下可用tools.jar补充判断）
-        val includeDir = File(javaHome, "include")
-        val javacFile = File(javaHome, "bin${File.separator}javac")
-        val javacExeFile = File(javaHome, "bin${File.separator}javac.exe")
-        val toolsJar = File(javaHome, "lib${File.separator}tools.jar")
-        val isJdk = includeDir.exists() || javacFile.exists() || javacExeFile.exists() || toolsJar.exists()
-        if (!isJdk) {
-            return "JAVA_HOME 路径无效，它似乎指向 JRE 目录而不是 JDK 目录"
-        }
-
-        // 尝试运行 java -version 命令，检查 JDK 是否可以正常运行
-        try {
-            val process = ProcessBuilder(javaExecutable.absolutePath, "-version")
-                .redirectErrorStream(true)
-                .start()
-            process.waitFor()
-            if (process.exitValue() != 0) {
-                return "JAVA_HOME 路径无效，java 命令运行失败"
-            }
-        } catch (e: IOException) {
-            return "JAVA_HOME 路径无效，无法运行 java 命令: ${e.message}"
-        }
-
-        javaHomePath = javaHome
-        return null
     }
 
     fun setupAapt(aaptPath: String): String? {
@@ -273,6 +262,14 @@ object ApkSigner {
 
         if (!isInitialized()) {
             return CommandResult.Error("请先初始化相关配置")
+        }
+
+        if (!File(keyStorePath).exists()) {
+            return CommandResult.Error("签名密钥库文件不存在: $keyStorePath\n请在【签名信息】页面重新选择有效的签名文件。")
+        }
+
+        if (!File(apkFilePath).exists()) {
+            return CommandResult.Error("待签名的APK文件不存在: $apkFilePath\n请重新选择待签名的APK。")
         }
 
         val outputDirectory = signedApkDirectory ?: apkFilePath.substringBeforeLast(File.separator)
@@ -404,6 +401,10 @@ object ApkSigner {
 
         if (!isInitialized()) {
             return CommandResult.Error("请先初始化相关配置")
+        }
+
+        if (!File(apkFilePath).exists()) {
+            return CommandResult.Error("待签名的APK文件不存在: $apkFilePath\n请重新选择待签名的APK。")
         }
 
         return if (apkFilePath.isNotEmpty()) {

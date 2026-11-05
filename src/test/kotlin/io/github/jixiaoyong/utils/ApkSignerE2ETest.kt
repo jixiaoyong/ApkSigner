@@ -156,4 +156,46 @@ class ApkSignerE2ETest {
         assertTrue(verifyOutput.contains("Verified using v2 scheme (APK Signature Scheme v2): false"), "仅勾选 V1 时，V2 必须被明确关闭，不得自动签名 (Issue #16)")
         assertTrue(verifyOutput.contains("Verified using v3 scheme (APK Signature Scheme v3): false"), "仅勾选 V1 时，V3 必须被明确关闭，不得自动签名 (Issue #16)")
     }
+
+    @Test
+    fun testRealApkSignWithSpacePath() {
+        val buildTools = findAvailableBuildTools()
+        assumeTrue(buildTools != null, "当前环境未检测到 Android build-tools，跳过测试")
+
+        val keystoreFile = File("src/test/resources/test.jks")
+        val sampleApkFile = File("src/test/resources/sample-unsigned.apk")
+        assumeTrue(keystoreFile.exists() && sampleApkFile.exists(), "测试所需资源文件不存在")
+
+        // 重点：创建路径中包含空格的临时目录和文件名 (Issue #24)
+        val spaceTempDir = File(System.getProperty("java.io.tmpdir"), "apk test space dir").apply { mkdirs() }
+        spaceTempDir.deleteOnExit()
+        val targetApk = File(spaceTempDir, "my space app.apk")
+        Files.copy(sampleApkFile.toPath(), targetApk.toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+        val initError = ApkSigner.init(buildTools!!.absolutePath)
+        assertEquals(null, initError, "ApkSigner 初始化应当成功")
+
+        val result = ApkSigner.alignAndSignApk(
+            apkFilePath = targetApk.absolutePath,
+            keyStorePath = keystoreFile.absolutePath,
+            keyAlias = "testkey",
+            keyStorePwd = "123456",
+            keyPwd = "123456",
+            signedApkDirectory = spaceTempDir.absolutePath,
+            zipAlign = false,
+            signVersions = listOf(SignType.V1, SignType.V2),
+            onProgress = {}
+        )
+
+        assertTrue(result is CommandResult.Success<*>, "含空格路径的 APK 签名应当成功: $result")
+        val signedApkPath = (result as CommandResult.Success<*>).result as String
+        val signedApkFile = File(signedApkPath)
+        assertTrue(signedApkFile.exists(), "签名后的 APK 文件应当生成在含空格的路径下")
+
+        // 使用 getApkSignInfo 验签
+        val verifyResult = ApkSigner.getApkSignInfo(signedApkPath)
+        assertTrue(verifyResult is CommandResult.Success<*>, "对含空格路径的已签名 APK 进行验签应当成功")
+        val verifyOutput = (verifyResult as CommandResult.Success<*>).result.toString()
+        assertTrue(verifyOutput.contains("Verifies"), "验签结果必须包含 Verifies")
+    }
 }
