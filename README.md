@@ -83,9 +83,9 @@ A tool for Android developers to sign their applications with GUI software.
 
   点击下载[📦 最新 Release 软件包 (.dmg/.msi/.deb)](https://github.com/jixiaoyong/ApkSigner/releases)
 
-  **macOS 用户请注意**，根据你的电脑芯片不同请分别下载对应软件：
-    * Apple 芯片：下载`*-arm64.dmg`
-    * Intel 芯片：下载`*-x86_64.dmg`
+  **macOS 用户请注意**：
+    * 官方 Release 预编译包主要面向 Apple Silicon 芯片（M 系列 / ARM64 架构，下载`*-arm64.dmg`）；
+    * 老款 Intel (x86_64) 芯片 Mac 由于 GitHub Actions 已停用相关构建环境，不再提供预编译包。如有需要，可下载源码在本地执行 `./gradlew packageReleaseDistributionForCurrentOS` 自助打包。
 
   对于 Windows 或 Linux 系统用户，非常抱歉我并没有对应机器完全测试软件的可用性，如果在使用中有任何问题欢迎反馈，我会尽量修复。同时也推荐你参考下面的方式下载源码自助打包。
 

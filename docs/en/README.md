@@ -83,9 +83,9 @@ Choose your preferred method below:
 
   Click to download the [📦 Latest Release Packages (.dmg/.msi/.deb)](https://github.com/jixiaoyong/ApkSigner/releases)
 
-  **Note for macOS users**: Please download the corresponding software based on your computer chip:
-    * Apple Chip: Download `*-arm64.dmg`
-    * Intel Chip: Download `*-x86_64.dmg`
+  **Note for macOS users**:
+    * Official prebuilt binaries support Apple Silicon (M-series / ARM64, download `*-arm64.dmg`);
+    * For legacy Intel (x86_64) Macs, prebuilt binaries are no longer provided as GitHub Actions has retired Intel runners. If needed, you can build locally via `./gradlew packageReleaseDistributionForCurrentOS`.
 
   For Windows or Linux users, I apologize that I have not fully tested the software's availability on corresponding machines. If you encounter any issues during use, feel free to give feedback, and I will try my best to fix them. You are also welcome to download the source code and package it yourself using the method below.
 
