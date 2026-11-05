@@ -5,7 +5,9 @@ import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignInfoBean
+import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.data.SettingPreferencesRepository
+import io.github.jixiaoyong.utils.SignVersionResolver
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
@@ -30,15 +32,20 @@ class SignAppViewModel(private val settings: SettingPreferencesRepository) : Bas
             settings.signInfoBeans,
             settings.signedDirectory,
             settings.isZipAlign,
-            settings.isAutoMatchSignature
+            settings.isAutoMatchSignature,
+            settings.apkSigner
         ) { params ->
+            val apkSignerPath = params[6] as String?
+            val majorVersion = SignVersionResolver.parseMajorVersion(apkSignerPath)
+            val supportedSignTypes = SignVersionResolver.supportedSignTypes(majorVersion)
             uiStateFlow.value.copy(
                 apkSignType = params[0] as Set<Int>,
                 globalSelectedSignInfo = params[1] as SignInfoBean?,
                 allSignInfoBeans = params[2] as List<SignInfoBean>?,
                 signedOutputDirectory = params[3] as String?,
                 isZipAlign = params[4] as Boolean,
-                isAutoMatchSignature = params[5] as Boolean
+                isAutoMatchSignature = params[5] as Boolean,
+                supportedSignTypes = supportedSignTypes
             )
         }.onEach {
             uiStateFlow.value = it
@@ -182,6 +189,7 @@ data class SignAppState(
     val apkPackageName: String? = null,
     val signedLogs: List<String> = emptyList(),
     val apkSignType: Set<Int> = emptySet(),
+    val supportedSignTypes: List<SignType> = SignType.ALL_SIGN_TYPES,
     val globalSelectedSignInfo: SignInfoBean? = null,
     val allSignInfoBeans: List<SignInfoBean>? = null,
     val apkSignatureMap: Map<String, Long> = emptyMap(),

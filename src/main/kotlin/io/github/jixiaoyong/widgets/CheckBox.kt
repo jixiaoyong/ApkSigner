@@ -22,22 +22,39 @@ import androidx.compose.ui.Modifier
 fun CheckBox(
     modifier: Modifier = Modifier,
     checked: Boolean = false,
+    enabled: Boolean = true,
     title: String = "",
     onCheckedChange: ((Boolean) -> Unit)? = null,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable {
+    val clickableModifier = if (enabled) {
+        modifier.clickable {
             onCheckedChange?.invoke(!checked)
-        }) {
+        }
+    } else {
+        modifier
+    }
+
+    val textColor = if (enabled) {
+        MaterialTheme.colors.onBackground
+    } else {
+        MaterialTheme.colors.onBackground.copy(alpha = 0.38f)
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = clickableModifier
+    ) {
         Checkbox(
             checked = checked,
+            enabled = enabled,
             colors = CheckboxDefaults.colors(
                 checkedColor = colors.primary,
                 checkmarkColor = colors.onPrimary,
-                uncheckedColor = colors.secondary
+                uncheckedColor = colors.secondary,
+                disabledColor = colors.onSurface.copy(alpha = 0.38f)
             ),
-            onCheckedChange = onCheckedChange
+            onCheckedChange = if (enabled) onCheckedChange else null
         )
-        Text(title, color = MaterialTheme.colors.onBackground)
+        Text(title, color = textColor)
     }
 }
