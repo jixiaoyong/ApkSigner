@@ -79,12 +79,20 @@ object RunCommandUtil {
         printLog: Boolean = true,
         printError: Boolean = true,
         javaHome: String? = null
+    ): CommandResult = runCommandWithResult(command.toList(), tag, printLog, printError, javaHome)
+
+    fun runCommandWithResult(
+        command: List<String>,
+        tag: String = "",
+        printLog: Boolean = true,
+        printError: Boolean = true,
+        javaHome: String? = null
     ): CommandResult {
         val logTag = if (tag.isBlank()) "" else "$tag: "
         Logger.info("$tag command: ${command.joinToString(" ")}")
 
         return try {
-            val process = createProcessBuilder(command.toList(), javaHome).start()
+            val process = createProcessBuilder(command, javaHome).start()
             val output = handleProcessOutput(process, logTag, printLog, printError)
             if (output.exitCode == 0) {
                 CommandResult.Success(output.stdout)

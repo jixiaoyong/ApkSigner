@@ -20,7 +20,43 @@ import okio.Path.Companion.toPath
  * @date : 25/3/2024
  */
 class SignAppViewModel(private val settings: SettingPreferencesRepository) : BaseViewModel() {
-    private val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+    companion object {
+        const val TITLE_CONTENT_DIVIDER = "-------------------------------------------------------"
+
+        /**
+         * 根据给定的 [pathList] 将给定的 [CommandResult] 列表合并为单个 [CommandResult]。
+         *
+         * 如果给定的[resultList]至少包含一个[CommandResult.Success]，则返回一个[CommandResult.Success]，
+         * 其中结果是所有成功结果的串联字符串，以换行符分隔。
+         *
+         * 如果给定的[resultList]不包含[CommandResult.Success]，则返回[CommandResult.Error]，
+         * 其中结果是所有错误消息的串联字符串，以换行符分隔。
+         *
+         * @param resultList 要合并的 [CommandResult] 列表
+         * @param pathList [resultList]中每个[CommandResult]对应的路径列表
+         * @return 单个 [CommandResult]，它是合并给定 [resultList] 的结果
+         */
+        fun mergeCommandResult(resultList: List<CommandResult>, pathList: List<String>): CommandResult {
+            val hasSuccess = resultList.any { it is CommandResult.Success<*> }
+            val message = List(resultList.size) { index ->
+                val path = pathList.getOrNull(index) ?: "未知路径"
+                val itemContent = when (val result = resultList.getOrNull(index)) {
+                    is CommandResult.Success<*> -> result.result?.toString() ?: "执行成功"
+                    is CommandResult.Error<*> -> result.message?.toString() ?: "执行出错"
+                    CommandResult.NOT_EXECUT -> "未执行"
+                    CommandResult.EXECUTING -> "正在执行..."
+                    null -> "无结果"
+                }
+                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n$itemContent"
+            }.joinToString("\n\n")
+
+            return if (hasSuccess) {
+                CommandResult.Success(message)
+            } else {
+                CommandResult.Error(message)
+            }
+        }
+    }
 
     private val uiStateFlow = MutableStateFlow(SignAppState())
     val uiState = uiStateFlow.asStateFlow()
@@ -162,26 +198,8 @@ class SignAppViewModel(private val settings: SettingPreferencesRepository) : Bas
      * @param pathList [resultList]中每个[CommandResult]对应的路径列表
      * @return 单个 [CommandResult]，它是合并给定 [resultList] 的结果
      */
-    fun mergeCommandResult(resultList: List<CommandResult>, pathList: List<String>) =
-
-        if (resultList.filter { it is CommandResult.Success<*> }.isNotEmpty()) {
-            val message = List(resultList.size) { index ->
-                val path = pathList.getOrNull(index)
-                val result = resultList.getOrNull(index)
-                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + (if (result is CommandResult.Error<*>) result.message.toString()
-                else (result as CommandResult.Success<*>).result.toString())
-            }.joinToString("\n\n")
-
-            CommandResult.Success(resultList.joinToString { message })
-        } else {
-            val message = List(resultList.size) { index ->
-                val path = pathList.getOrNull(index)
-                val result = resultList.getOrNull(index)
-                "$TITLE_CONTENT_DIVIDER\n[${index + 1}] $path\n$TITLE_CONTENT_DIVIDER\n" + ((result as CommandResult.Error<*>).message.toString())
-            }.joinToString("\n\n")
-
-            CommandResult.Error(message)
-        }
+    fun mergeCommandResult(resultList: List<CommandResult>, pathList: List<String>): CommandResult =
+        Companion.mergeCommandResult(resultList, pathList)
 }
 
 data class SignAppState(

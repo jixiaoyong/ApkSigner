@@ -198,4 +198,62 @@ class ApkSignerE2ETest {
         val verifyOutput = (verifyResult as CommandResult.Success<*>).result.toString()
         assertTrue(verifyOutput.contains("Verifies"), "验签结果必须包含 Verifies")
     }
+
+    @Test
+    fun testSignWithWrongPasswordOrAliasIntercepted() {
+        val buildTools = findAvailableBuildTools()
+        assumeTrue(buildTools != null, "当前环境未检测到 Android build-tools，跳过测试")
+
+        val keystoreFile = File("src/test/resources/test.jks").let {
+            if (it.exists()) it else File("test-sample/test.jks")
+        }
+        val sampleApkFile = File("src/test/resources/sample-unsigned.apk").let {
+            if (it.exists()) it else File("test-sample/sample-unsigned.apk")
+        }
+        assumeTrue(keystoreFile.exists() && sampleApkFile.exists(), "测试所需资源文件不存在")
+
+        ApkSigner.init(buildTools!!.absolutePath)
+
+        // 场景 1：错误别名被前置拦截
+        val resultAlias = ApkSigner.alignAndSignApk(
+            apkFilePath = sampleApkFile.absolutePath,
+            keyStorePath = keystoreFile.absolutePath,
+            keyAlias = "non_existent_alias",
+            keyStorePwd = "123456",
+            keyPwd = "123456",
+            onProgress = {}
+        )
+        assertTrue(resultAlias is CommandResult.Error<*>, "错误别名应当被安全拦截")
+        val errorMsgAlias = (resultAlias as CommandResult.Error<*>).message.toString()
+        assertTrue(errorMsgAlias.contains("未在签名文件中找到别名") || errorMsgAlias.contains("别名"), "错误信息应当准确指出别名问题: $errorMsgAlias")
+
+        // 场景 2：错误密钥库密码被前置拦截
+        val resultPass = ApkSigner.alignAndSignApk(
+            apkFilePath = sampleApkFile.absolutePath,
+            keyStorePath = keystoreFile.absolutePath,
+            keyAlias = "testkey",
+            keyStorePwd = "wrong_password_999",
+            keyPwd = "123456",
+            onProgress = {}
+        )
+        assertTrue(resultPass is CommandResult.Error<*>, "错误密码应当被安全拦截")
+        val errorMsgPass = (resultPass as CommandResult.Error<*>).message.toString()
+        assertTrue(errorMsgPass.contains("密码错误"), "错误信息应当准确指出密码错误: $errorMsgPass")
+    }
+
+    @Test
+    fun testExtractPackageNameWithoutGrep() = kotlinx.coroutines.runBlocking {
+        val buildTools = findAvailableBuildTools()
+        assumeTrue(buildTools != null, "当前环境未检测到 Android build-tools，跳过测试")
+
+        val sampleApkFile = File("src/test/resources/sample-unsigned.apk").let {
+            if (it.exists()) it else File("test-sample/sample-unsigned.apk")
+        }
+        assumeTrue(sampleApkFile.exists(), "测试所需资源文件不存在")
+
+        ApkSigner.init(buildTools!!.absolutePath)
+        val packageName = ApkSigner.getApkPackageName(sampleApkFile.absolutePath)
+        assertTrue(!packageName.isNullOrBlank(), "提取出的包名不应为空")
+        assertEquals("io.github.jixiaoyong.test", packageName, "包名应当能被内存正则准确匹配解析")
+    }
 }

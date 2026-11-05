@@ -1,6 +1,8 @@
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
 import io.github.jixiaoyong.utils.JdkDetector
+import io.github.jixiaoyong.utils.KeyStoreValidationResult
+import io.github.jixiaoyong.utils.KeyStoreValidator
 import io.github.jixiaoyong.utils.SignVersionResolver
 import kotlinx.coroutines.*
 import kotlinx.io.IOException
@@ -173,16 +175,21 @@ object ApkSigner {
 
 
     /**
-     * 获取当前apk文件的包名
+     * 获取当前apk文件的包名（纯内存正则解析，无需系统 grep 命令，兼容全平台及带空格路径）
      */
     suspend fun getApkPackageName(apkFilePath: String?): String? {
         if (apkFilePath.isNullOrBlank()) {
             return null
         }
+        val aapt = aaptPath ?: return null
+        val file = File(apkFilePath)
+        if (!file.exists()) {
+            return null
+        }
         val result = withContext(Dispatchers.IO) {
             RunCommandUtil.runCommandWithResult(
-                "$aaptPath dump badging $apkFilePath | grep 'package: name'",
-                "apk signer",
+                listOf(aapt, "dump", "badging", file.absolutePath),
+                tag = "aapt dump badging",
                 javaHome = javaHomePath
             )
         }
@@ -272,6 +279,17 @@ object ApkSigner {
             return CommandResult.Error("待签名的APK文件不存在: $apkFilePath\n请重新选择待签名的APK。")
         }
 
+        // 预校验签名配置合法性（解决 Issue #20）
+        val validationResult = KeyStoreValidator.validate(
+            keyStorePath = keyStorePath,
+            keyAlias = keyAlias,
+            keyStorePassword = keyStorePwd,
+            keyPassword = keyPwd
+        )
+        if (validationResult !is KeyStoreValidationResult.Success) {
+            return CommandResult.Error("签名参数校验失败: $validationResult")
+        }
+
         val outputDirectory = signedApkDirectory ?: apkFilePath.substringBeforeLast(File.separator)
         val outPutFilePath = outputDirectory + File.separator + apkFilePath.substringAfterLast(File.separator)
             .replace(".apk", "_signed.apk")
@@ -280,75 +298,91 @@ object ApkSigner {
         } else {
             apkFilePath
         }
-        if (alignedApkFilePath != null) {
-            try {
-                // 创建ProcessBuilder对象并设置相关属性
-                val signVersionParams = SignVersionResolver.resolveSignParams(signVersions, apkSignerCmdPath).toTypedArray()
-                val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
-                processBuilder.command(
-                    apkSignerCmdPath,
-                    "sign",
-                    "-v",
-                    "--ks",// signer 的私钥和证书链包含在给定的基于 Java 的密钥库文件中
-                    keyStorePath,
-                    "--ks-key-alias",// 表示 signer 在密钥库中的私钥和证书数据的别名的名称
-                    keyAlias,
-                    "--key-pass",// signer 私钥的密码。
-                    "pass:$keyPwd",
-                    "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
-                    "pass:$keyStorePwd",
-                    *signVersionParams,
-                    "--out",
-                    outPutFilePath,
-                    alignedApkFilePath
-                )
-                processBuilder.redirectErrorStream(true)
+        if (alignedApkFilePath == null) {
+            return CommandResult.Error("APK 对齐 (zipalign) 失败，请检查构建工具设置或日志")
+        }
 
-                Logger.log(processBuilder.command().joinToString(" "))
+        return try {
+            // 创建ProcessBuilder对象并设置相关属性
+            val signVersionParams = SignVersionResolver.resolveSignParams(signVersions, apkSignerCmdPath).toTypedArray()
+            val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
+            processBuilder.command(
+                apkSignerCmdPath,
+                "sign",
+                "-v",
+                "--ks",// signer 的私钥和证书链包含在给定的基于 Java 的密钥库文件中
+                keyStorePath,
+                "--ks-key-alias",// 表示 signer 在密钥库中的私钥和证书数据的别名的名称
+                keyAlias,
+                "--key-pass",// signer 私钥的密码。
+                "pass:$keyPwd",
+                "--ks-pass",// 包含 signer 私钥和证书的密钥库的密码。
+                "pass:$keyStorePwd",
+                *signVersionParams,
+                "--out",
+                outPutFilePath,
+                alignedApkFilePath
+            )
+            processBuilder.redirectErrorStream(true)
 
-                // 启动子进程并获取输出流
-                val process = processBuilder.start()
-                val reader = BufferedReader(InputStreamReader(process.inputStream))
+            Logger.log(processBuilder.command().joinToString(" "))
 
-                // 读取输出流并打印到控制台
-                var line: String? = null
-                val totalResult = StringBuffer()
-                while (reader.readLine().also {
-                        if (null != it) {
-                            line = it
-                        }
-                    } != null) {
-                    line?.let {
-                        Logger.info(it)
-                        onProgress(it)
-                        totalResult.append(it)
+            // 启动子进程并获取输出流
+            val process = processBuilder.start()
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+
+            // 读取输出流并打印到控制台
+            var line: String? = null
+            val totalResult = StringBuffer()
+            while (reader.readLine().also {
+                    if (null != it) {
+                        line = it
                     }
+                } != null) {
+                line?.let {
+                    Logger.info(it)
+                    onProgress(it)
+                    totalResult.append(it).append("\n")
                 }
+            }
 
-                // 等待子进程结束并获取退出值
-                val exitCode = process.waitFor()
-                Logger.log("Exited with code: $exitCode")
-                return if (0 == exitCode) {
-                    CommandResult.Success(outPutFilePath)
-                } else {
-                    CommandResult.Error(totalResult.toString())
-                }
-            } catch (e: Exception) {
-                Logger.error("签名失败", e)
-                return CommandResult.Error("${e.message}", e)
-            } finally {
-                if (zipAlign) {
-                    try {
-                        File(alignedApkFilePath).delete()
-                    } catch (e: Exception) {
-                        Logger.error("删除文件失败", e)
-                    }
+            // 等待子进程结束并获取退出值
+            val exitCode = process.waitFor()
+            Logger.log("Exited with code: $exitCode")
+            if (0 == exitCode) {
+                CommandResult.Success(outPutFilePath)
+            } else {
+                val rawError = totalResult.toString()
+                val friendlyError = formatApkSignerError(rawError, keyAlias)
+                CommandResult.Error(friendlyError)
+            }
+        } catch (e: Exception) {
+            Logger.error("签名失败", e)
+            CommandResult.Error("${e.message}", e)
+        } finally {
+            if (zipAlign) {
+                try {
+                    File(alignedApkFilePath).delete()
+                } catch (e: Exception) {
+                    Logger.error("删除文件失败", e)
                 }
             }
         }
-        return CommandResult.Success(outPutFilePath)
     }
 
+    private fun formatApkSignerError(rawError: String, keyAlias: String): String {
+        val hint = when {
+            rawError.contains("password was incorrect", ignoreCase = true) ||
+            rawError.contains("Keystore was tampered with", ignoreCase = true) ->
+                "【错误诊断】签名密钥库密码错误，请检查 storePassword 是否正确\n\n"
+            rawError.contains("Cannot recover key", ignoreCase = true) ->
+                "【错误诊断】私钥密码错误，请检查 keyPassword 是否正确\n\n"
+            rawError.contains("No key with alias", ignoreCase = true) ->
+                "【错误诊断】未在密钥库中找到别名 '$keyAlias'，请检查别名拼写或大小写\n\n"
+            else -> ""
+        }
+        return "$hint$rawError"
+    }
 
     private fun zipAlignApk(
         apkFilePath: String,
@@ -356,8 +390,7 @@ object ApkSigner {
         onProgress: (String) -> Unit
     ): String? {
         val outPutFilePath = alignedApkPath ?: apkFilePath.replace(".apk", "_aligned.apk")
-        try {
-// 创建ProcessBuilder对象并设置相关属性
+        return try {
             val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
             processBuilder.command(
                 zipAlignCmdPath,
@@ -370,24 +403,26 @@ object ApkSigner {
             )
             processBuilder.redirectErrorStream(true)
 
-// 启动子进程并获取输出流
             val process = processBuilder.start()
             val reader = BufferedReader(InputStreamReader(process.inputStream))
 
-// 读取输出流并打印到控制台
             var line: String?
             while (reader.readLine().also { line = it } != null) {
                 Logger.log(line)
                 line?.let { onProgress(it) }
             }
 
-// 等待子进程结束并获取退出值
             val exitCode = process.waitFor()
             Logger.log("Exited with code: $exitCode")
+            if (exitCode == 0 && File(outPutFilePath).exists()) {
+                outPutFilePath
+            } else {
+                null
+            }
         } catch (e: Exception) {
-            return null
+            Logger.error("zipAlign 异常", e)
+            null
         }
-        return outPutFilePath
     }
 
     /**
