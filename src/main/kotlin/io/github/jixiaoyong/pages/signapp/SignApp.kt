@@ -272,10 +272,12 @@ fun PageSignApp(
                 ) {
                     Row {
                         SignType.ALL_SIGN_TYPES.forEach { item ->
-                            val isSelected = uiState.apkSignType.contains(item.type)
+                            val isSupported = uiState.supportedSignTypes.contains(item)
+                            val isSelected = uiState.apkSignType.contains(item.type) && isSupported
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 CheckBox(
                                     checked = isSelected,
+                                    enabled = isSupported,
                                     title = item.name,
                                     onCheckedChange = {
                                         val newTypes = mutableSetOf<Int>()
@@ -288,7 +290,7 @@ fun PageSignApp(
 
                                         viewModel.changeApkSignType(newTypes)
                                     })
-                                HoverableTooltip(description = item.description(i18nStrings))
+                                HoverableTooltip(description = item.description(i18nStrings, isSupported))
                             }
                         }
                     }
@@ -366,7 +368,7 @@ fun PageSignApp(
                                 localSelectedSignInfo.keyPassword,
                                 signedApkDirectory = uiState.signedOutputDirectory,
                                 zipAlign = uiState.isZipAlign,
-                                signVersions = SignType.ALL_SIGN_TYPES.filter {
+                                signVersions = uiState.supportedSignTypes.filter {
                                     uiState.apkSignType.contains(it.type)
                                 },
                                 onProgress = { line ->

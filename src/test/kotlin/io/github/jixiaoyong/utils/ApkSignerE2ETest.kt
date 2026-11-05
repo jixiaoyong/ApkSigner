@@ -102,5 +102,58 @@ class ApkSignerE2ETest {
         assertTrue(verifyOutput.contains("Verifies"), "验签输出必须包含 'Verifies'")
         assertTrue(verifyOutput.contains("Verified using v1 scheme (JAR signing): true"), "V1 签名应当验证成功")
         assertTrue(verifyOutput.contains("Verified using v2 scheme (APK Signature Scheme v2): true"), "V2 签名应当验证成功")
+        assertTrue(verifyOutput.contains("Verified using v3 scheme (APK Signature Scheme v3): false"), "V3 签名应当被明确禁用 (Issue #16)")
+    }
+
+    @Test
+    fun testOnlyV1SchemeSigningDisablesV2AndV3() {
+        val buildTools = findAvailableBuildTools()
+        assumeTrue(buildTools != null, "当前环境未检测到 Android build-tools，跳过真实签名端到端测试")
+
+        val keystoreFile = File("src/test/resources/test.jks")
+        val sampleApkFile = File("src/test/resources/sample-unsigned.apk")
+        assumeTrue(keystoreFile.exists() && sampleApkFile.exists(), "测试所需资源文件不存在")
+
+        val tempDir = Files.createTempDirectory("apksigner_v1_only_test").toFile()
+        tempDir.deleteOnExit()
+        val targetApk = File(tempDir, "app_v1_only.apk")
+        Files.copy(sampleApkFile.toPath(), targetApk.toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+        val initError = ApkSigner.init(buildTools!!.absolutePath)
+        assertEquals(null, initError, "ApkSigner 初始化应当成功")
+
+        // 仅传递 V1 签名方案 (精确对应 Issue #16 场景)
+        val logs = mutableListOf<String>()
+        val result = ApkSigner.alignAndSignApk(
+            apkFilePath = targetApk.absolutePath,
+            keyStorePath = keystoreFile.absolutePath,
+            keyAlias = "testkey",
+            keyStorePwd = "123456",
+            keyPwd = "123456",
+            signedApkDirectory = tempDir.absolutePath,
+            zipAlign = false,
+            signVersions = listOf(SignType.V1),
+            onProgress = { logs.add(it) }
+        )
+
+        assertTrue(result is CommandResult.Success<*>, "仅 V1 签名应当成功，实际结果: $result")
+        val signedApkPath = (result as CommandResult.Success<*>).result as String
+        val signedApkFile = File(signedApkPath)
+        assertTrue(signedApkFile.exists(), "签名后的 APK 文件应当生成")
+
+        val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+        val apksignerExe = File(buildTools, if (isWindows) "apksigner.bat" else "apksigner").absolutePath
+        val verifyProcess = ProcessBuilder(apksignerExe, "verify", "-v", signedApkFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val verifyOutput = BufferedReader(InputStreamReader(verifyProcess.inputStream)).readText()
+        val exitCode = verifyProcess.waitFor()
+
+        assertEquals(0, exitCode, "apksigner verify 命令退出码应为 0，输出: $verifyOutput")
+        assertTrue(verifyOutput.contains("Verifies"), "验签输出必须包含 'Verifies'")
+        assertTrue(verifyOutput.contains("Verified using v1 scheme (JAR signing): true"), "仅勾选 V1 时，V1 必须为 true")
+        assertTrue(verifyOutput.contains("Verified using v2 scheme (APK Signature Scheme v2): false"), "仅勾选 V1 时，V2 必须被明确关闭，不得自动签名 (Issue #16)")
+        assertTrue(verifyOutput.contains("Verified using v3 scheme (APK Signature Scheme v3): false"), "仅勾选 V1 时，V3 必须被明确关闭，不得自动签名 (Issue #16)")
     }
 }
