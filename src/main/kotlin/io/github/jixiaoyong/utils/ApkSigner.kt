@@ -1,5 +1,6 @@
 import io.github.jixiaoyong.beans.CommandResult
 import io.github.jixiaoyong.beans.SignType
+import io.github.jixiaoyong.utils.SignVersionResolver
 import kotlinx.coroutines.*
 import kotlinx.io.IOException
 import java.io.BufferedReader
@@ -285,9 +286,7 @@ object ApkSigner {
         if (alignedApkFilePath != null) {
             try {
                 // 创建ProcessBuilder对象并设置相关属性
-                val signVersionParams = SignType.ALL_SIGN_TYPES.flatMap {
-                    arrayListOf("--v${it.type}-signing-enabled", if (signVersions.contains(it)) "true" else "false")
-                }.toTypedArray()
+                val signVersionParams = SignVersionResolver.resolveSignParams(signVersions, apkSignerCmdPath).toTypedArray()
                 val processBuilder = RunCommandUtil.createProcessBuilder(javaHome = javaHomePath)
                 processBuilder.command(
                     apkSignerCmdPath,

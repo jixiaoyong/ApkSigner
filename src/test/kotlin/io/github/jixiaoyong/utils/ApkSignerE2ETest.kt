@@ -1,0 +1,106 @@
+package io.github.jixiaoyong.utils
+
+import io.github.jixiaoyong.beans.CommandResult
+import io.github.jixiaoyong.beans.SignType
+import org.junit.jupiter.api.Assumptions.assumeTrue
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+class ApkSignerE2ETest {
+
+    /**
+     * 自动在当前运行环境中发现可用的 Android build-tools 目录
+     */
+    private fun findAvailableBuildTools(): File? {
+        val candidates = mutableListOf<File>()
+
+        // 1. 显式环境变量或系统属性
+        System.getenv("ANDROID_BUILD_TOOLS_DIR")?.let { candidates.add(File(it)) }
+        System.getProperty("android.build.tools.dir")?.let { candidates.add(File(it)) }
+
+        // 2. ANDROID_HOME / ANDROID_SDK_ROOT
+        listOfNotNull(System.getenv("ANDROID_HOME"), System.getenv("ANDROID_SDK_ROOT")).forEach { sdkHome ->
+            val btDir = File(sdkHome, "build-tools")
+            if (btDir.exists() && btDir.isDirectory) {
+                btDir.listFiles { f -> f.isDirectory }?.sortedDescending()?.forEach { candidates.add(it) }
+            }
+        }
+
+        // 3. 用户常用开发路径 (Mac / Linux)
+        val userDevPath = File("/Users/jixiaoyong/dev/sdks/android/build-tools")
+        if (userDevPath.exists() && userDevPath.isDirectory) {
+            userDevPath.listFiles { f -> f.isDirectory }?.sortedDescending()?.forEach { candidates.add(it) }
+        }
+
+        val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+        val apksignerName = if (isWindows) "apksigner.bat" else "apksigner"
+        val zipalignName = if (isWindows) "zipalign.exe" else "zipalign"
+
+        return candidates.firstOrNull { dir ->
+            File(dir, apksignerName).exists() && File(dir, zipalignName).exists()
+        }
+    }
+
+    @Test
+    fun testRealApkSignAndVerifyEndToEnd() {
+        val buildTools = findAvailableBuildTools()
+        assumeTrue(buildTools != null, "当前环境未检测到 Android build-tools，跳过真实签名端到端测试")
+
+        // 准备测试资源
+        val keystoreFile = File("src/test/resources/test.jks")
+        val sampleApkFile = File("src/test/resources/sample-unsigned.apk")
+        assumeTrue(keystoreFile.exists() && sampleApkFile.exists(), "测试所需资源文件不存在")
+
+        // 准备临时工作区
+        val tempDir = Files.createTempDirectory("apksigner_e2e_test").toFile()
+        tempDir.deleteOnExit()
+        val targetApk = File(tempDir, "app.apk")
+        Files.copy(sampleApkFile.toPath(), targetApk.toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+        // 1. 初始化 ApkSigner
+        val initError = ApkSigner.init(buildTools!!.absolutePath)
+        assertEquals(null, initError, "ApkSigner 初始化应当成功: $initError")
+        assertTrue(ApkSigner.isInitialized(), "ApkSigner 应当处于初始化完成状态")
+
+        // 2. 执行真实签名
+        val logs = mutableListOf<String>()
+        val result = ApkSigner.alignAndSignApk(
+            apkFilePath = targetApk.absolutePath,
+            keyStorePath = keystoreFile.absolutePath,
+            keyAlias = "testkey",
+            keyStorePwd = "123456",
+            keyPwd = "123456",
+            signedApkDirectory = tempDir.absolutePath,
+            zipAlign = true,
+            signVersions = listOf(SignType.V1, SignType.V2),
+            onProgress = { logs.add(it) }
+        )
+
+        assertTrue(result is CommandResult.Success<*>, "签名应当成功，实际结果: $result")
+        val signedApkPath = (result as CommandResult.Success<*>).result as String
+        val signedApkFile = File(signedApkPath)
+        assertTrue(signedApkFile.exists(), "签名后的 APK 文件应当真实生成于磁盘")
+        assertTrue(signedApkFile.length() > 0, "签名后的 APK 大小应当大于 0")
+
+        // 3. 运行 apksigner verify 验证签名合规性
+        val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+        val apksignerExe = File(buildTools, if (isWindows) "apksigner.bat" else "apksigner").absolutePath
+        val verifyProcess = ProcessBuilder(apksignerExe, "verify", "-v", signedApkFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val verifyOutput = BufferedReader(InputStreamReader(verifyProcess.inputStream)).readText()
+        val exitCode = verifyProcess.waitFor()
+
+        assertEquals(0, exitCode, "apksigner verify 命令退出码应为 0，输出: $verifyOutput")
+        assertTrue(verifyOutput.contains("Verifies"), "验签输出必须包含 'Verifies'")
+        assertTrue(verifyOutput.contains("Verified using v1 scheme (JAR signing): true"), "V1 签名应当验证成功")
+        assertTrue(verifyOutput.contains("Verified using v2 scheme (APK Signature Scheme v2): true"), "V2 签名应当验证成功")
+    }
+}
