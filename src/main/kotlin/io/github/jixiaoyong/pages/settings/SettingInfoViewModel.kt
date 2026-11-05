@@ -4,6 +4,7 @@ import ApkSigner
 import Logger
 import io.github.jixiaoyong.base.BaseViewModel
 import io.github.jixiaoyong.data.SettingPreferencesRepository
+import io.github.jixiaoyong.utils.JdkDetector
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.skiko.OS.*
@@ -49,14 +50,14 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
 
         viewModelScope.launch {
             repository.javaHome.collect { jdkInfo ->
-                val jdkInfoData =
-                    if (jdkInfo != null) {
-                        jdkInfo
-                    } else {
-                        val javaHomeEnv = System.getenv("JAVA_HOME")
-                        val javaVersion = getJdkVersion(javaHomeEnv)
-                        JdkInfo(javaHome = javaHomeEnv, jdkVersion = javaVersion)
-                    }
+                val jdkInfoData = if (jdkInfo != null && JdkDetector.validateAndGetInfo(jdkInfo.javaHome) != null) {
+                    jdkInfo
+                } else {
+                    JdkDetector.detectJdk()
+                }
+                if (jdkInfoData != null) {
+                    ApkSigner.setupJavaHome(jdkInfoData.javaHome)
+                }
                 uiStateFlow.update { it.copy(javaHome = jdkInfoData) }
             }
         }
@@ -153,20 +154,10 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
             return
         }
 
-        val javaBin = when (hostOs) {
-            MacOS, Linux -> "$javaHomePath/bin/java"
-            Windows -> "$javaHomePath\\bin\\java.exe"
-            else -> null
+        val jdkInfo = JdkDetector.validateAndGetInfo(javaHomePath)
+        if (jdkInfo != null) {
+            ApkSigner.setupJavaHome(jdkInfo.javaHome)
         }
-        val javaFile = javaBin?.let { java.io.File(it) }
-        val jdkVersion = getJdkVersion(javaHomePath)
-
-        val jdkInfo = if (javaFile != null && javaFile.exists() && javaFile.canExecute()) {
-            JdkInfo(javaHome = javaHomePath, jdkVersion = jdkVersion)
-        } else {
-            null
-        }
-
         viewModelScope.launch { repository.saveJavaHome(jdkInfo) }
     }
 
@@ -202,29 +193,6 @@ class SettingInfoViewModel(private val repository: SettingPreferencesRepository)
         // Explorer always return 1 whether succeed or failed
         // issue: https://github.com/microsoft/WSL/issues/6565
         return result == 0 || Windows == hostOs
-    }
-
-    private fun getJdkVersion(javaHomePath: String?): String? {
-        if (javaHomePath.isNullOrBlank()) return null
-        val javaBin = when (hostOs) {
-            MacOS, Linux -> "$javaHomePath/bin/java"
-            Windows -> "$javaHomePath\\bin\\java.exe"
-            else -> null
-        }
-        val javaFile = javaBin?.let { java.io.File(it) }
-        if (javaFile != null && javaFile.exists() && javaFile.canExecute()) {
-            try {
-                val process = ProcessBuilder(javaFile.absolutePath, "-version")
-                    .redirectErrorStream(true)
-                    .start()
-                val output = process.inputStream.bufferedReader().readText()
-                val versionRegex = Regex("\"([^\"]+)\"")
-                return versionRegex.find(output)?.groups?.get(1)?.value
-            } catch (e: Exception) {
-                return null
-            }
-        }
-        return null
     }
 }
 
