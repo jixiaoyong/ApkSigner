@@ -38,7 +38,7 @@ fun InfoItemWidget(
     content: @Composable (() -> Unit)? = null
 ) {
     val i18nString = strings
-    Column(modifier = Modifier.padding(horizontal = 10.dp).padding(top = 5.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).padding(top = 5.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp)
                 .padding(vertical = 5.dp),

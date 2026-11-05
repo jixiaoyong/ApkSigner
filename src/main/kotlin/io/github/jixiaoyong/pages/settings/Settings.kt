@@ -165,9 +165,15 @@ fun PageSettingInfo() {
         }
     }
 
-    Scaffold(scaffoldState = scaffoldState) {
+    Scaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp).verticalScroll(rememberScrollState())
+            modifier = Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 15.dp, vertical = 10.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             DropBoxPanel(
                 window,
@@ -193,7 +199,6 @@ fun PageSettingInfo() {
                             }
                         }
                     },
-                component = JPanel(),
                 onFileDrop = {
                     scope.launch {
                         val result = viewModel.setupBuildToolsConfig(it.first())

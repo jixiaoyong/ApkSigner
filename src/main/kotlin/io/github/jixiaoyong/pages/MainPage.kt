@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -99,46 +100,55 @@ fun App(viewModel: MainViewModel) {
     ToasterUtil.init(localThemeMode)
 
     AppTheme(darkTheme = localThemeMode) {
-        Scaffold(
-            topBar = {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination?.route ?: Routes.SignInfo
-                Row(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
-                        .background(MaterialTheme.colors.secondaryVariant).padding(horizontal = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    for (route in routes) {
-                        val isActive = route.third == currentDestination
-                        val backgroundColor = if (isActive) {
-                            MaterialTheme.colors.secondary
-                        } else {
-                            Color.Transparent
-                        }
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colors.background
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination?.route ?: Routes.SignInfo
+                    Row(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 65.dp)
+                            .background(MaterialTheme.colors.secondaryVariant).padding(horizontal = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        for (route in routes) {
+                            val isActive = route.third == currentDestination
+                            val backgroundColor = if (isActive) {
+                                MaterialTheme.colors.secondary
+                            } else {
+                                Color.Transparent
+                            }
 
-                        Row(
-                            modifier = Modifier.weight(1f).padding(horizontal = 1.dp)
-                                .background(backgroundColor, RoundedCornerShape(5.dp))
-                                .clickable {
-                                    navigationToPage(navController, route.third)
-                                }
-                                .padding(vertical = 15.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                route.first,
-                                contentDescription = route.second,
-                                tint = MaterialTheme.colors.primary,
-                                modifier = Modifier.padding(end = 5.dp).size(18.dp)
-                            )
-                            Text(route.second, color = MaterialTheme.colors.onBackground)
+                            Row(
+                                modifier = Modifier.weight(1f).padding(horizontal = 1.dp)
+                                    .background(backgroundColor, RoundedCornerShape(5.dp))
+                                    .clickable {
+                                        navigationToPage(navController, route.third)
+                                    }
+                                    .padding(vertical = 15.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    route.first,
+                                    contentDescription = route.second,
+                                    tint = MaterialTheme.colors.primary,
+                                    modifier = Modifier.padding(end = 5.dp).size(18.dp)
+                                )
+                                Text(route.second, color = MaterialTheme.colors.onBackground)
+                            }
                         }
                     }
-                }
-            }) {
-                NavHost(navController, startDestination = Routes.SignInfo) {
+                }) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = Routes.SignInfo,
+                    modifier = Modifier.fillMaxSize().padding(innerPadding)
+                ) {
                     composable(Routes.SignInfo) {
                         PageSignInfo(signInfoViewModel)
                     }
@@ -150,9 +160,9 @@ fun App(viewModel: MainViewModel) {
                     composable(Routes.SettingInfo) {
                         PageSettingInfo()
                     }
+                }
             }
         }
-
     }
 }
 

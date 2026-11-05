@@ -156,11 +156,17 @@ fun PageSignApp(
         }
     }
 
-    Scaffold(scaffoldState = scaffoldState) {
+    Scaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Column(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 10.dp)
                     .verticalScroll(rememberScrollState())
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -190,7 +196,6 @@ fun PageSignApp(
                                 }
                             }
                         },
-                    component = JPanel(),
                     onFileDrop = {
                         scope.launch {
                             val file = it.filter() {
