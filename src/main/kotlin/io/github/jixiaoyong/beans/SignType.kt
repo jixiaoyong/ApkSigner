@@ -31,8 +31,8 @@ sealed class SignType(val type: Int, val name: String) {
 
     companion object {
 
-        val DEF_SIGN_TYPES = listOf(V1, V2)
-        val ALL_SIGN_TYPES = listOf(V1, V2, V3, V4)
+        val DEF_SIGN_TYPES get() = listOf(V1, V2)
+        val ALL_SIGN_TYPES get() = listOf(V1, V2, V3, V4)
 
         fun valueOf(it: Int): SignType {
             return when (it) {

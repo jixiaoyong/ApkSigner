@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.jetbrains.navigation.compose)
     implementation(libs.jetbrains.lifecycle.viewmodel)
     implementation(libs.sujanpoudel.multiplatform.paths)
+
+    testImplementation(kotlin("test"))
 }
 
 compose.desktop {
@@ -82,4 +84,8 @@ apply(from = "versionInfo.gradle.kts")
 
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
