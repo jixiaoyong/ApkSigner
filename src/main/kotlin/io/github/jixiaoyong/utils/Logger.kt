@@ -85,6 +85,16 @@ object Logger {
         log("\u001B[90m${message}\u001B[0m")
     }
 
+    /**
+     * 日志脱敏：apksigner 签名命令里含明文密码（--key-pass pass:<密码> / --ks-pass pass:<密码>），
+     * 直接记日志会把密码写进磁盘日志文件（设置页可一键打开日志目录）。
+     * 记日志前把 pass: 开头的参数值替换为 ***，其它参数原样保留。
+     * 按参数逐个处理（而不是对拼好的字符串做正则），含空格的密码也能整个遮住。
+     */
+    fun maskSensitiveArgs(args: List<String>): String {
+        return args.joinToString(" ") { if (it.startsWith("pass:")) "pass:***" else it }
+    }
+
     fun log(message: String?) {
         if (IS_PRINT) {
             println(message)

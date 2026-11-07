@@ -325,7 +325,7 @@ object ApkSigner {
             )
             processBuilder.redirectErrorStream(true)
 
-            Logger.log(processBuilder.command().joinToString(" "))
+            Logger.log(Logger.maskSensitiveArgs(processBuilder.command()))
 
             // 启动子进程并获取输出流
             val process = processBuilder.start()
