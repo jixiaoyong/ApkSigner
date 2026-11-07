@@ -52,12 +52,15 @@ jobs:
       # 控制量:只留 7 天(默认 90 天),每次运行约 78 MB(dmg)+ msi,
       # 7 天内并行的几个 PR 也远不到 500 MB;超了也不会扣费,
       # 默认 spending limit 为 $0 时只会拦住不再上传,不会自动扣款。
+      # 注意路径:CI 跑的是 packageDistributionForCurrentOS(非 Release),
+      # 产物在 build/compose/binaries/main/(发版用的
+      # packageReleaseDistributionForCurrentOS 才在 main-release/)。
       - name: Upload built application for PR review
         uses: actions/upload-artifact@v4
         with:
           name: ApkSigner-${{ matrix.os }}
           path: |
-            build/compose/binaries/main-release/dmg/*.dmg
-            build/compose/binaries/main-release/msi/*.msi
+            build/compose/binaries/main/dmg/*.dmg
+            build/compose/binaries/main/msi/*.msi
           if-no-files-found: error
           retention-days: 7
