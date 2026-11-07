@@ -44,3 +44,20 @@ jobs:
       - name: Verify Desktop Application Packaging
         shell: bash
         run: ./gradlew packageDistributionForCurrentOS
+
+      # 让审核的人能直接下载 CI 编出来的安装包来测,而不用自己重新构建。
+      # 与 release 无关:产物只挂在本次 workflow 运行下面,不进 GitHub Releases。
+      # 额度:产物计入账号级 500 MB 共享存储(免费版),与 Packages 共用;
+      # 本仓是公开仓,runner 分钟免费,但产物存储仍占这 500 MB。
+      # 控制量:只留 7 天(默认 90 天),每次运行约 78 MB(dmg)+ msi,
+      # 7 天内并行的几个 PR 也远不到 500 MB;超了也不会扣费,
+      # 默认 spending limit 为 $0 时只会拦住不再上传,不会自动扣款。
+      - name: Upload built application for PR review
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApkSigner-${{ matrix.os }}
+          path: |
+            build/compose/binaries/main-release/dmg/*.dmg
+            build/compose/binaries/main-release/msi/*.msi
+          if-no-files-found: error
+          retention-days: 7
