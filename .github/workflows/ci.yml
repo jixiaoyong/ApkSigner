@@ -50,19 +50,34 @@ jobs:
           restore-keys: |
             gradle-wrapper-${{ runner.os }}-
 
+      # 探测发行包资产端点的真实状态，输出会进日志方便定位；失败不阻断后续步骤
+      - name: Diagnose Gradle release asset endpoint
+        shell: bash
+        continue-on-error: true
+        run: |
+          U="https://github.com/gradle/gradle-distributions/releases/download/v8.9.0/gradle-8.9-bin.zip"
+          for i in 1 2 3; do
+            curl -sS -o /dev/null -L --max-time 45 \
+              -w "probe $i: code=%{http_code} ttfb=%{time_starttransfer}s\n" \
+              -r 0-1024 "$U" || true
+          done
+
       - name: Warm up Gradle distribution (retry on upstream 5xx)
         shell: bash
         run: |
-          for i in 1 2 3 4 5; do
-            if ./gradlew --version >/dev/null 2>&1; then
+          LOG="$RUNNER_TEMP/gradle-warmup.log"
+          for i in 1 2 3 4 5 6 7 8; do
+            if ./gradlew --version >"$LOG" 2>&1; then
               echo "Gradle distribution ready (attempt $i)"
+              grep -E "^Gradle |^JVM" "$LOG" || true
               exit 0
             fi
-            wait_seconds=$((i * 15))
-            echo "::warning::Gradle distribution unavailable (attempt $i/5), retry in ${wait_seconds}s"
-            sleep "$wait_seconds"
+            echo "::warning::attempt $i/8 failed; tail of output:"
+            tail -4 "$LOG" || true
+            sleep $((i * 10))
           done
-          echo "::error::Gradle distribution still unavailable after 5 attempts (upstream 5xx)"
+          echo "::error::Gradle distribution still unavailable after 8 attempts"
+          tail -30 "$LOG"
           exit 1
 
       - name: Run Tests (Contract & End-to-End Real Signing)
