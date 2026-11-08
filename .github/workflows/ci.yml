@@ -14,6 +14,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: write # 清理本 PR 的历史产物需要（仅 PR 事件使用）
 
 jobs:
   cross-platform-test-and-build:
@@ -74,3 +75,47 @@ jobs:
       - name: Verify Desktop Application Packaging
         shell: bash
         run: ./gradlew packageDistributionForCurrentOS
+
+      # 让 PR 审核者直接下载 CI 编出的安装包，无需本地重新构建。
+      # 与发版无关：产物只挂在本 workflow 运行下，不进 GitHub Releases。
+      # 发版由 publish-release.yml 在 push tag v*.*.* 时触发，产物在 main-release/ 目录；
+      # 这里跑的是 packageDistributionForCurrentOS，产物在 main/ 目录。
+      # 一次完整运行实测约 139MB（macOS dmg 74MB + Windows msi 65MB）。
+      # ci.yml 同时被 master push 触发，因此用 if 限定只在 PR 上传，避免每次推 master 白传。
+      - name: Upload built application for PR review
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApkSigner-${{ matrix.os }}
+          path: |
+            build/compose/binaries/main/dmg/*.dmg
+            build/compose/binaries/main/msi/*.msi
+          if-no-files-found: error
+          retention-days: 3 # 过期 PR 不再有新运行，3 天后产物自动消失
+
+      # upload-artifact@v4 的 name 只在单次 run 内去重，同一 PR 多次 push 会累积多份。
+      # 这里删掉本 head 分支的历史产物，只保留最新一次运行；清理失败不影响构建结论
+      # （来自 fork 的 PR 会被降权为只读 token，此时跳过清理，上传仍可用）。
+      - name: Prune stale artifacts of this PR
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          ARTIFACT_NAME: ApkSigner-${{ matrix.os }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = context.payload.pull_request.head.ref;
+            // 只取同名产物：两个 matrix job 各自清理自己的历史，避免拉取全仓 artifact 列表
+            const artifacts = await github.paginate(
+              github.rest.actions.listArtifactsForRepo,
+              { owner, repo, per_page: 100, name: process.env.ARTIFACT_NAME }
+            );
+            for (const artifact of artifacts) {
+              const run = artifact.workflow_run;
+              if (!run || artifact.expired || run.head_branch !== branch) continue;
+              if (run.id === context.runId) continue;
+              await github.rest.actions.deleteArtifact({
+                owner, repo, artifact_id: artifact.id
+              });
+            }
