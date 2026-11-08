@@ -37,11 +37,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      # Gradle 发行包（gradle-8.9-bin.zip）的下载链路是 services.gradle.org -> 307 ->
-      # GitHub Releases 资产地址；该资产端点会偶发 5xx（2026-11-08 实测本机与 runner 同时 504，
-      # 构建在编译前就失败，与代码无关）。wrapper 自己不会重试，所以这里补两件事：
-      # 1) 缓存已下载好的发行包，命中后完全不再访问网络；
-      # 2) 未命中时做指数退避重试，把偶发 504 消化掉。
+      # Gradle 发行包（gradle-8.9-bin.zip）经 services.gradle.org 307 跳到 GitHub Releases
+      # 资产地址。2026-11-08 该端点间歇返回 503/504（GitHub 同期记录了
+      # "Increase in timeouts for some unauthenticated users" 事件）。wrapper 自身不会重试，
+      # 冷缓存时这里补上发行包缓存与退避重试，避免构建在编译开始前就被基础设施抖动打断。
       - name: Cache Gradle wrapper distribution
         uses: actions/cache@v4
         with:
@@ -49,18 +48,6 @@ jobs:
           key: gradle-wrapper-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-wrapper-${{ runner.os }}-
-
-      # 探测发行包资产端点的真实状态，输出会进日志方便定位；失败不阻断后续步骤
-      - name: Diagnose Gradle release asset endpoint
-        shell: bash
-        continue-on-error: true
-        run: |
-          U="https://github.com/gradle/gradle-distributions/releases/download/v8.9.0/gradle-8.9-bin.zip"
-          for i in 1 2 3; do
-            curl -sS -o /dev/null -L --max-time 45 \
-              -w "probe $i: code=%{http_code} ttfb=%{time_starttransfer}s\n" \
-              -r 0-1024 "$U" || true
-          done
 
       - name: Warm up Gradle distribution (retry on upstream 5xx)
         shell: bash
@@ -84,16 +71,6 @@ jobs:
         shell: bash
         run: ./gradlew test --info
 
-      # 打包阶段在 Windows 上要下载 WiX 工具链（同样是 GitHub 资产地址），一并加上重试。
       - name: Verify Desktop Application Packaging
         shell: bash
-        run: |
-          for i in 1 2 3; do
-            if ./gradlew packageDistributionForCurrentOS; then
-              exit 0
-            fi
-            wait_seconds=$((i * 15))
-            echo "::warning::packaging failed (attempt $i/3, likely WiX/toolchain download), retry in ${wait_seconds}s"
-            sleep "$wait_seconds"
-          done
-          exit 1
+        run: ./gradlew packageDistributionForCurrentOS
