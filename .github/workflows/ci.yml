@@ -14,6 +14,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: write # 清理本 PR 的历史产物需要（仅 PR 事件使用）
 
 jobs:
   cross-platform-test-and-build:
@@ -45,17 +46,14 @@ jobs:
         shell: bash
         run: ./gradlew packageDistributionForCurrentOS
 
-      # 让审核的人能直接下载 CI 编出来的安装包来测,而不用自己重新构建。
-      # 与 release 无关:产物只挂在本次 workflow 运行下面,不进 GitHub Releases。
-      # 额度:产物计入账号级 500 MB 共享存储(免费版),与 Packages 共用;
-      # 本仓是公开仓,runner 分钟免费,但产物存储仍占这 500 MB。
-      # 控制量:只留 7 天(默认 90 天),每次运行约 78 MB(dmg)+ msi,
-      # 7 天内并行的几个 PR 也远不到 500 MB;超了也不会扣费,
-      # 默认 spending limit 为 $0 时只会拦住不再上传,不会自动扣款。
-      # 注意路径:CI 跑的是 packageDistributionForCurrentOS(非 Release),
-      # 产物在 build/compose/binaries/main/(发版用的
-      # packageReleaseDistributionForCurrentOS 才在 main-release/)。
+      # 让 PR 审核者直接下载 CI 编出的安装包，无需本地重新构建。
+      # 与发版无关：产物只挂在本 workflow 运行下，不进 GitHub Releases。
+      # 发版由 publish-release.yml 在 push tag v*.*.* 时触发，产物在 main-release/ 目录；
+      # 这里跑的是 packageDistributionForCurrentOS，产物在 main/ 目录。
+      # 一次完整运行实测约 139MB（macOS dmg 74MB + Windows msi 65MB）。
+      # ci.yml 同时被 master push 触发，因此用 if 限定只在 PR 上传，避免每次推 master 白传。
       - name: Upload built application for PR review
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: ApkSigner-${{ matrix.os }}
@@ -63,4 +61,28 @@ jobs:
             build/compose/binaries/main/dmg/*.dmg
             build/compose/binaries/main/msi/*.msi
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3 # 过期 PR 不再有新运行，3 天后产物自动消失
+
+      # upload-artifact@v4 的 name 只在单次 run 内去重，同一 PR 多次 push 会累积多份。
+      # 这里删掉本 head 分支的历史产物，只保留最新一次运行；清理失败不影响构建结论
+      # （来自 fork 的 PR 会被降权为只读 token，此时跳过清理，上传仍可用）。
+      - name: Prune stale artifacts of this PR
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = context.payload.pull_request.head.ref;
+            const artifacts = await github.paginate(
+              github.rest.actions.listArtifactsForRepo,
+              { owner, repo, per_page: 100 }
+            );
+            for (const artifact of artifacts) {
+              const run = artifact.workflow_run;
+              if (!run || artifact.expired || run.head_branch !== branch) continue;
+              if (run.id === context.runId) continue;
+              await github.rest.actions.deleteArtifact({
+                owner, repo, artifact_id: artifact.id
+              });
+            }
