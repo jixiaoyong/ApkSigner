@@ -29,7 +29,7 @@ object RunCommandUtil {
         javaHome: String? = null
     ): Exception? {
         val logTag = if (tag.isBlank()) "" else "$tag: "
-        Logger.info("$tag command: ${command.joinToString(" ")}")
+        Logger.info("$tag command: ${Logger.maskSensitiveArgs(command)}")
 
         return try {
             val process = createProcessBuilder(command, javaHome).start()
@@ -89,7 +89,7 @@ object RunCommandUtil {
         javaHome: String? = null
     ): CommandResult {
         val logTag = if (tag.isBlank()) "" else "$tag: "
-        Logger.info("$tag command: ${command.joinToString(" ")}")
+        Logger.info("$tag command: ${Logger.maskSensitiveArgs(command)}")
 
         return try {
             val process = createProcessBuilder(command, javaHome).start()

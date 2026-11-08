@@ -37,6 +37,36 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # Gradle 发行包（gradle-8.9-bin.zip）经 services.gradle.org 307 跳到 GitHub Releases
+      # 资产地址。2026-11-08 该端点间歇返回 503/504（GitHub 同期记录了
+      # "Increase in timeouts for some unauthenticated users" 事件）。wrapper 自身不会重试，
+      # 冷缓存时这里补上发行包缓存与退避重试，避免构建在编译开始前就被基础设施抖动打断。
+      - name: Cache Gradle wrapper distribution
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: gradle-wrapper-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-wrapper-${{ runner.os }}-
+
+      - name: Warm up Gradle distribution (retry on upstream 5xx)
+        shell: bash
+        run: |
+          LOG="$RUNNER_TEMP/gradle-warmup.log"
+          for i in 1 2 3 4 5 6 7 8; do
+            if ./gradlew --version >"$LOG" 2>&1; then
+              echo "Gradle distribution ready (attempt $i)"
+              grep -E "^Gradle |^JVM" "$LOG" || true
+              exit 0
+            fi
+            echo "::warning::attempt $i/8 failed; tail of output:"
+            tail -4 "$LOG" || true
+            sleep $((i * 10))
+          done
+          echo "::error::Gradle distribution still unavailable after 8 attempts"
+          tail -30 "$LOG"
+          exit 1
+
       - name: Run Tests (Contract & End-to-End Real Signing)
         shell: bash
         run: ./gradlew test --info
