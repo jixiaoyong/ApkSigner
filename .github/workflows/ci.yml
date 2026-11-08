@@ -37,10 +37,48 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # Gradle 发行包（gradle-8.9-bin.zip）的下载链路是 services.gradle.org -> 307 ->
+      # GitHub Releases 资产地址；该资产端点会偶发 5xx（2026-11-08 实测本机与 runner 同时 504，
+      # 构建在编译前就失败，与代码无关）。wrapper 自己不会重试，所以这里补两件事：
+      # 1) 缓存已下载好的发行包，命中后完全不再访问网络；
+      # 2) 未命中时做指数退避重试，把偶发 504 消化掉。
+      - name: Cache Gradle wrapper distribution
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper/dists
+          key: gradle-wrapper-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-wrapper-${{ runner.os }}-
+
+      - name: Warm up Gradle distribution (retry on upstream 5xx)
+        shell: bash
+        run: |
+          for i in 1 2 3 4 5; do
+            if ./gradlew --version >/dev/null 2>&1; then
+              echo "Gradle distribution ready (attempt $i)"
+              exit 0
+            fi
+            wait_seconds=$((i * 15))
+            echo "::warning::Gradle distribution unavailable (attempt $i/5), retry in ${wait_seconds}s"
+            sleep "$wait_seconds"
+          done
+          echo "::error::Gradle distribution still unavailable after 5 attempts (upstream 5xx)"
+          exit 1
+
       - name: Run Tests (Contract & End-to-End Real Signing)
         shell: bash
         run: ./gradlew test --info
 
+      # 打包阶段在 Windows 上要下载 WiX 工具链（同样是 GitHub 资产地址），一并加上重试。
       - name: Verify Desktop Application Packaging
         shell: bash
-        run: ./gradlew packageDistributionForCurrentOS
+        run: |
+          for i in 1 2 3; do
+            if ./gradlew packageDistributionForCurrentOS; then
+              exit 0
+            fi
+            wait_seconds=$((i * 15))
+            echo "::warning::packaging failed (attempt $i/3, likely WiX/toolchain download), retry in ${wait_seconds}s"
+            sleep "$wait_seconds"
+          done
+          exit 1
