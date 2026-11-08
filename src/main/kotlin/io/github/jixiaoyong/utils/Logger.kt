@@ -21,6 +21,9 @@ object Logger {
     /** 日志目录内保留的日志文件个数上限 */
     const val MAX_LOG_FILE_COUNT = 50 // 50 个文件
 
+    /** 日志保留天数：清理时，文件名时间早于「现在 - N 天」的日志一并删除（默认 7 天） */
+    const val MAX_LOG_FILE_KEEP_DAYS = 7L
+
     /** 单个日志文件的硬上限：运行期间超限即轮转到新文件，避免一次长时间运行把当次文件写到几百 MB */
     const val MAX_SINGLE_LOG_FILE_SIZE = 10L * 1024 * 1024 // 10Mb
 
@@ -99,23 +102,42 @@ object Logger {
     internal fun reduceLogFileCountAndSize(
         directory: File,
         maxCount: Int = MAX_LOG_FILE_COUNT,
-        maxSize: Long = MAX_LOG_FILE_SIZE
+        maxSize: Long = MAX_LOG_FILE_SIZE,
+        maxAgeDays: Long = MAX_LOG_FILE_KEEP_DAYS,
+        now: LocalDateTime = LocalDateTime.now()
     ) {
         val logs = (directory.listFiles() ?: return)
             .filter { it.isFile && isLogFileName(it.name) }
             .sortedBy { it.name }
 
+        val expireBefore = now.minusDays(maxAgeDays)
         var count = logs.size
         var total = logs.sumOf { it.length() }
         for (old in logs) {
+            // 正在写的那个文件永远不删（正常情况下它是最新的，这里只是兜底时钟回拨）
+            if (old == currentLogFile) break
+            val expired = parseLogFileTime(old.name)?.isBefore(expireBefore) == true
             // +1 预留给即将创建的新文件，避免"清理完刚好塞满、再写一个就超额"
-            if (count + 1 <= maxCount && total <= maxSize) break
+            val overLimit = count + 1 > maxCount || total > maxSize
+            // 既没超期、也没超额，说明后面的更年轻更小，直接结束
+            if (!expired && !overLimit) break
             val length = old.length()
             if (old.delete()) {
                 count--
                 total -= length
             }
         }
+    }
+
+    /**
+     * 从日志文件名解析出该日志的创建时间。
+     * 用文件名而不是 lastModified：文件被复制/触碰后 mtime 会变，而文件名是写入时的时间戳，
+     * 且旧格式（无 .log、无毫秒）与新格式都要能解析，避免历史日志永远不被清理。
+     */
+    private fun parseLogFileTime(fileName: String): LocalDateTime? {
+        val base = fileName.removeSuffix(LOG_FILE_SUFFIX)
+        return runCatching { LocalDateTime.parse(base, DATE_FORMATTER_LOG_FILE) }.getOrNull()
+            ?: runCatching { LocalDateTime.parse(base, DATE_FORMATTER) }.getOrNull()
     }
 
     /** 是否为本应用写出的日志文件名（旧格式无后缀、新格式带 .log 都算，便于平滑清理存量） */

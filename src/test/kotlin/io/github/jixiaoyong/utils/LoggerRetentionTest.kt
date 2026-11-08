@@ -2,6 +2,8 @@ package io.github.jixiaoyong.utils
 
 import java.io.File
 import java.nio.file.Files
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -92,6 +94,37 @@ class LoggerRetentionTest {
         assertTrue(left.size <= 2, "总量超限时应从最旧开始删除，实际剩余 ${left.size} 个")
         assertTrue(left.none { it.name == "2026-11-01-100000" }, "最旧的日志应先被删除")
         assertTrue(left.any { it.name == "2026-11-05-100000" }, "最新的日志必须保留")
+    }
+
+    @Test
+    fun testReduce_deletesLogsOlderThanKeepDays() {
+        val dir = newTempDir()
+        val newFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss-SSS")
+        val oldFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss")
+        // 固定"现在"，不依赖真实时钟
+        val now = LocalDateTime.of(2026, 11, 8, 12, 0)
+
+        val tooOld = logFile(dir, now.minusDays(8).format(newFmt) + ".log")
+        val boundary = logFile(dir, now.minusDays(7).format(newFmt) + ".log")   // 恰好 7 天，保留
+        val recent = logFile(dir, now.minusDays(1).format(newFmt) + ".log")
+        // 旧格式（无 .log、无毫秒）也必须能解析出时间，否则历史日志永远清理不掉
+        val tooOldLegacy = logFile(dir, now.minusDays(9).format(oldFmt))
+        val png = logFile(dir, "screenshot.png", "PNG")
+
+        Logger.reduceLogFileCountAndSize(
+            dir,
+            maxCount = 100,
+            maxSize = Long.MAX_VALUE,
+            maxAgeDays = 7,
+            now = now
+        )
+
+        assertFalse(tooOld.exists(), "超过 7 天的日志应被删除")
+        assertFalse(tooOldLegacy.exists(), "旧格式文件名也应能解析出时间并被删除")
+        assertTrue(boundary.exists(), "恰好满 7 天的日志应保留（严格小于才删）")
+        assertTrue(recent.exists(), "近期日志必须保留")
+        assertTrue(png.exists(), "非日志文件不得被删除")
+        assertTrue(Logger.MAX_LOG_FILE_KEEP_DAYS in 1L..30L, "默认保留天数应在合理区间")
     }
 
     @Test
