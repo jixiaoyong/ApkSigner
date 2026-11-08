@@ -98,14 +98,21 @@ class LoggerRetentionTest {
     fun testReduce_deletionFailureDoesNotHangOrThrow() {
         val dir = newTempDir()
         repeat(3) { index -> logFile(dir, "2026-11-0${index + 1}-100000") }
-        // 目录设为只读：文件删不掉（非 root 用户），旧实现会在这里 while(true) 空转不返回
+        // 目录设为只读：POSIX 下文件删不掉（非 root 用户），旧实现会在这里 while(true) 空转不返回。
+        // 注意：Windows 上目录的只读属性并不阻止删除，所以不断言"文件仍存在"，
+        // 只验证本用例的 P0 目标——必须在有限时间内返回、且不抛异常。
         dir.setWritable(false)
 
+        val start = System.currentTimeMillis()
         Logger.reduceLogFileCountAndSize(dir, maxCount = 1, maxSize = Long.MAX_VALUE)
+        val elapsed = System.currentTimeMillis() - start
 
         dir.setWritable(true)
-        // 不断言文件是否删掉（不同系统/权限模型下有差异），只要求：能返回、不抛异常
-        assertEquals(3, dir.listFiles()!!.count { Logger.isLogFileName(it.name) })
+        assertTrue(elapsed < 2_000, "清理必须在有限时间内返回；旧实现在删不掉时会一直空转（耗时 ${elapsed}ms）")
+        assertTrue(
+            dir.listFiles()!!.count { Logger.isLogFileName(it.name) } <= 3,
+            "清理不得凭空多出文件"
+        )
     }
 
     @Test
