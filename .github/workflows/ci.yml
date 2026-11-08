@@ -70,13 +70,16 @@ jobs:
         if: github.event_name == 'pull_request'
         continue-on-error: true
         uses: actions/github-script@v7
+        env:
+          ARTIFACT_NAME: ApkSigner-${{ matrix.os }}
         with:
           script: |
             const { owner, repo } = context.repo;
             const branch = context.payload.pull_request.head.ref;
+            // 只取同名产物：两个 matrix job 各自清理自己的历史，避免拉取全仓 artifact 列表
             const artifacts = await github.paginate(
               github.rest.actions.listArtifactsForRepo,
-              { owner, repo, per_page: 100 }
+              { owner, repo, per_page: 100, name: process.env.ARTIFACT_NAME }
             );
             for (const artifact of artifacts) {
               const run = artifact.workflow_run;
