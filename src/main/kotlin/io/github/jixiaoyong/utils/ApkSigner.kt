@@ -123,19 +123,34 @@ object ApkSigner {
         }
     }
 
-    fun setupZipAlign(zipAlignPath: String): String? {
-        // check os is mac/linux or windows
-        val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
-            if (File(zipAlignPath).exists()) null else Exception("文件不存在: $zipAlignPath")
+    /**
+     * 判断路径是否指向一个可执行的普通文件。
+     *
+     * 原先在 macOS/Linux 上用 `command -v <路径>` 检查，但 `command` 是 shell 内建，
+     * ProcessBuilder 不经过 shell，只有部分系统恰好提供了同名兼容脚本
+     * （macOS 的 FreeBSD wrapper、RHEL 系的 /usr/bin/command）；Debian 系（含 Ubuntu、
+     * 以及 ubuntu-latest runner）没有，导致检查恒失败、zipalign/aapt 路径永不设置、
+     * isInitialized() 恒 false，点签名被挡。
+     *
+     * 改用 JVM 原生判定：跨三平台一致、无需启动子进程，同时能拒掉目录和丢失执行位的文件。
+     */
+    private fun isRunnableFile(path: String): Boolean {
+        val file = File(path)
+        if (!file.isFile) return false
+        // Windows 没有 POSIX 执行位，对普通文件 canExecute() 无意义，退化为 isFile
+        return if (System.getProperty("os.name").contains("Windows", ignoreCase = true)) {
+            true
         } else {
-            RunCommandUtil.runCommand(listOf("command", "-v", zipAlignPath), "zip align")
+            file.canExecute()
         }
+    }
 
-        return if (null != result) {
-            "zipAlign命令(${zipAlignPath})检查失败，请重试（${result.message}）"
-        } else {
+    fun setupZipAlign(zipAlignPath: String): String? {
+        return if (isRunnableFile(zipAlignPath)) {
             zipAlignCmdPath = zipAlignPath
             null
+        } else {
+            "zipAlign命令(${zipAlignPath})检查失败，请确认路径指向可执行文件"
         }
     }
 
@@ -157,19 +172,11 @@ object ApkSigner {
     }
 
     fun setupAapt(aaptPath: String): String? {
-        // check os is mac/linux or windows
-        val result = if (System.getProperties().getProperty("os.name").contains("Windows")) {
-            File(aaptPath).exists()
-            null
-        } else {
-            RunCommandUtil.runCommand("command -v $aaptPath", "aapt")
-        }
-
-        return if (null != result) {
-            "aapt命令(${aaptPath})检查失败，请重试（${result.message}）"
-        } else {
+        return if (isRunnableFile(aaptPath)) {
             aaptCmdPath = aaptPath
             null
+        } else {
+            "aapt命令(${aaptPath})检查失败，请确认路径指向可执行文件"
         }
     }
 
